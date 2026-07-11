@@ -18,6 +18,14 @@ func SetupRoutes(app *fiber.App) {
 	app.Use(middleware.SecurityHeaders())
 	app.Use(middleware.CORSConfig())
 
+	// ── Root endpoint (welcome message) ──────────────────────────────────────
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{
+			"success": true,
+			"message": "Pasuruaninfo API is running",
+		})
+	})
+
 	// ── Health check (unauthenticated, no rate limit) ────────────────────────
 	app.Get("/api/v1/health", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{"status": "ok"})

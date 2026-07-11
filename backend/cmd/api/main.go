@@ -105,6 +105,13 @@ func main() {
 		// Do NOT log request bodies — may contain passwords/tokens
 	}))
 
+	// Serve static files in the upload directory
+	uploadDir := os.Getenv("UPLOAD_DIR")
+	if uploadDir == "" {
+		uploadDir = "./uploads"
+	}
+	app.Static("/uploads", uploadDir)
+
 	// Register all routes (security middleware applied inside)
 	routes.SetupRoutes(app)
 
