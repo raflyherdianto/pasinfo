@@ -222,7 +222,7 @@ const loadUserData = async () => {
     userData.value = {
       id: null,
       nama: 'Member Pasinfo',
-      email: 'member@pasinfo.com',
+      email: 'member@pasuruaninfo.com',
       photo: '',
       avatar: '',
       CreatedAt: '',

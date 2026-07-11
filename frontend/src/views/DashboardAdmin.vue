@@ -688,7 +688,7 @@
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Email</label>
-              <input type="email" v-model="userForm.email" placeholder="Contoh: herdianto@pasinfo.com" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 text-sm">
+              <input type="email" v-model="userForm.email" placeholder="Contoh: herdianto@pasuruaninfo.com" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 text-sm">
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">{{ isEditingUser ? 'Password Baru (Opsional)' : 'Password' }}</label>
@@ -1067,7 +1067,7 @@ const loadIklanData = () => {
     iklanList.value = JSON.parse(local);
   } else {
     iklanList.value = [
-      { id: 1, name: 'Iklan Banner Utama', slot: 'Header', image: 'https://images.unsplash.com/photo-1542744094-3a31f103e35f?w=600', url: 'https://pasinfo.com/promo', status: 'Aktif' },
+      { id: 1, name: 'Iklan Banner Utama', slot: 'Header', image: 'https://images.unsplash.com/photo-1542744094-3a31f103e35f?w=600', url: 'https://pasuruaninfo.com/promo', status: 'Aktif' },
       { id: 2, name: 'Sponsor Lokal Bromo', slot: 'Sidebar', image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=600', url: 'https://bromojeep.com', status: 'Aktif' },
       { id: 3, name: 'Promo Hotel Pasuruan', slot: 'Content', image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600', url: 'https://hotelpasuruan.com', status: 'Non-Aktif' }
     ];
@@ -1776,7 +1776,7 @@ const openIklanCreateModal = () => {
     name: '',
     slot: 'Header',
     image: 'https://images.unsplash.com/photo-1542744094-3a31f103e35f?w=600',
-    url: 'https://pasinfo.com/promo',
+    url: 'https://pasuruaninfo.com/promo',
     status: 'Aktif'
   };
   showIklanModal.value = true;

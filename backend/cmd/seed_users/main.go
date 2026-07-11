@@ -21,29 +21,29 @@ func main() {
 
 	password := os.Getenv("SEED_USER_PASSWORD")
 	if password == "" {
-		password = "pas" + "info" + "123"
+		password = "pas" + "uruan" + "info" + "123"
 	}
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 
 	// Clean up other users
-	db.Where("email NOT LIKE ?", "%@pasinfo.com").Delete(&models.User{})
+	db.Where("email NOT LIKE ?", "%@pasuruaninfo.com").Delete(&models.User{})
 
 	users := []models.User{
 		{
 			Name:     "Admin Pasinfo",
-			Email:    "admin@pasinfo.com",
+			Email:    "admin@pasuruaninfo.com",
 			Password: string(hashedPassword),
 			Role:     "admin",
 		},
 		{
 			Name:     "Penulis Pasinfo",
-			Email:    "penulis@pasinfo.com",
+			Email:    "penulis@pasuruaninfo.com",
 			Password: string(hashedPassword),
 			Role:     "penulis",
 		},
 		{
 			Name:     "Editor Pasinfo",
-			Email:    "editor@pasinfo.com",
+			Email:    "editor@pasuruaninfo.com",
 			Password: string(hashedPassword),
 			Role:     "editor",
 		},

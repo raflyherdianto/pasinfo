@@ -30,7 +30,7 @@ FROM nginxinc/nginx-unprivileged:1.27-alpine AS production
 LABEL org.opencontainers.image.title="pasinfo-frontend" \
       org.opencontainers.image.description="Pasinfo News Portal — Frontend (Vue 3 / Vite)" \
       org.opencontainers.image.vendor="raflyherdianto" \
-      org.opencontainers.image.url="https://pasinfo.com"
+      org.opencontainers.image.url="https://pasuruaninfo.com"
 
 USER root
 

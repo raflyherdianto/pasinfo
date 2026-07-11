@@ -71,13 +71,13 @@ const beritaBaseURL = "https://berita-indo-api-next.vercel.app/api"
 // getOrCreateSystemUser memastikan ada system user untuk artikel yang difetch
 func getOrCreateNewsAPIUser() (models.User, error) {
 	var user models.User
-	result := database.DB.Where("email = ?", "newsapi@pasinfo.com").First(&user)
+	result := database.DB.Where("email = ?", "newsapi@pasuruaninfo.com").First(&user)
 	if result.Error == nil {
 		return user, nil
 	}
 	user = models.User{
 		Name:     "Berita Indo Bot",
-		Email:    "newsapi@pasinfo.com",
+		Email:    "newsapi@pasuruaninfo.com",
 		Password: "",
 		Role:     "penulis",
 	}

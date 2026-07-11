@@ -40,7 +40,7 @@ FROM alpine:3.21 AS production
 LABEL org.opencontainers.image.title="pasinfo-backend" \
       org.opencontainers.image.description="Pasinfo News Portal — Backend API (Go/Fiber)" \
       org.opencontainers.image.vendor="raflyherdianto" \
-      org.opencontainers.image.url="https://api.pasinfo.com"
+      org.opencontainers.image.url="https://api.pasuruaninfo.com"
 
 # ── Runtime packages ──────────────────────────────────────────────────────────
 # ca-certificates : TLS certificate validation for outbound HTTPS requests

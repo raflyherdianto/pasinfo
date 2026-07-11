@@ -55,41 +55,41 @@ func ConnectDB() {
 }
 
 func SeedDatabase() {
-	// Hapus semua user selain email @pasinfo.com
-	DB.Where("email NOT LIKE ?", "%@pasinfo.com").Delete(&models.User{})
+	// Hapus semua user selain email @pasuruaninfo.com
+	DB.Where("email NOT LIKE ?", "%@pasuruaninfo.com").Delete(&models.User{})
 
 	log.Println("Checking database seed users...")
 	seedPassword := os.Getenv("SEED_USER_PASSWORD")
 	if seedPassword == "" {
-		seedPassword = "pas" + "info" + "123"
+		seedPassword = "pas" + "uruan" + "info" + "123"
 	}
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(seedPassword), bcrypt.DefaultCost)
 
 	users := []models.User{
 		{
 			Name:       "Admin Pasinfo",
-			Email:      "admin@pasinfo.com",
+			Email:      "admin@pasuruaninfo.com",
 			Password:   string(hashedPassword),
 			Role:       "admin",
 			IsVerified: 1,
 		},
 		{
 			Name:       "Penulis Pasinfo",
-			Email:      "penulis@pasinfo.com",
+			Email:      "penulis@pasuruaninfo.com",
 			Password:   string(hashedPassword),
 			Role:       "penulis",
 			IsVerified: 1,
 		},
 		{
 			Name:       "Editor Pasinfo",
-			Email:      "editor@pasinfo.com",
+			Email:      "editor@pasuruaninfo.com",
 			Password:   string(hashedPassword),
 			Role:       "editor",
 			IsVerified: 1,
 		},
 		{
 			Name:       "Member Pasinfo",
-			Email:      "member@pasinfo.com",
+			Email:      "member@pasuruaninfo.com",
 			Password:   string(hashedPassword),
 			Role:       "member",
 			IsVerified: 1,

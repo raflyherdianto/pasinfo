@@ -9,7 +9,7 @@ import (
 // SetupRoutes registers all API routes for the application.
 // Security layers applied:
 //   - SecurityHeaders: applied globally on every response
-//   - CORSConfig: strict allowlist (pasinfo.com only in production)
+//   - CORSConfig: strict allowlist (pasuruaninfo.com only in production)
 //   - RequestID: unique ID attached to every request for traceability
 //   - RateLimiter: per-IP rate limiting on auth endpoints
 func SetupRoutes(app *fiber.App) {

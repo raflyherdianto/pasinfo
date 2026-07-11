@@ -44,7 +44,7 @@ func SecurityHeaders() fiber.Handler {
 				"script-src 'self'; "+
 				"style-src 'self' 'unsafe-inline'; "+
 				"img-src 'self' data: https:; "+
-				"connect-src 'self' https://api.pasinfo.com https://wilayah.id; "+
+				"connect-src 'self' https://api.pasuruaninfo.com https://wilayah.id; "+
 				"font-src 'self' https://fonts.gstatic.com; "+
 				"frame-ancestors 'none'")
 		if os.Getenv("HTTPS") == "true" {
@@ -60,8 +60,8 @@ func SecurityHeaders() fiber.Handler {
 
 func CORSConfig() fiber.Handler {
 	allowedOrigins := map[string]struct{}{
-		"https://pasinfo.com":     {},
-		"https://www.pasinfo.com": {},
+		"https://pasuruaninfo.com":     {},
+		"https://www.pasuruaninfo.com": {},
 	}
 	if os.Getenv("APP_ENV") != "production" {
 		allowedOrigins["http://localhost:5173"] = struct{}{}
