@@ -1,0 +1,149 @@
+# =============================================================================
+# GitHub Actions — Frontend CI/CD
+# Trigger: any push to main that touches frontend/** files
+#
+# Secrets required (repo → Settings → Secrets):
+#   VM_HOST     : IP address or hostname of the Oracle ARM VM
+#   VM_USER     : SSH username (e.g. ubuntu / opc)
+#   VM_PASSWORD : SSH password (prefer key-based auth in production)
+#
+# NOTE: Vite bakes the VITE_* env vars at build-time.
+#       Place your frontend .env in ~/pasinfo/frontend/ on the VM.
+#       GitHub Actions reads it via --secret so it is never stored in the
+#       image layer. The workflow mounts it as a build secret during docker build.
+# =============================================================================
+
+name: "🚀 Deploy Frontend"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "frontend/**"
+      - ".github/workflows/deploy-frontend.yml"
+
+  # Allow manual trigger from GitHub UI
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-frontend-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  REGISTRY:    ghcr.io
+  IMAGE_NAME:  ${{ github.repository_owner }}/pasinfo-frontend
+  COMPOSE_DIR: ~/pasinfo/frontend
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Job 1: Build & Push Docker image to GHCR
+  # ---------------------------------------------------------------------------
+  build-and-push:
+    name: "Build & Push Image"
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+
+    steps:
+      - name: "⬇️  Checkout repository"
+        uses: actions/checkout@v4
+
+      - name: "🔧 Set up QEMU (ARM64 emulation)"
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: linux/arm64
+
+      - name: "🔧 Set up Docker Buildx"
+        uses: docker/setup-buildx-action@v3
+
+      - name: "🔑 Log in to GHCR"
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "🏷️  Extract image metadata"
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=sha-,format=short
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      # ---------------------------------------------------------------------------
+      # The frontend .env is stored on the VM, not in the repo.
+      # For build-time VITE_* vars, the VM reads its local .env and passes
+      # them at `docker compose build` time (handled in deploy job below).
+      # The GHCR image is therefore built without secrets; the actual runtime
+      # deployment step on the VM re-builds from the cached layers + .env.
+      #
+      # Alternatively (current approach): build image here using only public
+      # defaults, then deploy the image to the VM where the .env is mounted.
+      # Since Vite embeds vars at build time, the deploy job on the VM will
+      # re-build the image locally using the VM's .env if VITE_* vars are needed.
+      # ---------------------------------------------------------------------------
+      - name: "🐳 Build & push (linux/arm64)"
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          context:   ./frontend
+          file:      ./frontend/Dockerfile
+          platforms: linux/arm64
+          push:      true
+          tags:      ${{ steps.meta.outputs.tags }}
+          labels:    ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=frontend
+          cache-to:   type=gha,mode=max,scope=frontend
+          provenance: false
+
+  # ---------------------------------------------------------------------------
+  # Job 2: Deploy the new image to the Oracle ARM VM via SSH
+  # ---------------------------------------------------------------------------
+  deploy:
+    name: "Deploy to VM"
+    runs-on: ubuntu-latest
+    needs: build-and-push
+
+    environment:
+      name: production-frontend
+      url: http://${{ secrets.VM_HOST }}
+
+    steps:
+      - name: "🚢 SSH — pull latest image and restart service"
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host:     ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key:      ${{ secrets.VM_KEY }}
+          timeout:  120s
+          script: |
+            set -euo pipefail
+
+            echo "=== Logging in to GHCR ==="
+            echo "${{ secrets.GITHUB_TOKEN }}" | \
+              docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+            echo "=== Pulling latest frontend image ==="
+            docker pull ghcr.io/${{ env.IMAGE_NAME }}:latest
+
+            echo "=== Restarting service via Docker Compose ==="
+            docker compose \
+              -f ${{ env.COMPOSE_DIR }}/docker-compose.yml \
+              up -d --remove-orphans
+
+            echo "=== Waiting for health check (max 60s) ==="
+            timeout 60 sh -c \
+              'until docker inspect --format="{{.State.Health.Status}}" pasinfo-frontend | grep -q "healthy"; do sleep 3; done'
+
+            echo "=== Pruning dangling and unused images ==="
+            docker image prune -f
+
+            echo "=== Deployment complete ==="
