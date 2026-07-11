@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -47,6 +48,7 @@ func (img *beritaArticleImage) UnmarshalJSON(data []byte) error {
 type beritaArticle struct {
 	Title          string             `json:"title"`
 	Link           string             `json:"link"`
+	Content        string             `json:"content"`
 	ContentSnippet string             `json:"contentSnippet"`
 	IsoDate        string             `json:"isoDate"`
 	Image          beritaArticleImage `json:"image"`
@@ -89,17 +91,17 @@ func getOrCreateNewsAPIUser() (models.User, error) {
 }
 
 // fetchFromBeritaIndo mengambil artikel dari satu endpoint berita-indo-api
-func fetchFromBeritaIndo(client *http.Client, url string, categoryID uint, sysUser models.User, result *FetchResult) {
-	resp, err := client.Get(url)
+func fetchFromBeritaIndo(client *http.Client, apiURL string, categoryID uint, sysUser models.User, result *FetchResult) {
+	resp, err := client.Get(apiURL)
 	if err != nil {
-		log.Printf("[BeritaIndo] Gagal fetch %s: %v", url, err)
+		log.Printf("[BeritaIndo] Gagal fetch %s: %v", apiURL, err)
 		result.Errors++
 		return
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		log.Printf("[BeritaIndo] HTTP %d dari %s", resp.StatusCode, url)
+		log.Printf("[BeritaIndo] HTTP %d dari %s", resp.StatusCode, apiURL)
 		result.Errors++
 		return
 	}
@@ -113,7 +115,7 @@ func fetchFromBeritaIndo(client *http.Client, url string, categoryID uint, sysUs
 
 	var apiResp beritaAPIResponse
 	if err := json.Unmarshal(body, &apiResp); err != nil {
-		log.Printf("[BeritaIndo] Gagal parse JSON dari %s: %v", url, err)
+		log.Printf("[BeritaIndo] Gagal parse JSON dari %s: %v", apiURL, err)
 		result.Errors++
 		return
 	}
@@ -142,9 +144,24 @@ func fetchFromBeritaIndo(client *http.Client, url string, categoryID uint, sysUs
 
 		// Scrape full article content using readability instead of snippet
 		content := ""
-		scraped, err := readability.FromURL(article.Link, 5*time.Second)
-		if err == nil && scraped.TextContent != "" {
-			content = strings.TrimSpace(scraped.TextContent)
+		parsedURL, parseErr := url.Parse(article.Link)
+		if parseErr == nil {
+			req, reqErr := http.NewRequest("GET", article.Link, nil)
+			if reqErr == nil {
+				req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+				resp, fetchErr := client.Do(req)
+				if fetchErr == nil && resp.StatusCode == http.StatusOK {
+					defer resp.Body.Close()
+					scraped, extractErr := readability.FromReader(resp.Body, parsedURL)
+					if extractErr == nil && scraped.TextContent != "" {
+						content = strings.TrimSpace(scraped.TextContent)
+					}
+				}
+			}
+		}
+
+		if content == "" {
+			content = strings.TrimSpace(article.Content)
 		}
 		if content == "" {
 			content = strings.TrimSpace(article.ContentSnippet)
@@ -171,7 +188,7 @@ func fetchFromBeritaIndo(client *http.Client, url string, categoryID uint, sysUs
 			Views:     0,
 			Status:    "published",
 			SourceURL: article.Link,
-			Source:    sourceName(url),
+			Source:    sourceName(apiURL),
 		}
 		news.CreatedAt = pubTime
 
