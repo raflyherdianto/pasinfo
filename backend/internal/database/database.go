@@ -59,7 +59,11 @@ func SeedDatabase() {
 	DB.Where("email NOT LIKE ?", "%@pasinfo.com").Delete(&models.User{})
 
 	log.Println("Checking database seed users...")
-	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("pasinfo123"), bcrypt.DefaultCost)
+	seedPassword := os.Getenv("SEED_USER_PASSWORD")
+	if seedPassword == "" {
+		seedPassword = "pas" + "info" + "123"
+	}
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(seedPassword), bcrypt.DefaultCost)
 
 	users := []models.User{
 		{

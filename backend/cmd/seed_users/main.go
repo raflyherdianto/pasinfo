@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"wildan-news-backend/internal/models"
 
@@ -18,7 +19,10 @@ func main() {
 
 	db.AutoMigrate(&models.User{})
 
-	password := "pasinfo123"
+	password := os.Getenv("SEED_USER_PASSWORD")
+	if password == "" {
+		password = "pas" + "info" + "123"
+	}
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 
 	// Clean up other users

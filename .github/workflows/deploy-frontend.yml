@@ -114,7 +114,6 @@ jobs:
 
     environment:
       name: production-frontend
-      url: http://${{ secrets.VM_HOST }}
 
     steps:
       - name: "🚢 SSH — pull latest image and restart service"
