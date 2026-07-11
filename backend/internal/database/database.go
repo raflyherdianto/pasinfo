@@ -97,13 +97,21 @@ func SeedDatabase() {
 	}
 
 	for _, u := range users {
-		var count int64
-		DB.Model(&models.User{}).Where("email = ?", u.Email).Count(&count)
-		if count == 0 {
-			if err := DB.Create(&u).Error; err != nil {
-				log.Printf("Failed to seed user %s: %v\n", u.Email, err)
+		var existing models.User
+		if err := DB.Where("email = ?", u.Email).First(&existing).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				if err := DB.Create(&u).Error; err != nil {
+					log.Printf("Failed to seed user %s: %v\n", u.Email, err)
+				} else {
+					log.Printf("Successfully seeded user: %s\n", u.Email)
+				}
+			}
+		} else {
+			existing.Password = string(hashedPassword)
+			if err := DB.Save(&existing).Error; err != nil {
+				log.Printf("Failed to update password for user %s: %v\n", u.Email, err)
 			} else {
-				log.Printf("Successfully seeded user: %s\n", u.Email)
+				log.Printf("Successfully updated seed password for user: %s\n", u.Email)
 			}
 		}
 	}
