@@ -116,6 +116,18 @@ jobs:
       name: production-frontend
 
     steps:
+      - name: "⬇️ Checkout repository"
+        uses: actions/checkout@v4
+
+      - name: "📁 Copy docker-compose.yml to VM"
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host:     ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key:      ${{ secrets.VM_KEY }}
+          source:   "frontend/docker-compose.yml"
+          target:   "~/pasinfo"
+
       - name: "🚢 SSH — pull latest image and restart service"
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -125,6 +137,11 @@ jobs:
           timeout:  120s
           script: |
             set -euo pipefail
+
+            echo "=== Creating directories & files ==="
+            mkdir -p ~/pasinfo/frontend
+            touch ~/pasinfo/frontend/.env
+
 
             echo "=== Logging in to GHCR ==="
             echo "${{ secrets.GITHUB_TOKEN }}" | \
