@@ -9,7 +9,10 @@
 
 services:
   backend:
-    image: ghcr.io/raflyherdianto/pasinfo-backend:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: pasinfo-backend:latest
 
     container_name: pasinfo-backend
 

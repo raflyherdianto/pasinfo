@@ -32,15 +32,19 @@ LABEL org.opencontainers.image.title="pasinfo-frontend" \
       org.opencontainers.image.vendor="raflyherdianto" \
       org.opencontainers.image.url="https://pasinfo.com"
 
-# Remove default config and content (runs as nginx user)
+USER root
+
+# Remove default config and content (runs as root user)
 RUN rm -rf /usr/share/nginx/html/* \
  && rm -f /etc/nginx/conf.d/default.conf
 
-# Copy Vite build output
-COPY --from=builder /app/dist /usr/share/nginx/html
+# Copy Vite build output and change owner to nginx
+COPY --from=builder --chown=nginx:nginx /app/dist /usr/share/nginx/html
 
-# Copy hardened NGINX config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy hardened NGINX config and change owner to nginx
+COPY --chown=nginx:nginx nginx.conf /etc/nginx/conf.d/default.conf
+
+USER nginx
 
 EXPOSE 8080
 

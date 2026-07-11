@@ -7,7 +7,10 @@ version: "3.9"
 
 services:
   frontend:
-    image: ghcr.io/raflyherdianto/pasinfo-frontend:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: pasinfo-frontend:latest
 
     container_name: pasinfo-frontend
 
