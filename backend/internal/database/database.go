@@ -208,7 +208,26 @@ func SeedWilayah() {
 		return
 	}
 
-	basePath := "scripts/node_modules/idn-area-data/data"
+	basePaths := []string{
+		"data/wilayah",
+		"./data/wilayah",
+		"scripts/node_modules/idn-area-data/data",
+		"../scripts/node_modules/idn-area-data/data",
+	}
+
+	var basePath string
+	for _, p := range basePaths {
+		if _, err := os.Stat(p + "/provinces.csv"); err == nil {
+			basePath = p
+			break
+		}
+	}
+
+	if basePath == "" {
+		log.Println("[WARN] Wilayah CSV data files not found. Skipping Wilayah seeding.")
+		return
+	}
+	log.Printf("[Wilayah] Seeding from path: %s", basePath)
 	
 	// 1. Provinces
 	log.Println("Seeding Provinces...")
