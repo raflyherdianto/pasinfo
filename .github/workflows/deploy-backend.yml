@@ -1,9 +1,9 @@
 # =============================================================================
-# GitHub Actions — Backend CI/CD (Local Build on VM)
-# Trigger: any push to main that touches backend/** files
+# GitHub Actions — Backend CI/CD (Build & Push to GHCR)
+# Watchtower on Host VM will automatically pull and deploy the new image
 # =============================================================================
 
-name: "🚀 Deploy Backend"
+name: "🚀 Build & Push Backend to GHCR"
 
 on:
   push:
@@ -19,53 +19,45 @@ concurrency:
   group: deploy-backend-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  COMPOSE_DIR: ~/pasinfo/backend
+permissions:
+  contents: read
+  packages: write
 
 jobs:
-  deploy:
-    name: "Deploy to VM (Build Local)"
+  build-and-push:
+    name: "Build & Push Backend Image"
     runs-on: ubuntu-latest
-
-    environment:
-      name: production-backend
 
     steps:
       - name: "⬇️ Checkout repository"
         uses: actions/checkout@v4
 
-      - name: "📁 Copy backend files to VM"
-        uses: appleboy/scp-action@v0.1.7
+      - name: "🔧 Set up Docker Buildx"
+        uses: docker/setup-buildx-action@v3
+
+      - name: "🔑 Log in to GitHub Container Registry"
+        uses: docker/login-action@v3
         with:
-          host:     ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          key:      ${{ secrets.VM_KEY }}
-          source:   "backend/**"
-          target:   "~/pasinfo"
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: "🚢 SSH — build and restart backend service"
-        uses: appleboy/ssh-action@v1.2.0
+      - name: "🏷️ Extract Metadata (tags, labels)"
+        id: meta
+        uses: docker/metadata-action@v5
         with:
-          host:     ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          key:      ${{ secrets.VM_KEY }}
-          timeout:  300s
-          script: |
-            set -euo pipefail
+          images: ghcr.io/${{ github.repository_owner }}/pasinfo-backend
+          tags: |
+            type=raw,value=latest,enable=true
+            type=sha,prefix=,format=short
 
-            echo "=== Creating directories & files ==="
-            mkdir -p ~/pasinfo/backend/data ~/pasinfo/backend/uploads/images
-            touch ~/pasinfo/backend/.env
-
-            echo "=== Building and restarting backend service via Docker Compose ==="
-            cd ~/pasinfo/backend
-            docker compose up -d --build --remove-orphans
-
-            echo "=== Waiting for health check (max 60s) ==="
-            timeout 60 sh -c \
-              'until docker inspect --format="{{.State.Health.Status}}" pasinfo-backend | grep -q "healthy"; do sleep 3; done'
-
-            echo "=== Pruning unused images & build cache ==="
-            docker image prune -f
-
-            echo "=== Deployment complete ==="
+      - name: "🐳 Build and Push Backend Docker Image"
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

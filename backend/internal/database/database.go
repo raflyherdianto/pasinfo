@@ -2,12 +2,14 @@ package database
 
 import (
 	"encoding/csv"
+	"fmt"
 	"log"
 	"os"
 	"strings"
 
 	"github.com/glebarez/sqlite"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 
@@ -18,15 +20,54 @@ var DB *gorm.DB
 
 func ConnectDB() {
 	var err error
-	
-	dbPath := os.Getenv("DB_PATH")
-	if dbPath == "" {
-		dbPath = "./internal/data/wildan-news.db"
+	dbDriver := strings.ToLower(os.Getenv("DB_DRIVER"))
+
+	if dbDriver == "postgres" || dbDriver == "postgresql" || os.Getenv("DB_HOST") != "" {
+		host := os.Getenv("DB_HOST")
+		if host == "" {
+			host = "localhost"
+		}
+		port := os.Getenv("DB_PORT")
+		if port == "" {
+			port = "5432"
+		}
+		user := os.Getenv("DB_USER")
+		if user == "" {
+			user = "postgres"
+		}
+		password := os.Getenv("DB_PASSWORD")
+		if password == "" {
+			if os.Getenv("APP_ENV") == "production" {
+				log.Fatal("[FATAL] DB_PASSWORD environment variable is not set in production mode. Refusing to start.")
+			}
+			password = "postgres"
+		}
+		dbname := os.Getenv("DB_NAME")
+		if dbname == "" {
+			dbname = "pasinfo"
+		}
+		sslmode := os.Getenv("DB_SSLMODE")
+		if sslmode == "" {
+			sslmode = "disable"
+		}
+
+		dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
+			host, user, password, dbname, port, sslmode)
+
+		log.Printf("[Database] Connecting to PostgreSQL at %s:%s (db=%s)...", host, port, dbname)
+		DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
+			Logger: logger.Default.LogMode(logger.Info),
+		})
+	} else {
+		dbPath := os.Getenv("DB_PATH")
+		if dbPath == "" {
+			dbPath = "./internal/data/wildan-news.db"
+		}
+		log.Printf("[Database] Connecting to SQLite at %s...", dbPath)
+		DB, err = gorm.Open(sqlite.Open(dbPath), &gorm.Config{
+			Logger: logger.Default.LogMode(logger.Info),
+		})
 	}
-	
-	DB, err = gorm.Open(sqlite.Open(dbPath), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
-	})
 
 	if err != nil {
 		log.Fatal("Failed to connect to database. \n", err)
@@ -49,6 +90,19 @@ func ConnectDB() {
 	if err != nil {
 		log.Fatal("Failed to migrate database. \n", err)
 	}
+
+	if !DB.Migrator().HasColumn("news_images", "image_caption") {
+		DB.Migrator().AddColumn(&models.NewsImage{}, "image_caption")
+	}
+	if DB.Migrator().HasColumn("news", "image_caption") {
+		DB.Migrator().DropColumn("news", "image_caption")
+	}
+	_ = DB.Exec("ALTER TABLE news DROP COLUMN IF EXISTS image_caption").Error
+	_ = DB.Exec("ALTER TABLE news_images ADD COLUMN IF NOT EXISTS image_caption text").Error
+	if dbDriver == "postgres" || dbDriver == "postgresql" || os.Getenv("DB_HOST") != "" {
+		_ = DB.Exec("SELECT setval(pg_get_serial_sequence('news_images', 'id'), coalesce(max(id), 1)) FROM news_images;").Error
+		_ = DB.Exec("SELECT setval(pg_get_serial_sequence('news', 'id'), coalesce(max(id), 1)) FROM news;").Error
+	}
 	
 	SeedDatabase()
 	SeedWilayah()
@@ -61,7 +115,11 @@ func SeedDatabase() {
 	log.Println("Checking database seed users...")
 	seedPassword := os.Getenv("SEED_USER_PASSWORD")
 	if seedPassword == "" {
-		seedPassword = "pas" + "uruan" + "info" + "123"
+		if os.Getenv("APP_ENV") == "production" {
+			log.Println("[WARN] SEED_USER_PASSWORD is not set — skipping seed user password updates")
+			return
+		}
+		seedPassword = "pasuruaninfo123"
 	}
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(seedPassword), bcrypt.DefaultCost)
 

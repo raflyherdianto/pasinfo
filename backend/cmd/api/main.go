@@ -47,8 +47,8 @@ func main() {
 		}()
 	}
 
-	// Parse body limit from env (default 10 MB; upload is gated separately)
-	bodyLimitMB := 10
+	// Parse body limit from env (default 50 MB; upload is gated separately)
+	bodyLimitMB := 50
 	if v := os.Getenv("BODY_LIMIT_MB"); v != "" {
 		if n, err := strconv.Atoi(v); err == nil && n > 0 {
 			bodyLimitMB = n
@@ -64,8 +64,8 @@ func main() {
 		BodyLimit: bodyLimitMB * 1024 * 1024,
 
 		// Read/Write timeouts to prevent slowloris attacks
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 30 * time.Second,
+		ReadTimeout:  60 * time.Second,
+		WriteTimeout: 60 * time.Second,
 		IdleTimeout:  120 * time.Second,
 
 		// Disable X-Powered-By equivalent

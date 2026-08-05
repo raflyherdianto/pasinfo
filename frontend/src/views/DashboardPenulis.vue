@@ -63,21 +63,25 @@
             <i class="fas fa-arrow-left"></i> <span>Kembali ke Riwayat</span>
           </button>
           <span class="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium truncate max-w-[200px] sm:max-w-xs">
-            Mengedit: {{ editingBerita?.judul }}
+            {{ isReadOnly ? 'Melihat' : 'Mengedit' }}: {{ editingBerita?.judul }}
           </span>
         </div>
         
-        
+        <!-- Form Tulis / Edit / Detail Berita -->
         <div v-if="currentPage === 1 || editingBeritaId" class="p-6">
-          <h3 class="text-xl font-bold text-gray-800 mb-6">{{ editingBeritaId ? 'Edit Berita' : 'Tulis Berita Baru' }}</h3>
+          <h3 class="text-xl font-bold text-gray-800 mb-6">{{ isReadOnly ? 'Detail Berita' : (editingBeritaId ? 'Edit Berita' : 'Tulis Berita Baru') }}</h3>
           
           <div class="space-y-5">
-            
+            <!-- Upload Gambar / Gambar Terupload -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">
-                Upload Gambar <span class="text-gray-400 font-normal">(Bisa lebih dari 1, pilih 1 utama)</span>
+                {{ isReadOnly ? 'Gambar Terupload' : 'Upload Gambar' }} 
+                <span v-if="!isReadOnly" class="text-gray-400 font-normal">(Bisa lebih dari 1, pilih 1 utama)</span>
               </label>
-              <div @click="$refs.gambarInput.click()"
+
+              <!-- Upload Dropzone (Hanya untuk Tulis / Edit) -->
+              <div v-if="!isReadOnly"
+                   @click="$refs.gambarInput.click()"
                    @dragover.prevent="dragOver = true"
                    @dragleave.prevent="dragOver = false"
                    @drop.prevent="handleDrop"
@@ -89,93 +93,110 @@
                 <input type="file" ref="gambarInput" @change="handleFileSelect" multiple accept="image/*" class="hidden">
               </div>
               
-              
-              <div v-if="previewImages.length > 0" class="flex flex-wrap gap-3 mt-3">
-                <div v-for="(img, index) in previewImages" :key="index" class="relative w-24 h-24 rounded-lg overflow-hidden border border-gray-200">
-                  <img :src="img" alt="Preview" class="w-full h-full object-cover">
-                  <button @click.stop="removeImage(index)" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600">
-                    &times;
-                  </button>
+              <!-- Dynamic Per-Image Captions List -->
+              <div v-if="previewImages.length > 0" class="space-y-3" :class="!isReadOnly ? 'mt-4' : 'mt-2'">
+                <label v-if="!isReadOnly" class="block text-sm font-medium text-gray-700">Keterangan / Caption Gambar</label>
+                <div v-for="(img, index) in previewImages" :key="index" class="p-3 bg-gray-50 border border-gray-200 rounded-xl flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+                  <div class="relative w-24 h-24 shrink-0 rounded-lg overflow-hidden border border-gray-200 bg-white">
+                    <img :src="img" alt="Preview" class="w-full h-full object-cover">
+                    <button v-if="!isReadOnly" @click.stop="removeImage(index)" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600 shadow-sm" title="Hapus Gambar">
+                      &times;
+                    </button>
+                  </div>
+                  <div class="flex-1 w-full">
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">
+                      Caption Gambar #{{ index + 1 }} <span v-if="index === 0" class="text-blue-600 font-normal">(Gambar Utama)</span>
+                    </label>
+                    <input 
+                      type="text" 
+                      v-model="previewCaptions[index]" 
+                      :disabled="isReadOnly"
+                      :placeholder="isReadOnly ? 'Tidak ada caption' : 'Masukkan keterangan untuk gambar #' + (index + 1)" 
+                      class="w-full text-sm border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border bg-white disabled:bg-gray-100 disabled:text-gray-600"
+                    />
+                  </div>
                 </div>
               </div>
+
+              <div v-else-if="isReadOnly" class="p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-500 italic mt-2">
+                Tidak ada gambar terupload untuk berita ini.
+              </div>
             </div>
             
+            <!-- Individual Region Fields (Tidak digabung grid 2 kolom) -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Provinsi</label>
+              <v-select 
+                v-model="selectedProv" 
+                :options="provinces" 
+                label="name" 
+                placeholder="Pilih Provinsi"
+                :disabled="isReadOnly"
+                @update:modelValue="onProvChange"
+              ></v-select>
+            </div>
             
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Keterangan Gambar</label>
-              <input type="text" v-model="formData.caption" placeholder="Caption untuk gambar ini" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Kota/Kabupaten</label>
+              <v-select 
+                v-model="selectedRegency" 
+                :options="regencies" 
+                label="name" 
+                placeholder="Pilih Kota/Kabupaten"
+                :disabled="isReadOnly || !selectedProv"
+                @update:modelValue="onRegencyChange"
+              ></v-select>
             </div>
             
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Provinsi</label>
-                <v-select 
-                  v-model="selectedProv" 
-                  :options="provinces" 
-                  label="name" 
-                  placeholder="Pilih Provinsi"
-                  @update:modelValue="onProvChange"
-                ></v-select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Kota/Kabupaten</label>
-                <v-select 
-                  v-model="selectedRegency" 
-                  :options="regencies" 
-                  label="name" 
-                  placeholder="Pilih Kota/Kabupaten"
-                  :disabled="!selectedProv"
-                  @update:modelValue="onRegencyChange"
-                ></v-select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Kecamatan</label>
-                <v-select 
-                  v-model="selectedDistrict" 
-                  :options="districts" 
-                  label="name" 
-                  placeholder="Pilih Kecamatan"
-                  :disabled="!selectedRegency"
-                  @update:modelValue="onDistrictChange"
-                ></v-select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Desa/Kelurahan</label>
-                <v-select 
-                  v-model="selectedVillage" 
-                  :options="villages" 
-                  label="name" 
-                  placeholder="Pilih Desa/Kelurahan"
-                  :disabled="!selectedDistrict"
-                  @update:modelValue="onVillageChange"
-                ></v-select>
-              </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Kecamatan</label>
+              <v-select 
+                v-model="selectedDistrict" 
+                :options="districts" 
+                label="name" 
+                placeholder="Pilih Kecamatan"
+                :disabled="isReadOnly || !selectedRegency"
+                @update:modelValue="onDistrictChange"
+              ></v-select>
             </div>
             
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Desa/Kelurahan</label>
+              <v-select 
+                v-model="selectedVillage" 
+                :options="villages" 
+                label="name" 
+                placeholder="Pilih Desa/Kelurahan"
+                :disabled="isReadOnly || !selectedDistrict"
+                @update:modelValue="onVillageChange"
+              ></v-select>
+            </div>
             
+            <!-- Kategori -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
-              <select v-model="formData.kategori" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border bg-white">
+              <select v-model="formData.kategori" :disabled="isReadOnly" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border bg-white disabled:bg-gray-100 disabled:text-gray-500">
                 <option value="" disabled>Pilih kategori...</option>
                 <option v-for="cat in categories" :key="cat.id || cat.ID" :value="cat.id || cat.ID">{{ cat.name }}</option>
               </select>
             </div>
             
-            
+            <!-- Judul Berita -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Judul Berita</label>
-              <input type="text" v-model="formData.judul" placeholder="Masukkan judul berita" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border font-semibold text-lg">
+              <input type="text" v-model="formData.judul" :disabled="isReadOnly" placeholder="Masukkan judul berita" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 border font-semibold text-lg disabled:bg-gray-100 disabled:text-gray-500">
             </div>
             
-            
-            <div class="mb-6">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Isi Berita</label>
-              <QuillEditor theme="snow" v-model:content="formData.konten" contentType="html" class="w-full bg-white border border-gray-300 rounded-lg shadow-sm" style="min-height: 400px; font-size: 16px;" />
+            <!-- Isi Berita (Quill Editor) -->
+            <div class="mb-6" :class="{ 'pointer-events-none opacity-80': isReadOnly }" @click="!isReadOnly && focusEditor()">
+              <label class="block text-sm font-medium text-gray-700 mb-1 cursor-pointer" @click="!isReadOnly && focusEditor()">Isi Berita</label>
+              <div class="cursor-text" @click="!isReadOnly && focusEditor()">
+                <QuillEditor ref="quillEditorRef" theme="snow" v-model:content="formData.konten" contentType="html" class="w-full bg-white border border-gray-300 rounded-lg shadow-sm cursor-text" style="min-height: 400px; font-size: 16px;" />
+              </div>
               <p class="text-xs text-gray-500 mt-2">Anda dapat menulis berita dengan format paragraf yang rapi</p>
             </div>
 
-            
+            <!-- Catatan Revisi jika status = revisi -->
             <div v-if="editingBerita?.status === 'revisi' && revisionNote" class="mb-6 bg-red-50 border border-red-100 rounded-xl p-5">
               <h4 class="font-bold text-red-800 mb-2 flex items-center space-x-2">
                 <i class="fas fa-exclamation-triangle"></i>
@@ -184,13 +205,19 @@
               <p class="text-sm text-red-700 whitespace-pre-wrap pl-6">{{ revisionNote }}</p>
             </div>
             
-            
+            <!-- Tombol Action -->
             <div v-if="showActionButtons" class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-100">
               <button @click="saveDraft" class="flex-1 py-2.5 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors flex items-center justify-center space-x-2" :disabled="isSubmitting">
                 <i class="fas fa-save"></i> <span>{{ isSubmitting ? 'Menyimpan...' : 'Simpan Draft' }}</span>
               </button>
               <button @click="submitBerita" class="flex-1 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors shadow-sm flex items-center justify-center space-x-2" :disabled="isSubmitting">
                 <i class="fas fa-paper-plane"></i> <span>{{ isSubmitting ? 'Mengirim...' : (editingBerita?.status === 'revisi' ? 'Kirim Revisi' : 'Kirim ke Editor') }}</span>
+              </button>
+            </div>
+
+            <div v-else-if="isReadOnly" class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-100">
+              <button @click="cancelEdit" class="w-full py-2.5 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors flex items-center justify-center space-x-2">
+                <i class="fas fa-arrow-left"></i> <span>Kembali ke Riwayat</span>
               </button>
             </div>
           </div>
@@ -330,7 +357,7 @@
         </div>
         
         
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Provinsi</label>
             <v-select 
@@ -434,7 +461,26 @@ const currentPage = ref(1)
 const editingBeritaId = ref<number | null>(null)
 const dragOver = ref(false)
 const previewImages = ref<string[]>([])
+const previewCaptions = ref<string[]>([])
 const isSubmitting = ref(false)
+const quillEditorRef = ref<any>(null)
+
+const focusEditor = () => {
+  if (quillEditorRef.value) {
+    if (typeof quillEditorRef.value.focus === 'function') {
+      quillEditorRef.value.focus()
+    } else if (quillEditorRef.value.getQuill && typeof quillEditorRef.value.getQuill === 'function') {
+      const quill = quillEditorRef.value.getQuill()
+      if (quill && typeof quill.focus === 'function') quill.focus()
+    } else {
+      const el = quillEditorRef.value.$el
+      const editorEl: HTMLElement | null = (el && typeof el.querySelector === 'function') 
+        ? el.querySelector('.ql-editor') 
+        : document.querySelector('.ql-editor')
+      if (editorEl && typeof editorEl.focus === 'function') editorEl.focus()
+    }
+  }
+}
 
 const initialForm = {
   judul: '',
@@ -527,7 +573,8 @@ const fetchRiwayatBerita = async () => {
           kategori: b.category_id || b.CategoryID,
           konten: b.konten || b.Content,
           caption: b.image_caption || b.ImageCaption,
-          images: (b.images || b.Images) ? (b.images || b.Images).map((img: any) => img.image_path || img.ImagePath) : [],
+          images: (b.images || b.Images) ? (b.images || b.Images).map((img: any) => typeof img === 'string' ? img : (img.image_path || img.ImagePath)) : [],
+          image_captions: (b.images || b.Images) ? (b.images || b.Images).map((img: any) => typeof img === 'object' ? (img.image_caption || img.ImageCaption || '') : '') : (b.image_captions || []),
           lokasi: {
             provinsi: b.province_id || b.ProvinceID,
             kota: b.regency_id || b.RegencyID,
@@ -678,13 +725,20 @@ const statusConfig = {
 }
 
 const editingBerita = computed(() => {
-  return editingBeritaId.value ? riwayatBerita.value.find(b => b.id === editingBeritaId.value) : null
+  if (!editingBeritaId.value) return null
+  return riwayatBerita.value.find(b => String(b.id || b.ID) === String(editingBeritaId.value)) || null
 })
 
 const showActionButtons = computed(() => {
   if (!editingBeritaId.value) return true
-  const status = editingBerita.value?.status
-  return status === 'draft' || status === 'revisi'
+  const status = (editingBerita.value?.status || editingBerita.value?.Status || '').toString().toLowerCase()
+  return status === 'draft' || status === 'revisi' || status === 'revision'
+})
+
+const isReadOnly = computed(() => {
+  if (!editingBeritaId.value) return false
+  const status = (editingBerita.value?.status || editingBerita.value?.Status || '').toString().toLowerCase()
+  return ['pending', 'dikoreksi', 'published', 'rilis', 'telah rilis'].includes(status)
 })
 
 const revisionNote = computed(() => {
@@ -714,7 +768,7 @@ const switchPage = (page: number) => {
 
 const editBerita = async (id: number) => {
   editingBeritaId.value = id
-  const berita = riwayatBerita.value.find(b => b.id === id)
+  const berita = riwayatBerita.value.find(b => String(b.id || b.ID) === String(id))
   if (berita) {
     formData.value = {
       judul: berita.judul,
@@ -729,7 +783,26 @@ const editBerita = async (id: number) => {
       }
     }
 
-    previewImages.value = berita.images ? [...berita.images] : []
+    if (Array.isArray(berita.images)) {
+      previewImages.value = berita.images.map((img: any) => 
+        typeof img === 'string' ? img : (img.image_path || img.ImagePath || '')
+      )
+    } else {
+      previewImages.value = []
+    }
+
+    if (Array.isArray(berita.image_captions) && berita.image_captions.length > 0) {
+      previewCaptions.value = berita.image_captions.map((cap: any) => typeof cap === 'string' ? cap : String(cap || ''))
+    } else if (Array.isArray(berita.images)) {
+      previewCaptions.value = berita.images.map((img: any, idx: number) => {
+        if (typeof img === 'object' && img !== null) {
+          return img.image_caption || img.ImageCaption || ''
+        }
+        return idx === 0 && berita.caption ? berita.caption : ''
+      })
+    } else {
+      previewCaptions.value = []
+    }
 
     try {
       const provCode = berita.lokasi.provinsi
@@ -770,6 +843,19 @@ const editBerita = async (id: number) => {
     } catch (err) {
       console.error('Error loading locations for edit:', err)
     }
+
+    setTimeout(() => {
+      if (quillEditorRef.value) {
+        try {
+          if (typeof quillEditorRef.value.enable === 'function') {
+            quillEditorRef.value.enable(!isReadOnly.value)
+          } else if (quillEditorRef.value.getQuill && typeof quillEditorRef.value.getQuill === 'function') {
+            const q = quillEditorRef.value.getQuill()
+            if (q && typeof q.enable === 'function') q.enable(!isReadOnly.value)
+          }
+        } catch (e) {}
+      }
+    }, 100)
   }
 }
 
@@ -782,8 +868,27 @@ const cancelEdit = () => {
 const resetForm = () => {
   formData.value = JSON.parse(JSON.stringify(initialForm))
   previewImages.value = []
+  previewCaptions.value = []
   selectedProv.value = null
   clearRegencies()
+
+  if (quillEditorRef.value) {
+    try {
+      if (typeof quillEditorRef.value.setHTML === 'function') {
+        quillEditorRef.value.setHTML('')
+      } else if (typeof quillEditorRef.value.setText === 'function') {
+        quillEditorRef.value.setText('')
+      } else if (quillEditorRef.value.getQuill && typeof quillEditorRef.value.getQuill === 'function') {
+        const quill = quillEditorRef.value.getQuill()
+        if (quill && typeof quill.setText === 'function') quill.setText('')
+      }
+    } catch (e) {}
+    const el = quillEditorRef.value.$el
+    const editorEl: Element | null = (el && typeof el.querySelector === 'function') 
+      ? el.querySelector('.ql-editor') 
+      : document.querySelector('.ql-editor')
+    if (editorEl) editorEl.innerHTML = ''
+  }
 }
 
 const saveDraft = async () => {
@@ -817,23 +922,32 @@ const submitBerita = async () => {
 }
 
 const handleSaveOrUpdate = async (statusTarget: string) => {
+  const cleanedImages = previewImages.value.map((img: any) => 
+    typeof img === 'string' ? img : (img.image_path || img.ImagePath || '')
+  ).filter((img: string) => img.trim() !== '')
+
+  const cleanedCaptions = previewImages.value.map((_: any, idx: number) => {
+    const cap = previewCaptions.value[idx]
+    return typeof cap === 'string' ? cap : String(cap || '')
+  })
+
   const payload = {
     title: formData.value.judul,
     content: formData.value.konten,
     category_id: parseInt(formData.value.kategori) || 1,
-    province_id: selectedProv.value ? selectedProv.value.code : formData.value.lokasi.provinsi,
-    regency_id: selectedRegency.value ? selectedRegency.value.code : formData.value.lokasi.kota,
-    district_id: selectedDistrict.value ? selectedDistrict.value.code : formData.value.lokasi.kecamatan,
-    village_id: selectedVillage.value ? selectedVillage.value.code : formData.value.lokasi.desa,
-    image_caption: formData.value.caption,
-    images: previewImages.value,
+    province_id: selectedProv.value ? selectedProv.value.code : (formData.value.lokasi?.provinsi || ''),
+    regency_id: selectedRegency.value ? selectedRegency.value.code : (formData.value.lokasi?.kota || ''),
+    district_id: selectedDistrict.value ? selectedDistrict.value.code : (formData.value.lokasi?.kecamatan || ''),
+    village_id: selectedVillage.value ? selectedVillage.value.code : (formData.value.lokasi?.desa || ''),
+    images: cleanedImages,
+    image_captions: cleanedCaptions,
     status: statusTarget
   }
 
   const token = localStorage.getItem('token')
 
   try {
-    let res;
+    let res: Response;
     if (editingBeritaId.value) {
       res = await fetch(`http://localhost:8080/api/v1/news/${editingBeritaId.value}`, {
         method: 'PUT',
@@ -852,20 +966,16 @@ const handleSaveOrUpdate = async (statusTarget: string) => {
         },
         body: JSON.stringify(payload)
       })
-      if (res.ok && statusTarget === 'pending') {
-        const json = await res.json()
-        await fetch(`http://localhost:8080/api/v1/news/${json.data.ID || json.data.id}/status`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ status: 'pending', message: "" })
-        })
-      }
     }
 
-    if (res && res.ok) {
+    let json: any = {}
+    try {
+      json = await res.json()
+    } catch (e) {
+      console.error('Failed to parse response JSON:', e)
+    }
+
+    if (res.ok && json && json.success) {
       Swal.fire({
         icon: 'success',
         title: 'Berhasil',
@@ -879,19 +989,20 @@ const handleSaveOrUpdate = async (statusTarget: string) => {
         cancelEdit()
       }
     } else {
+      const errMsg = (json && json.message) ? json.message : `Gagal memproses berita (HTTP ${res.status}: ${res.statusText})`
       Swal.fire({
         icon: 'error',
-        title: 'Gagal',
-        text: 'Gagal memproses berita.',
+        title: 'Gagal Memproses',
+        text: errMsg,
         confirmButtonColor: '#2563eb'
       })
     }
-  } catch (err) {
-    console.error(err)
+  } catch (err: any) {
+    console.error('Save/Update news network error:', err)
     Swal.fire({
       icon: 'error',
       title: 'Terjadi Kesalahan',
-      text: 'Terjadi kesalahan sistem saat memproses berita.',
+      text: err.message || 'Terjadi kesalahan sistem / koneksi saat memproses berita.',
       confirmButtonColor: '#2563eb'
     })
   }
@@ -928,7 +1039,7 @@ const openNotifikasi = async (id: number) => {
   }
 }
 
-const convertToWebP = (file: File, quality: number = 0.85): Promise<string> => {
+const convertToWebP = (file: File, quality: number = 0.75): Promise<string> => {
   return new Promise((resolve, reject) => {
     if (!file.type.startsWith('image/')) {
       reject(new Error('File is not an image'))
@@ -943,7 +1054,7 @@ const convertToWebP = (file: File, quality: number = 0.85): Promise<string> => {
         let width = img.width
         let height = img.height
 
-        const maxDimension = 1600
+        const maxDimension = 1200
         if (width > maxDimension || height > maxDimension) {
           if (width > height) {
             height = Math.round((height * maxDimension) / width)
@@ -976,26 +1087,27 @@ const convertToWebP = (file: File, quality: number = 0.85): Promise<string> => {
   })
 }
 
-const processFiles = (files: FileList | File[]) => {
+const processFiles = async (files: FileList | File[]) => {
   const allowedMime = ['image/jpeg', 'image/png', 'image/webp']
   const maxBytes = 5 * 1024 * 1024 // 5 MB
 
-  Array.from(files).forEach(async file => {
+  for (const file of Array.from(files)) {
     if (!allowedMime.includes(file.type)) {
       Swal.fire('Format Tidak Didukung', `Berkas "${file.name}" harus berupa JPG, PNG, atau WEBP.`, 'error')
-      return
+      continue
     }
     if (file.size > maxBytes) {
       Swal.fire('Berkas Terlalu Besar', `Berkas "${file.name}" melebihi ukuran maksimum 5 MB.`, 'error')
-      return
+      continue
     }
     try {
-      const webpData = await convertToWebP(file, 0.85)
+      const webpData = await convertToWebP(file, 0.75)
       previewImages.value.push(webpData)
+      previewCaptions.value.push('')
     } catch (err) {
       console.error('Failed to convert image to WebP:', err)
     }
-  })
+  }
 }
 
 const handleFileSelect = (e: Event) => {
@@ -1014,6 +1126,7 @@ const handleDrop = (e: DragEvent) => {
 
 const removeImage = (index: number) => {
   previewImages.value.splice(index, 1)
+  previewCaptions.value.splice(index, 1)
 }
 
 

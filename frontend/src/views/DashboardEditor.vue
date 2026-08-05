@@ -112,9 +112,14 @@
                 </template>
               </div>
             </div>
-            <p v-if="selectedBerita.image_caption || selectedBerita.ImageCaption" class="text-center text-sm text-gray-500 italic mt-2">{{ selectedBerita.image_caption || selectedBerita.ImageCaption }}</p>
+            <p v-if="currentImages && currentImages[activeImgIndex] && (currentImages[activeImgIndex].image_caption || currentImages[activeImgIndex].ImageCaption)" class="text-center text-sm text-gray-500 italic mt-2">
+              {{ currentImages[activeImgIndex].image_caption || currentImages[activeImgIndex].ImageCaption }}
+            </p>
+            <p v-else-if="selectedBerita.image_caption || selectedBerita.ImageCaption" class="text-center text-sm text-gray-500 italic mt-2">
+              {{ selectedBerita.image_caption || selectedBerita.ImageCaption }}
+            </p>
 
-            <div class="mt-8 bg-gray-50 p-6 rounded-xl border border-gray-100" v-html="sanitizeHTML(selectedBerita.konten || selectedBerita.Content)"></div>
+            <div class="mt-8 bg-gray-50 p-6 rounded-xl border border-gray-100 article-content" v-html="formatArticleContent(selectedBerita.konten || selectedBerita.Content)"></div>
           </div>
 
           <div class="bg-blue-50 border border-blue-100 rounded-xl p-5 mb-6">
@@ -286,6 +291,16 @@ import vSelect from 'vue-select'
 import 'vue-select/dist/vue-select.css'
 
 const activeImgIndex = ref(0)
+
+const formatArticleContent = (content: string) => {
+  if (!content) return ''
+  let sanitized = sanitizeHTML(content)
+  // Remove empty paragraphs containing only <br>, &nbsp; or whitespace
+  sanitized = sanitized.replace(/<p>\s*(<br\s*\/?>|&nbsp;|\s*)\s*<\/p>/gi, '')
+  // Replace 2 or more consecutive <br> with a single <br>
+  sanitized = sanitized.replace(/(<br\s*\/?>\s*){2,}/gi, '<br>')
+  return sanitized
+}
 
 const currentImages = computed(() => {
   return selectedBerita.value ? (selectedBerita.value.images || selectedBerita.value.Images || []) : []
@@ -773,3 +788,13 @@ const handleProfilePhotoUpload = async (e: Event) => {
   }
 }
 </script>
+
+<style scoped>
+.article-content :deep(p) {
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+.article-content :deep(p:last-child) {
+  margin-bottom: 0;
+}
+</style>

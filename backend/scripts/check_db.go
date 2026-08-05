@@ -8,13 +8,12 @@ import (
 )
 func main() {
 	database.ConnectDB()
-	var c int64
-	database.DB.Model(&models.Province{}).Count(&c)
-	fmt.Println("Provinces:", c)
-	database.DB.Model(&models.Regency{}).Count(&c)
-	fmt.Println("Regencies:", c)
-	database.DB.Model(&models.District{}).Count(&c)
-	fmt.Println("Districts:", c)
-	database.DB.Model(&models.Village{}).Count(&c)
-	fmt.Println("Villages:", c)
+	_ = database.DB.Exec("SELECT setval(pg_get_serial_sequence('news_images', 'id'), coalesce(max(id), 1)) FROM news_images;").Error
+	testImg := models.NewsImage{
+		NewsID:       1,
+		ImagePath:    "http://test-image.jpg",
+		ImageCaption: "Test Caption",
+	}
+	err := database.DB.Create(&testImg).Error
+	fmt.Printf("Create NewsImage Error: %v, Created ID: %d\n", err, testImg.ID)
 }

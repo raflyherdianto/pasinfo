@@ -1,25 +1,32 @@
 # =============================================================================
 # docker-compose.yml — Frontend (Pasinfo Portal)
-# Production deployment on Oracle Cloud ARM VM
+# Enterprise Grade — Least Privilege & Production Hardened
 # =============================================================================
-
-version: "3.9"
+name: pasinfo-frontend
 
 services:
   frontend:
     build:
       context: .
       dockerfile: Dockerfile
-    image: pasinfo-frontend:latest
+    image: ghcr.io/raflyherdianto/pasinfo-frontend:latest
 
     container_name: pasinfo-frontend
 
+    # ── Principle of Least Privilege: Dedicated unprivileged NGINX UID:GID ─────
+    user: "101:101"
+
+    # ── Process Init & Lifecycle Management ────────────────────────────────────
+    init: true
     restart: unless-stopped
 
     environment:
       NGINX_PORT: "8080"
 
-    # ── Security: container hardening ─────────────────────────────────────────
+    # ── Security & Capability Hardening ───────────────────────────────────────
+    cap_drop:
+      - ALL
+    cap_add: []
     security_opt:
       - no-new-privileges:true
     read_only: true
@@ -37,25 +44,38 @@ services:
       retries: 3
       start_period: 10s
 
-    # ── Resource limits ───────────────────────────────────────────────────────
+    # ── Watchtower Auto-Deploy Labels ─────────────────────────────────────────
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+      org.opencontainers.image.title: "pasinfo-frontend"
+      org.opencontainers.image.description: "Pasinfo Frontend Portal Service"
+      org.opencontainers.image.source: "https://github.com/raflyherdianto/pasinfo"
+
+    # ── Resource Limits & Protection ──────────────────────────────────────────
+    pids_limit: 100
     deploy:
       resources:
         limits:
           cpus: "0.50"
           memory: "256M"
         reservations:
+          cpus: "0.05"
           memory: "64M"
 
-    # ── Logging ───────────────────────────────────────────────────────────────
+    # ── Logging Constraints ───────────────────────────────────────────────────
     logging:
       driver: "json-file"
       options:
         max-size: "5m"
         max-file: "3"
+        compress: "true"
 
     networks:
       - shared-network
 
+# =============================================================================
+# Named volumes and networks
+# =============================================================================
 networks:
   shared-network:
     name: shared-network

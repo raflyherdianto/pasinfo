@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -24,30 +25,32 @@ func GetNews(c *fiber.Ctx) error {
 	var response []models.NewsResponse
 	for _, n := range news {
 		var imgPaths []string
+		var imgCaptions []string
 		for _, img := range n.Images {
 			imgPaths = append(imgPaths, img.ImagePath)
+			imgCaptions = append(imgCaptions, img.ImageCaption)
 		}
 		response = append(response, models.NewsResponse{
-			ID:        n.ID,
-			Judul:     n.Title,
-			Kategori:  n.Category.Name,
-			Konten:    n.Content,
-			ImageCaption: n.ImageCaption,
-			ProvinceID:   n.ProvinceID,
-			RegencyID:    n.RegencyID,
-			DistrictID:   n.DistrictID,
-			VillageID:    n.VillageID,
-			Images:       imgPaths,
-			Penulis:   n.Author.Name,
-			Waktu:     formatWaktuWIB(n.CreatedAt),
-			SourceURL: n.SourceURL,
-			Source:    n.Source,
-			Status:    n.Status,
-			Views:     n.Views,
-			Kota:      getRegencyName(n.RegencyID),
-			CreatedAt: n.CreatedAt,
-			UpdatedAt: n.UpdatedAt,
-			WaktuUpdate: formatWaktuWIB(n.UpdatedAt),
+			ID:            n.ID,
+			Judul:         n.Title,
+			Kategori:      n.Category.Name,
+			Konten:        n.Content,
+			ProvinceID:    n.ProvinceID,
+			RegencyID:     n.RegencyID,
+			DistrictID:    n.DistrictID,
+			VillageID:     n.VillageID,
+			Images:        imgPaths,
+			ImageCaptions: imgCaptions,
+			Penulis:       formatAuthorName(n),
+			Waktu:         formatWaktuWIB(n.CreatedAt),
+			SourceURL:     n.SourceURL,
+			Source:        n.Source,
+			Status:        n.Status,
+			Views:         n.Views,
+			Kota:          getRegencyName(n.RegencyID),
+			CreatedAt:     n.CreatedAt,
+			UpdatedAt:     n.UpdatedAt,
+			WaktuUpdate:   formatWaktuWIB(n.UpdatedAt),
 		})
 	}
 
@@ -70,30 +73,32 @@ func GetNewsByCategory(c *fiber.Ctx) error {
 	var response []models.NewsResponse
 	for _, n := range news {
 		var imgPaths []string
+		var imgCaptions []string
 		for _, img := range n.Images {
 			imgPaths = append(imgPaths, img.ImagePath)
+			imgCaptions = append(imgCaptions, img.ImageCaption)
 		}
 		response = append(response, models.NewsResponse{
-			ID:        n.ID,
-			Judul:     n.Title,
-			Kategori:  n.Category.Name,
-			Konten:    n.Content,
-			ImageCaption: n.ImageCaption,
-			ProvinceID:   n.ProvinceID,
-			RegencyID:    n.RegencyID,
-			DistrictID:   n.DistrictID,
-			VillageID:    n.VillageID,
-			Images:       imgPaths,
-			Penulis:   n.Author.Name,
-			Waktu:     formatWaktuWIB(n.CreatedAt),
-			SourceURL: n.SourceURL,
-			Source:    n.Source,
-			Status:    n.Status,
-			Views:     n.Views,
-			Kota:      getRegencyName(n.RegencyID),
-			CreatedAt: n.CreatedAt,
-			UpdatedAt: n.UpdatedAt,
-			WaktuUpdate: formatWaktuWIB(n.UpdatedAt),
+			ID:            n.ID,
+			Judul:         n.Title,
+			Kategori:      n.Category.Name,
+			Konten:        n.Content,
+			ProvinceID:    n.ProvinceID,
+			RegencyID:     n.RegencyID,
+			DistrictID:    n.DistrictID,
+			VillageID:     n.VillageID,
+			Images:        imgPaths,
+			ImageCaptions: imgCaptions,
+			Penulis:       formatAuthorName(n),
+			Waktu:         formatWaktuWIB(n.CreatedAt),
+			SourceURL:     n.SourceURL,
+			Source:        n.Source,
+			Status:        n.Status,
+			Views:         n.Views,
+			Kota:          getRegencyName(n.RegencyID),
+			CreatedAt:     n.CreatedAt,
+			UpdatedAt:     n.UpdatedAt,
+			WaktuUpdate:   formatWaktuWIB(n.UpdatedAt),
 		})
 	}
 
@@ -119,37 +124,49 @@ func GetNewsDetail(c *fiber.Ctx) error {
 	database.DB.Model(&n).UpdateColumn("views", n.Views)
 
 	var imgPaths []string
+	var imgCaptions []string
 	for _, img := range n.Images {
 		imgPaths = append(imgPaths, img.ImagePath)
+		imgCaptions = append(imgCaptions, img.ImageCaption)
 	}
 
 	response := models.NewsResponse{
-		ID:        n.ID,
-		Judul:     n.Title,
-		Kategori:  n.Category.Name,
-		Konten:    n.Content,
-		ImageCaption: n.ImageCaption,
-		ProvinceID:   n.ProvinceID,
-		RegencyID:    n.RegencyID,
-		DistrictID:   n.DistrictID,
-		VillageID:    n.VillageID,
-		Images:       imgPaths,
-		Penulis:   n.Author.Name,
-		Waktu:     formatWaktuWIB(n.CreatedAt),
-		SourceURL: n.SourceURL,
-		Source:    n.Source,
-		Status:    n.Status,
-		Views:     n.Views,
-		Kota:      getRegencyName(n.RegencyID),
-		CreatedAt: n.CreatedAt,
-		UpdatedAt: n.UpdatedAt,
-		WaktuUpdate: formatWaktuWIB(n.UpdatedAt),
+		ID:            n.ID,
+		Judul:         n.Title,
+		Kategori:      n.Category.Name,
+		Konten:        n.Content,
+		ProvinceID:    n.ProvinceID,
+		RegencyID:     n.RegencyID,
+		DistrictID:    n.DistrictID,
+		VillageID:     n.VillageID,
+		Images:        imgPaths,
+		ImageCaptions: imgCaptions,
+		Penulis:       formatAuthorName(n),
+		Waktu:         formatWaktuWIB(n.CreatedAt),
+		SourceURL:     n.SourceURL,
+		Source:        n.Source,
+		Status:        n.Status,
+		Views:         n.Views,
+		Kota:          getRegencyName(n.RegencyID),
+		CreatedAt:     n.CreatedAt,
+		UpdatedAt:     n.UpdatedAt,
+		WaktuUpdate:   formatWaktuWIB(n.UpdatedAt),
 	}
 
 	return c.JSON(fiber.Map{
 		"success": true,
 		"data":    response,
 	})
+}
+
+func formatAuthorName(n models.News) string {
+	if strings.TrimSpace(n.Author.Name) != "" {
+		return strings.TrimSpace(n.Author.Name)
+	}
+	if strings.TrimSpace(n.Source) != "" {
+		return strings.TrimSpace(n.Source)
+	}
+	return "Redaksi Pasinfo"
 }
 
 // helper to format time to WIB
@@ -183,52 +200,113 @@ func getRegencyName(regencyID string) string {
 
 
 type CreateNewsRequest struct {
-	Title        string   `json:"title"`
-	Content      string   `json:"content"`
-	CategoryID   uint     `json:"category_id"`
-	ProvinceID   string   `json:"province_id"`
-	RegencyID    string   `json:"regency_id"`
-	DistrictID   string   `json:"district_id"`
-	VillageID    string   `json:"village_id"`
-	ImageCaption string   `json:"image_caption"`
-	Images       []string `json:"images"`
-	AuthorID     uint     `json:"author_id"`
+	Title         string   `json:"title"`
+	Content       string   `json:"content"`
+	CategoryID    uint     `json:"category_id"`
+	ProvinceID    string   `json:"province_id"`
+	RegencyID     string   `json:"regency_id"`
+	DistrictID    string   `json:"district_id"`
+	VillageID     string   `json:"village_id"`
+	Images        []string `json:"images"`
+	ImageCaptions []string `json:"image_captions"`
+	AuthorID      uint     `json:"author_id"`
+	Status        string   `json:"status"`
 }
 
 func CreateNews(c *fiber.Ctx) error {
 	var req CreateNewsRequest
 	if err := c.BodyParser(&req); err != nil {
-		return c.Status(400).JSON(fiber.Map{"success": false, "message": "Invalid request"})
+		return c.Status(400).JSON(fiber.Map{"success": false, "message": "Invalid request payload"})
 	}
 
 	userIDFloat := c.Locals("user_id").(float64)
 	authorID := uint(userIDFloat)
 
+	// Validate Author ID exists in DB, fallback if token has stale ID
+	var authorUser models.User
+	if err := database.DB.First(&authorUser, authorID).Error; err != nil {
+		if err := database.DB.Where("role = ?", "penulis").First(&authorUser).Error; err != nil {
+			database.DB.First(&authorUser)
+		}
+		if authorUser.ID != 0 {
+			authorID = authorUser.ID
+		}
+	}
+
+	// Validate Category ID exists in DB, fallback to ID 1 if invalid
+	categoryID := req.CategoryID
+	if categoryID == 0 {
+		categoryID = 1
+	}
+	var cat models.Category
+	if err := database.DB.First(&cat, categoryID).Error; err != nil {
+		var firstCat models.Category
+		if database.DB.First(&firstCat).Error == nil {
+			categoryID = firstCat.ID
+		}
+	}
+
+	statusTarget := req.Status
+	if statusTarget == "" {
+		statusTarget = "draft"
+	}
+
 	news := models.News{
-		Title:        req.Title,
-		Content:      req.Content,
-		CategoryID:   req.CategoryID,
-		ProvinceID:   req.ProvinceID,
-		RegencyID:    req.RegencyID,
-		DistrictID:   req.DistrictID,
-		VillageID:    req.VillageID,
-		ImageCaption: req.ImageCaption,
-		AuthorID:     authorID, // Populated from JWT
-		Status:       "draft", // Default as draft when first created
-		SourceURL:    fmt.Sprintf("manual-%d-%d", authorID, time.Now().UnixNano()),
-		Source:       "Pasinfo",
+		Title:      req.Title,
+		Content:    req.Content,
+		CategoryID: categoryID,
+		ProvinceID: req.ProvinceID,
+		RegencyID:  req.RegencyID,
+		DistrictID: req.DistrictID,
+		VillageID:  req.VillageID,
+		AuthorID:   authorID,
+		Status:     statusTarget,
+		SourceURL:  fmt.Sprintf("manual-%d-%d", authorID, time.Now().UnixNano()),
+		Source:     "Pasinfo",
 	}
 
 	if err := database.DB.Create(&news).Error; err != nil {
-		return c.Status(500).JSON(fiber.Map{"success": false, "message": "Failed to create news"})
+		log.Printf("[CreateNews DB Error] %v", err)
+		return c.Status(500).JSON(fiber.Map{"success": false, "message": fmt.Sprintf("Failed to create news: %v", err)})
 	}
 
-	for _, imgPath := range req.Images {
-		img := models.NewsImage{
-			NewsID:    news.ID,
-			ImagePath: imgPath,
+	log.Printf("[CreateNews Request] news_id=%d Images count: %d, Captions count: %d", news.ID, len(req.Images), len(req.ImageCaptions))
+	for i, imgPath := range req.Images {
+		caption := ""
+		if i < len(req.ImageCaptions) {
+			caption = req.ImageCaptions[i]
 		}
-		database.DB.Create(&img)
+		img := models.NewsImage{
+			NewsID:       news.ID,
+			ImagePath:    imgPath,
+			ImageCaption: caption,
+		}
+		if err := database.DB.Create(&img).Error; err != nil {
+			log.Printf("[CreateNews Image Error] news_id=%d idx=%d: %v", news.ID, i, err)
+		}
+	}
+
+	database.DB.Preload("Author").Preload("Category").Preload("Images").First(&news, news.ID)
+
+	if statusTarget == "pending" {
+		var authorUser models.User
+		database.DB.First(&authorUser, authorID)
+		authorName := authorUser.Name
+		if authorName == "" {
+			authorName = "Penulis"
+		}
+		var editors []models.User
+		database.DB.Where("role = ?", "editor").Find(&editors)
+		for _, ed := range editors {
+			notif := models.Notification{
+				UserID:  ed.ID,
+				NewsID:  &news.ID,
+				Title:   "Artikel Baru Menunggu Review",
+				Message: fmt.Sprintf("%s mengajukan artikel '%s'", authorName, news.Title),
+				Type:    "info",
+			}
+			database.DB.Create(&notif)
+		}
 	}
 
 	return c.Status(201).JSON(fiber.Map{
@@ -345,16 +423,16 @@ func DeleteNews(c *fiber.Ctx) error {
 }
 
 type UpdateNewsRequest struct {
-	Title        string   `json:"title"`
-	Content      string   `json:"content"`
-	CategoryID   uint     `json:"category_id"`
-	ProvinceID   string   `json:"province_id"`
-	RegencyID    string   `json:"regency_id"`
-	DistrictID   string   `json:"district_id"`
-	VillageID    string   `json:"village_id"`
-	ImageCaption string   `json:"image_caption"`
-	Images       []string `json:"images"`
-	Status       string   `json:"status"`
+	Title         string   `json:"title"`
+	Content       string   `json:"content"`
+	CategoryID    uint     `json:"category_id"`
+	ProvinceID    string   `json:"province_id"`
+	RegencyID     string   `json:"regency_id"`
+	DistrictID    string   `json:"district_id"`
+	VillageID     string   `json:"village_id"`
+	Images        []string `json:"images"`
+	ImageCaptions []string `json:"image_captions"`
+	Status        string   `json:"status"`
 }
 
 func UpdateNews(c *fiber.Ctx) error {
@@ -384,7 +462,6 @@ func UpdateNews(c *fiber.Ctx) error {
 	news.RegencyID = req.RegencyID
 	news.DistrictID = req.DistrictID
 	news.VillageID = req.VillageID
-	news.ImageCaption = req.ImageCaption
 	
 	if req.Status != "" {
 		news.Status = req.Status
@@ -399,14 +476,24 @@ func UpdateNews(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"success": false, "message": "Failed to update news"})
 	}
 
+	log.Printf("[UpdateNews Request] news_id=%d Images count: %d, Captions count: %d", news.ID, len(req.Images), len(req.ImageCaptions))
 	database.DB.Where("news_id = ?", news.ID).Delete(&models.NewsImage{})
-	for _, imgPath := range req.Images {
-		img := models.NewsImage{
-			NewsID:    news.ID,
-			ImagePath: imgPath,
+	for i, imgPath := range req.Images {
+		caption := ""
+		if i < len(req.ImageCaptions) {
+			caption = req.ImageCaptions[i]
 		}
-		database.DB.Create(&img)
+		img := models.NewsImage{
+			NewsID:       news.ID,
+			ImagePath:    imgPath,
+			ImageCaption: caption,
+		}
+		if err := database.DB.Create(&img).Error; err != nil {
+			log.Printf("[UpdateNews Image Error] news_id=%d idx=%d: %v", news.ID, i, err)
+		}
 	}
+
+	database.DB.Preload("Author").Preload("Category").Preload("Images").First(&news, news.ID)
 
 	if req.Status == "pending" {
 		var editors []models.User

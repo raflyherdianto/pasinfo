@@ -1,10 +1,10 @@
 <template>
-  <div class="min-h-screen bg-gray-50 py-8 font-sans">
-    <main class="container mx-auto px-4 max-w-7xl">
+  <div class="min-h-screen bg-gray-50 py-4 sm:py-8 font-sans">
+    <main class="container mx-auto px-2.5 sm:px-4 md:px-6 max-w-7xl">
       
       <button
         @click="router.back()"
-        class="flex items-center gap-2 text-gray-600 hover:text-blue-600 mb-6 transition-colors font-medium"
+        class="flex items-center gap-2 text-gray-600 hover:text-blue-600 mb-4 sm:mb-6 transition-colors font-medium text-sm sm:text-base px-1"
       >
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
@@ -32,21 +32,21 @@
       </div>
 
       
-      <article v-else-if="berita" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="p-6 md:p-8">
+      <article v-else-if="berita" class="bg-white rounded-xl sm:rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+        <div class="p-5 sm:p-6 md:p-8">
           
-          <div class="mb-6">
-            <div class="flex justify-between items-start">
-              <span class="inline-block bg-blue-100 text-blue-700 text-xs font-semibold px-2.5 py-1 rounded-full mb-4 uppercase tracking-wide">
+          <div class="mb-5 sm:mb-6">
+            <div class="flex justify-between items-center mb-3">
+              <span class="inline-block bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
                 {{ berita.kategori }}
               </span>
               <button 
                 @click="toggleBookmark"
-                class="flex items-center gap-2 text-base text-gray-500 hover:text-red-600 transition-colors font-semibold"
+                class="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 hover:text-red-600 transition-colors font-semibold"
                 :title="isBookmarked ? 'Hapus Bookmark' : 'Simpan Bookmark'"
               >
                 <svg 
-                  class="w-5 h-5" 
+                  class="w-4 h-4 sm:w-5 sm:h-5" 
                   :class="isBookmarked ? 'fill-red-500 text-red-500' : 'text-gray-400'"
                   fill="none" 
                   stroke="currentColor" 
@@ -57,40 +57,44 @@
                 <span>{{ isBookmarked ? 'Tersimpan' : 'Bookmark' }}</span>
               </button>
             </div>
-            <h1 class="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight mb-4">
+            <h1 class="text-lg sm:text-2xl md:text-3xl font-bold md:font-extrabold text-gray-900 leading-snug md:leading-tight mb-3">
               {{ berita.judul }}
             </h1>
-            <div class="flex flex-wrap items-center text-sm text-gray-500 gap-4">
-              <span class="flex items-center gap-1.5">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                {{ berita.waktu }}
-              </span>
-              <span class="flex items-center gap-1.5">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex flex-wrap items-center text-xs sm:text-sm text-gray-500 gap-x-3 gap-y-1.5 py-3 border-y border-gray-100 my-4">
+              <span class="flex items-center gap-1.5 font-medium text-gray-700">
+                <svg class="w-4 h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                 </svg>
-                {{ berita.penulis }}
+                {{ getPenulisName(berita) }}
               </span>
-              <a
-                v-if="berita.source_url"
-                :href="berita.source_url"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="flex items-center gap-1.5 text-blue-500 hover:underline"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+              <span class="w-1 h-1 bg-gray-300 rounded-full"></span>
+              <span class="flex items-center gap-1.5 shrink-0">
+                <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                Sumber Asli
-              </a>
+                {{ formatDateOnly(berita.waktu) }}
+              </span>
+              <template v-if="berita.source_url && !berita.source_url.startsWith('manual') && berita.source_url !== 'manual' && berita.source !== 'Pasinfo'">
+                <span class="w-1 h-1 bg-gray-300 rounded-full"></span>
+                <a
+                  :href="berita.source_url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="flex items-center gap-1 text-blue-600 hover:underline text-xs"
+                >
+                  <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                  </svg>
+                  Sumber Asli
+                </a>
+              </template>
             </div>
           </div>
 
           
-          <div class="mb-8 relative group">
-            <div class="relative rounded-xl overflow-hidden bg-gray-100 aspect-video shadow-sm border border-gray-100">
+          <!-- Large Main Featured Image Card (Mobile: h-64 sm:h-80) -->
+          <div class="mb-6 sm:mb-8 relative group">
+            <div class="relative rounded-xl overflow-hidden bg-gray-100 h-64 sm:h-80 md:h-auto md:aspect-video shadow-md border border-gray-100">
               <img
                 :src="(berita.images && berita.images.length > 0) ? berita.images[activeImgIndex] : '/images/themes/photo.jpg'"
                 :alt="berita.judul"
@@ -103,7 +107,7 @@
               <button 
                 v-if="berita.images && berita.images.length > 1" 
                 @click.stop="prevImage" 
-                class="absolute left-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white p-2.5 rounded-full transition-all backdrop-blur-sm opacity-0 group-hover:opacity-100 flex items-center justify-center"
+                class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white p-2.5 sm:p-3 rounded-full transition-all backdrop-blur-sm flex items-center justify-center"
               >
                 <svg class="w-5 h-5 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
@@ -114,7 +118,7 @@
               <button 
                 v-if="berita.images && berita.images.length > 1" 
                 @click.stop="nextImage" 
-                class="absolute right-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white p-2.5 rounded-full transition-all backdrop-blur-sm opacity-0 group-hover:opacity-100 flex items-center justify-center"
+                class="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white p-2.5 sm:p-3 rounded-full transition-all backdrop-blur-sm flex items-center justify-center"
               >
                 <svg class="w-5 h-5 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
@@ -124,31 +128,32 @@
               
               <div 
                 v-if="berita.images && berita.images.length > 1" 
-                class="absolute bottom-4 right-4 bg-black/50 backdrop-blur-md text-white text-xs px-3 py-1.5 rounded-full font-medium"
+                class="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 bg-black/60 backdrop-blur-md text-white text-xs px-3 py-1.5 rounded-full font-medium"
               >
                 {{ activeImgIndex + 1 }} / {{ berita.images.length }}
               </div>
             </div>
-            <p v-if="berita.image_caption" class="mt-3.5 text-center text-sm md:text-base text-gray-500 italic max-w-3xl mx-auto px-4">
-              {{ berita.image_caption }}
+            <p v-if="getActiveImageCaption(berita, activeImgIndex)" class="mt-2.5 text-center text-sm sm:text-base text-gray-600 font-normal max-w-3xl mx-auto px-2">
+              {{ getActiveImageCaption(berita, activeImgIndex) }}
             </p>
           </div>
 
           
           <div 
-            class="prose prose-lg max-w-none text-gray-700 leading-relaxed prose-headings:mt-6 prose-headings:mb-3 prose-p:my-4 prose-h1:mt-8 prose-h1:mb-4 prose-h2:mt-7 prose-h2:mb-3.5 prose-h3:mt-6 prose-h3:mb-3" 
+            class="prose prose-base sm:prose-lg max-w-none text-gray-800 leading-relaxed text-base sm:text-lg prose-p:my-2.5 sm:prose-p:my-3.5 prose-p:leading-relaxed prose-headings:font-bold prose-h2:text-xl sm:prose-h2:text-2xl prose-h2:mt-6 prose-h2:mb-3 prose-img:rounded-xl article-content" 
             v-html="formattedKonten"
+            @click="handleContentClick"
           ></div>
 
           
-          <div class="mt-8 pt-6 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <span class="text-sm font-bold text-gray-600 uppercase tracking-wider flex items-center gap-2">
+          <div class="mt-6 pt-5 sm:mt-8 sm:pt-6 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <span class="text-xs sm:text-sm font-bold text-gray-600 uppercase tracking-wider flex items-center gap-2">
               <svg class="w-4 h-4 text-blue-600 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 10.742l4.636-2.318M8.684 13.258l4.636 2.318m6.037-7.04a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0zm-10 5a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0zm10 5a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
               </svg>
               Bagikan Artikel:
             </span>
-            <div class="flex flex-wrap gap-2.5">
+            <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-2.5">
               
               <a 
                 :href="`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`" 
@@ -238,21 +243,33 @@
                   <h4 class="text-sm font-semibold text-gray-800 line-clamp-2 group-hover:text-blue-600 transition-colors mb-1">
                     {{ item.judul }}
                   </h4>
-                  <span class="text-xs text-gray-500">{{ item.waktu }}</span>
+                  <span class="text-xs text-gray-500 flex items-center gap-2">
+                    <span>{{ getPenulisName(item) }}</span>
+                    <span class="w-1 h-1 bg-gray-300 rounded-full"></span>
+                    <span>{{ formatDateOnly(item.waktu) }}</span>
+                  </span>
                 </div>
               </div>
             </div>
 
             
-            <div class="mt-8 bg-gray-50 border border-gray-200 rounded-xl p-4 text-center text-gray-400 font-bold tracking-widest flex items-center justify-center min-h-[250px]">
-              IKLAN SIDEBAR
+            <div class="mt-8 bg-gray-50 border border-gray-200 rounded-xl p-4 text-center text-gray-400 font-semibold text-xs flex flex-col items-center justify-center min-h-[250px] gap-1">
+              <span class="font-bold text-gray-500 uppercase tracking-wider">Space Ads Available</span>
+              <span>Contact Admin for more information</span>
             </div>
           </div>
         </aside>
       </div>
 
       
-      <section v-if="relatedNews.length > 0" class="mt-12">
+      <!-- Iklan Sebelum Berita Terkait -->
+      <div v-if="relatedNews.length > 0" class="mt-10 bg-gray-100 border border-gray-200 rounded-lg p-6 text-center text-gray-400 font-semibold text-xs sm:text-sm flex flex-col items-center justify-center min-h-[120px] gap-1">
+        <span class="font-bold text-gray-500 uppercase tracking-wider">Space Ads Available</span>
+        <span>Contact Admin for more information</span>
+      </div>
+
+      <!-- Section Berita Terkait -->
+      <section v-if="relatedNews.length > 0" class="mt-8">
         <h3 class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
           <div class="w-1.5 h-6 bg-blue-600 rounded-full"></div>
           Berita Terkait
@@ -268,36 +285,86 @@
           >
             <div
               v-for="item in relatedNews"
-              :key="item.id"
+              :key="'rel-'+item.id"
               class="w-64 sm:w-72 flex-none bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow group shrink-0"
               @click="navigateToBerita(item.id, item.judul, $event)"
               @dragstart.prevent
             >
-            <div class="aspect-[4/3] overflow-hidden pointer-events-none">
-              <img
-                :src="(item.images && item.images.length > 0) ? item.images[0] : '/images/themes/photo.jpg'"
-                :alt="item.judul"
-                draggable="false"
-                class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                @error="handleImageError"
-              />
-            </div>
-            <div class="p-4">
-              <h4 class="font-semibold text-gray-800 line-clamp-2 group-hover:text-blue-600 transition-colors mb-2">
-                {{ item.judul }}
-              </h4>
-              <span class="text-xs text-gray-500">{{ item.waktu }}</span>
+              <div class="aspect-[4/3] overflow-hidden pointer-events-none">
+                <img
+                  :src="(item.images && item.images.length > 0) ? item.images[0] : '/images/themes/photo.jpg'"
+                  :alt="item.judul"
+                  draggable="false"
+                  class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  @error="handleImageError"
+                />
+              </div>
+              <div class="p-4">
+                <h4 class="font-semibold text-gray-800 line-clamp-2 group-hover:text-blue-600 transition-colors mb-2">
+                  {{ item.judul }}
+                </h4>
+                <span class="text-xs text-gray-500 flex items-center gap-2">
+                  <span>{{ getPenulisName(item) }}</span>
+                  <span class="w-1 h-1 bg-gray-300 rounded-full"></span>
+                  <span>{{ formatDateOnly(item.waktu) }}</span>
+                </span>
+              </div>
             </div>
           </div>
         </div>
-        </div>
+      </section>
 
-
-        
-        <div class="mt-8 bg-gray-100 border border-gray-200 rounded-lg p-6 text-center text-gray-400 font-bold tracking-widest flex items-center justify-center min-h-[120px]">
-          IKLAN RELATED
+      <!-- Section Berita Terbaru -->
+      <section v-if="latestNews.length > 0" class="mt-12">
+        <h3 class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+          <div class="w-1.5 h-6 bg-green-600 rounded-full"></div>
+          Berita Terbaru
+        </h3>
+        <div class="w-full relative">
+          <div 
+            class="flex overflow-x-auto gap-4 pb-4 hide-scrollbar cursor-grab active:cursor-grabbing select-none"
+            ref="latestScrollContainer"
+            @mousedown="onLatestMouseDown"
+            @mouseleave="onLatestMouseLeave"
+            @mouseup="onLatestMouseUp"
+            @mousemove="onLatestMouseMove"
+          >
+            <div
+              v-for="item in latestNews"
+              :key="'lat-'+item.id"
+              class="w-64 sm:w-72 flex-none bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow group shrink-0 border-t-2 border-t-green-500"
+              @click="navigateToBerita(item.id, item.judul, $event)"
+              @dragstart.prevent
+            >
+              <div class="aspect-[4/3] overflow-hidden pointer-events-none">
+                <img
+                  :src="(item.images && item.images.length > 0) ? item.images[0] : '/images/themes/photo.jpg'"
+                  :alt="item.judul"
+                  draggable="false"
+                  class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  @error="handleImageError"
+                />
+              </div>
+              <div class="p-4">
+                <h4 class="font-semibold text-gray-800 line-clamp-2 group-hover:text-green-600 transition-colors mb-2">
+                  {{ item.judul }}
+                </h4>
+                <span class="text-xs text-gray-500 flex items-center gap-2">
+                  <span>{{ getPenulisName(item) }}</span>
+                  <span class="w-1 h-1 bg-gray-300 rounded-full"></span>
+                  <span>{{ formatDateOnly(item.waktu) }}</span>
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
+
+      <!-- Iklan di Bawah Berita Terbaru -->
+      <div v-if="latestNews.length > 0" class="mt-8 bg-gray-100 border border-gray-200 rounded-lg p-6 text-center text-gray-400 font-semibold text-xs sm:text-sm flex flex-col items-center justify-center min-h-[120px] gap-1">
+        <span class="font-bold text-gray-500 uppercase tracking-wider">Space Ads Available</span>
+        <span>Contact Admin for more information</span>
+      </div>
     </main>
 
     
@@ -395,8 +462,84 @@ const formattedKonten = computed(() => {
       rawHTML = '<p>' + kotaStr + '</p>' + content
     }
   }
-  return sanitizeHTML(rawHTML)
+  let sanitized = sanitizeHTML(rawHTML)
+  // Remove empty paragraphs containing only <br>, &nbsp; or whitespace
+  sanitized = sanitized.replace(/<p>\s*(<br\s*\/?>|&nbsp;|\s*)\s*<\/p>/gi, '')
+  // Replace 2 or more consecutive <br> with a single <br>
+  sanitized = sanitized.replace(/(<br\s*\/?>\s*){2,}/gi, '<br>')
+
+  // Construct Baca Juga (Same Category Latest News) & Inline Ad HTML
+  let inlineAddonsHTML = ''
+  if (relatedNews.value && relatedNews.value.length > 0) {
+    const sameCatItem = relatedNews.value.find((p: any) => String(p.id) !== String(berita.value.id)) || relatedNews.value[0]
+    if (sameCatItem) {
+      const sameCatUrl = `/berita/${sameCatItem.id}/${createSlug(sameCatItem.judul)}`
+      inlineAddonsHTML += `
+        <div class="my-6 p-4 bg-blue-50/80 border-l-4 border-blue-600 rounded-r-xl not-prose flex items-start gap-3 shadow-sm">
+          <span class="font-bold text-blue-800 shrink-0 text-sm sm:text-base">Baca Juga:</span>
+          <a href="${sameCatUrl}" class="font-semibold text-blue-700 hover:text-blue-900 hover:underline text-sm sm:text-base line-clamp-2">
+            ${sameCatItem.judul}
+          </a>
+        </div>
+      `
+    }
+  }
+
+  // Inline Ad Section below Baca Juga
+  inlineAddonsHTML += `
+    <div class="my-6 bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100 border border-dashed border-gray-300 rounded-xl p-5 text-center text-gray-400 font-bold tracking-widest flex flex-col items-center justify-center min-h-[100px] not-prose shadow-inner">
+      <span class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-1">Space Ads Available</span>
+      <span class="text-xs text-gray-400 font-normal">Contact Admin for more information</span>
+    </div>
+  `
+
+  // Insert after 2nd </p> tag or 2nd <br> break
+  const pMatches = sanitized.match(/<\/p>/gi)
+  const pCount = pMatches ? pMatches.length : 0
+
+  if (pCount >= 2) {
+    let currentP = 0
+    return sanitized.replace(/<\/p>/gi, (match) => {
+      currentP++
+      if (currentP === 2) {
+        return match + inlineAddonsHTML
+      }
+      return match
+    })
+  } else if (sanitized.includes('<br')) {
+    let brCount = 0
+    let brInserted = false
+    const result = sanitized.replace(/<br\s*\/?>/gi, (match) => {
+      brCount++
+      if (brCount === 2 && !brInserted) {
+        brInserted = true
+        return match + inlineAddonsHTML
+      }
+      return match
+    })
+    if (brInserted) return result
+    if (brCount === 1) {
+      return sanitized.replace(/<br\s*\/?>/i, (match) => match + inlineAddonsHTML)
+    }
+  }
+
+  if (pCount === 1) {
+    return sanitized.replace(/<\/p>/i, (match) => match + inlineAddonsHTML)
+  }
+
+  return sanitized + inlineAddonsHTML
 })
+
+const handleContentClick = (e: MouseEvent) => {
+  const target = (e.target as HTMLElement).closest('a')
+  if (target) {
+    const href = target.getAttribute('href')
+    if (href && href.startsWith('/berita/')) {
+      e.preventDefault()
+      router.push(href)
+    }
+  }
+}
 
 const copyUrl = () => {
   navigator.clipboard.writeText(currentUrl.value)
@@ -427,6 +570,38 @@ const shareInstagram = () => {
   })
 }
 
+const getPenulisName = (item: any): string => {
+  if (!item) return 'Redaksi Pasinfo'
+  if (typeof item.penulis === 'string' && item.penulis.trim() !== '') return item.penulis.trim()
+  if (item.penulis && typeof item.penulis === 'object' && item.penulis.name) return item.penulis.name
+  if (item.Author && typeof item.Author === 'object' && item.Author.name) return item.Author.name
+  if (item.author && typeof item.author === 'object' && item.author.name) return item.author.name
+  if (item.author_name && typeof item.author_name === 'string' && item.author_name.trim() !== '') return item.author_name.trim()
+  if (item.source && typeof item.source === 'string' && item.source.trim() !== '') return item.source.trim()
+  return 'Redaksi Pasinfo'
+}
+
+const formatDateOnly = (waktuStr?: string): string => {
+  if (!waktuStr) return ''
+  let clean = waktuStr.replace(/\s*WIB\s*/gi, '').trim()
+  clean = clean.replace(/,?\s+\d{1,2}:\d{2}(:\d{2})?$/, '').trim()
+  return clean
+}
+
+const getActiveImageCaption = (item: any, index: number): string => {
+  if (!item) return ''
+  if (item.image_captions && Array.isArray(item.image_captions) && item.image_captions[index]) {
+    return item.image_captions[index]
+  }
+  if (item.ImageCaptions && Array.isArray(item.ImageCaptions) && item.ImageCaptions[index]) {
+    return item.ImageCaptions[index]
+  }
+  if (item.images && Array.isArray(item.images) && typeof item.images[index] === 'object' && item.images[index].image_caption) {
+    return item.images[index].image_caption
+  }
+  return item.image_caption || item.ImageCaption || ''
+}
+
 interface NewsItem {
   id: number
   judul: string
@@ -444,6 +619,7 @@ interface NewsItem {
 
 const berita = ref<NewsItem | null>(null)
 const relatedNews = ref<NewsItem[]>([])
+const latestNews = ref<NewsItem[]>([])
 const popularNews = ref<NewsItem[]>([])
 const loading = ref(true)
 const error = ref('')
@@ -466,7 +642,6 @@ const fetchBerita = async () => {
     saveToHistory(detailData.data)
     checkIfBookmarked()
 
-
     const allData = await allRes.json()
     if (allData.success && allData.data) {
       const allNews = allData.data as NewsItem[]
@@ -475,13 +650,16 @@ const fetchBerita = async () => {
         .filter(n => n.id !== Number(props.id) && n.kategori === berita.value?.kategori)
         .slice(0, 6)
 
-
       if (relatedNews.value.length === 0) {
         relatedNews.value = allNews
           .filter(n => n.id !== Number(props.id))
           .slice(0, 6)
       }
 
+      latestNews.value = [...allNews]
+        .filter(n => n.id !== Number(props.id))
+        .sort((a, b) => b.id - a.id)
+        .slice(0, 6)
 
       popularNews.value = [...allNews]
         .sort((a, b) => b.id - a.id)
@@ -504,6 +682,34 @@ const scrollContainer = ref<HTMLElement | null>(null)
 let isDown = false
 let startX = 0
 let scrollLeft = 0
+
+const latestScrollContainer = ref<HTMLElement | null>(null)
+let isLatestDown = false
+let latestStartX = 0
+let latestScrollLeft = 0
+
+const onLatestMouseDown = (e: MouseEvent) => {
+  if (!latestScrollContainer.value) return
+  isLatestDown = true
+  latestStartX = e.pageX - latestScrollContainer.value.offsetLeft
+  latestScrollLeft = latestScrollContainer.value.scrollLeft
+}
+
+const onLatestMouseLeave = () => {
+  isLatestDown = false
+}
+
+const onLatestMouseUp = () => {
+  isLatestDown = false
+}
+
+const onLatestMouseMove = (e: MouseEvent) => {
+  if (!isLatestDown || !latestScrollContainer.value) return
+  e.preventDefault()
+  const x = e.pageX - latestScrollContainer.value.offsetLeft
+  const walk = (x - latestStartX) * 2
+  latestScrollContainer.value.scrollLeft = latestScrollLeft - walk
+}
 let isDragging = false
 
 const onMouseDown = (e: MouseEvent) => {

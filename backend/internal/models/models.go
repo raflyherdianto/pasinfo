@@ -25,47 +25,46 @@ type User struct {
 
 type News struct {
 	gorm.Model
-	Title     string `json:"judul"`
-	CategoryID uint   `json:"category_id"`
-	Category  Category `json:"kategori" gorm:"foreignKey:CategoryID"`
-	Content      string      `json:"konten"`
-	ImageCaption string      `json:"image_caption"`
-	ProvinceID   string      `json:"province_id"`
-	RegencyID    string      `json:"regency_id"`
-	DistrictID   string      `json:"district_id"`
-	VillageID    string      `json:"village_id"`
-	Images       []NewsImage `json:"images" gorm:"foreignKey:NewsID"`
-	AuthorID  uint   `json:"author_id"`
-	Author    User   `json:"penulis" gorm:"foreignKey:AuthorID"`
-	Views     int    `json:"views"`
-	Status    string `json:"status" gorm:"default:'draft'"` // "draft", "pending", "revision", "published"
-	SourceURL string `json:"source_url" gorm:"uniqueIndex"` // URL asli artikel (untuk deduplication)
-	Source    string `json:"source"`    // nama sumber (misal: "Kompas", "NewsAPI")
+	Title      string      `json:"judul"`
+	CategoryID uint        `json:"category_id"`
+	Category   Category    `json:"kategori" gorm:"foreignKey:CategoryID"`
+	Content    string      `json:"konten"`
+	ProvinceID string      `json:"province_id"`
+	RegencyID  string      `json:"regency_id"`
+	DistrictID string      `json:"district_id"`
+	VillageID  string      `json:"village_id"`
+	Images     []NewsImage `json:"images" gorm:"foreignKey:NewsID"`
+	AuthorID   uint        `json:"author_id"`
+	Author     User        `json:"penulis" gorm:"foreignKey:AuthorID"`
+	Views      int         `json:"views"`
+	Status     string      `json:"status" gorm:"default:'draft'"` // "draft", "pending", "revision", "published"
+	SourceURL  string      `json:"source_url" gorm:"uniqueIndex"` // URL asli artikel (untuk deduplication)
+	Source     string      `json:"source"`                        // nama sumber (misal: "Kompas", "NewsAPI")
 }
 
 // For returning formatted time in JSON like "10 menit", we can use a custom response struct or calculate on the frontend.
 // Since frontend expects 'waktu', we can format the created_at appropriately.
 type NewsResponse struct {
-	ID        uint      `json:"id"`
-	Judul     string    `json:"judul"`
-	Kategori  string    `json:"kategori"`
-	Konten       string    `json:"konten"`
-	ImageCaption string    `json:"image_caption"`
-	ProvinceID   string    `json:"province_id"`
-	RegencyID    string    `json:"regency_id"`
-	DistrictID   string    `json:"district_id"`
-	VillageID    string    `json:"village_id"`
-	Images       []string  `json:"images"`
-	Penulis   string    `json:"penulis"`
-	Waktu     string    `json:"waktu"`
-	SourceURL string    `json:"source_url"`
-	Source    string    `json:"source"`
-	Status    string    `json:"status"`
-	Views     int       `json:"views"`
-	Kota      string    `json:"kota"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	WaktuUpdate string    `json:"waktu_update"`
+	ID            uint      `json:"id"`
+	Judul         string    `json:"judul"`
+	Kategori      string    `json:"kategori"`
+	Konten        string    `json:"konten"`
+	ProvinceID    string    `json:"province_id"`
+	RegencyID     string    `json:"regency_id"`
+	DistrictID    string    `json:"district_id"`
+	VillageID     string    `json:"village_id"`
+	Images        []string  `json:"images"`
+	ImageCaptions []string  `json:"image_captions"`
+	Penulis       string    `json:"penulis"`
+	Waktu         string    `json:"waktu"`
+	SourceURL     string    `json:"source_url"`
+	Source        string    `json:"source"`
+	Status        string    `json:"status"`
+	Views         int       `json:"views"`
+	Kota          string    `json:"kota"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
+	WaktuUpdate   string    `json:"waktu_update"`
 }
 
 type Province struct {
@@ -98,9 +97,10 @@ type Category struct {
 }
 
 type NewsImage struct {
-	ID        uint   `json:"id" gorm:"primaryKey"`
-	NewsID    uint   `json:"news_id"`
-	ImagePath string `json:"image_path"`
+	ID           uint   `json:"id" gorm:"primaryKey"`
+	NewsID       uint   `json:"news_id"`
+	ImagePath    string `json:"image_path"`
+	ImageCaption string `json:"image_caption" gorm:"type:text"`
 }
 
 type Notification struct {

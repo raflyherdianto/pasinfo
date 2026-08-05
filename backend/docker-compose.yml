@@ -1,39 +1,59 @@
 # =============================================================================
 # docker-compose.yml — Backend (Pasinfo API)
-# Production deployment on Oracle Cloud ARM VM
-#
-# Pre-requisite on VM:
-#   1. Create ~/pasinfo/backend/.env (copy from .env.example)
-#   2. docker compose -f ~/pasinfo/backend/docker-compose.yml up -d
+# Enterprise Grade — Least Privilege & Production Hardened
 # =============================================================================
+name: pasinfo-backend
 
 services:
   backend:
     build:
       context: .
       dockerfile: Dockerfile
-    image: pasinfo-backend:latest
+    image: ghcr.io/raflyherdianto/pasinfo-backend:latest
 
     container_name: pasinfo-backend
 
+    # ── Principle of Least Privilege: Dedicated non-root UID:GID ──────────────
+    user: "10001:10001"
+
+    # ── Process Init & Lifecycle Management ────────────────────────────────────
+    init: true
     restart: unless-stopped
 
     # ── Environment ────────────────────────────────────────────────────────────
-    # .env is created MANUALLY on the VM — never stored in repository
     env_file:
       - .env
 
-    # Explicit env overrides to enforce security defaults
     environment:
       APP_ENV: production
       HTTPS: "true"
 
     # ── Volumes ───────────────────────────────────────────────────────────────
     volumes:
-      # SQLite database file — persisted outside container
-      - pasinfo-db:/app/data
-      # Uploaded images — persisted outside container, served by frontend NGINX
+      # Uploaded images — persisted outside container, served by NGINX
       - pasinfo-uploads:/app/uploads
+
+    # ── Security & Capability Hardening ───────────────────────────────────────
+    cap_drop:
+      - ALL
+    cap_add: []
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+      - /run:size=16m,mode=0755
+
+    # ── Resource Limits & Protection ──────────────────────────────────────────
+    pids_limit: 100
+    deploy:
+      resources:
+        limits:
+          cpus: "0.80"
+          memory: "512M"
+        reservations:
+          cpus: "0.10"
+          memory: "128M"
 
     # ── Health check ──────────────────────────────────────────────────────────
     healthcheck:
@@ -43,28 +63,20 @@ services:
       retries: 3
       start_period: 15s
 
-    # ── Security: container hardening ─────────────────────────────────────────
-    security_opt:
-      - no-new-privileges:true   # Prevent privilege escalation via setuid binaries
-    read_only: true              # Root filesystem is read-only
-    tmpfs:
-      - /tmp:size=64m,mode=1777  # Temp space for Go runtime (read_only bypass)
+    # ── Watchtower Auto-Deploy Labels ─────────────────────────────────────────
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+      org.opencontainers.image.title: "pasinfo-backend"
+      org.opencontainers.image.description: "Pasinfo Backend API Service"
+      org.opencontainers.image.source: "https://github.com/raflyherdianto/pasinfo"
 
-    # ── Resource limits ───────────────────────────────────────────────────────
-    deploy:
-      resources:
-        limits:
-          cpus: "0.80"
-          memory: "512M"
-        reservations:
-          memory: "128M"
-
-    # ── Logging ───────────────────────────────────────────────────────────────
+    # ── Logging Constraints ───────────────────────────────────────────────────
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "5"
+        compress: "true"
 
     networks:
       - shared-network
@@ -73,8 +85,6 @@ services:
 # Named volumes and networks
 # =============================================================================
 volumes:
-  pasinfo-db:
-    driver: local
   pasinfo-uploads:
     driver: local
 

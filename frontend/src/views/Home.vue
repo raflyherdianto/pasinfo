@@ -3,48 +3,158 @@
     
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
         
-        <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3 content-start">
+        <div class="lg:col-span-2">
+          
+          <!-- 6 Berita Utama Mobile Slider -->
           <div 
-            v-for="news in featuredNews"
-            :key="news.id"
-            class="relative rounded-xl overflow-hidden group cursor-pointer shadow-lg h-[320px]"
-            @click="navigateToBerita(news.id, news.judul)"
+            class="relative rounded-xl overflow-hidden shadow-xl h-80 sm:h-96 md:hidden group"
+            @mouseenter="stopAutoSlider"
+            @mouseleave="startAutoSlider"
+            @touchstart="stopAutoSlider"
+            @touchend="startAutoSlider"
           >
-            <img 
-              :src="(news.images && news.images.length > 0) ? news.images[0] : '/images/themes/photo.jpg'"
-              :alt="news.judul" 
-              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            />
-            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-4 md:p-5">
-              <span class="bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded w-max mb-2">
-                {{ news.kategori }}
-              </span>
-              <h2 class="text-base md:text-lg font-bold text-white mb-2 leading-snug line-clamp-3">
-                {{ news.judul }}
-              </h2>
-              <div class="flex items-center text-gray-300 text-xs gap-3">
-                <span class="flex items-center gap-1">
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                  {{ news.waktu }}
+            <div v-if="featuredNews.length > 0" class="w-full h-full relative">
+              <div 
+                v-for="(news, index) in featuredNews"
+                :key="'slide-' + news.id"
+                class="absolute inset-0 transition-opacity duration-500 cursor-pointer"
+                :class="index === currentSlide ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'"
+                @click="navigateToBerita(news.id, news.judul)"
+              >
+                <img 
+                  :src="(news.images && news.images.length > 0) ? news.images[0] : '/images/themes/photo.jpg'"
+                  :alt="news.judul" 
+                  class="w-full h-full object-cover"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent flex flex-col justify-end p-5 sm:p-6">
+                  <span class="bg-blue-600 text-white text-xs font-bold px-2.5 py-0.5 rounded w-max mb-2">
+                    {{ news.kategori }}
+                  </span>
+                  <h2 class="text-lg sm:text-xl font-bold text-white mb-2 leading-snug line-clamp-3">
+                    {{ news.judul }}
+                  </h2>
+                  <div class="flex items-center text-gray-300 text-xs gap-3">
+                    <span class="flex items-center gap-1 truncate">
+                      <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                      <span class="truncate">{{ getPenulisName(news) }}</span>
+                    </span>
+                    <span class="w-1 h-1 bg-gray-400 rounded-full"></span>
+                    <span class="flex items-center gap-1 shrink-0">
+                      <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                      {{ formatDateOnly(news.waktu) }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              
+              <button 
+                @click.stop="prevSlide" 
+                class="absolute left-2 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/70 text-white p-2 rounded-full backdrop-blur-sm transition-all"
+                aria-label="Previous Slide"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+              </button>
+              <button 
+                @click.stop="nextSlide" 
+                class="absolute right-2 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/70 text-white p-2 rounded-full backdrop-blur-sm transition-all"
+                aria-label="Next Slide"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+              </button>
+
+              
+              <div class="absolute bottom-2.5 right-4 z-20 flex gap-1.5">
+                <button 
+                  v-for="(_, idx) in featuredNews" 
+                  :key="'dot-' + idx"
+                  @click.stop="currentSlide = idx"
+                  class="h-1.5 rounded-full transition-all duration-300"
+                  :class="idx === currentSlide ? 'w-5 bg-blue-500' : 'w-1.5 bg-white/60'"
+                  :aria-label="'Go to slide ' + (idx + 1)"
+                ></button>
+              </div>
+            </div>
+          </div>
+
+          
+          <div class="hidden md:grid md:grid-cols-2 gap-3 content-start">
+            <div 
+              v-for="news in featuredNews"
+              :key="news.id"
+              class="relative rounded-xl overflow-hidden group cursor-pointer shadow-lg h-[320px]"
+              @click="navigateToBerita(news.id, news.judul)"
+            >
+              <img 
+                :src="(news.images && news.images.length > 0) ? news.images[0] : '/images/themes/photo.jpg'"
+                :alt="news.judul" 
+                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-4 md:p-5">
+                <span class="bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded w-max mb-2">
+                  {{ news.kategori }}
                 </span>
-                <span class="w-1 h-1 bg-gray-400 rounded-full"></span>
-                <span class="flex items-center gap-1 truncate">
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                  <span class="truncate">{{ news.penulis }}</span>
-                </span>
+                <h2 class="text-base md:text-lg font-bold text-white mb-2 leading-snug line-clamp-3">
+                  {{ news.judul }}
+                </h2>
+                <div class="flex items-center text-gray-300 text-xs gap-3">
+                  <span class="flex items-center gap-1 truncate">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    <span class="truncate">{{ getPenulisName(news) }}</span>
+                  </span>
+                  <span class="w-1 h-1 bg-gray-400 rounded-full"></span>
+                  <span class="flex items-center gap-1 shrink-0">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    {{ formatDateOnly(news.waktu) }}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         
+        <!-- Berita Terbaru Section -->
         <div class="bg-white rounded-xl shadow p-6 flex flex-col h-full lg:max-h-[calc(3*320px+2*0.75rem)] overflow-hidden">
           <h3 class="text-xl font-bold border-b pb-3 mb-4 text-gray-800 shrink-0">Berita Terbaru</h3>
+          
+          <!-- Mobile Main Card (6 Berita Utama Style) -->
+          <div 
+            v-if="latestNews.length > 0"
+            class="relative rounded-xl overflow-hidden shadow-lg h-72 sm:h-80 group cursor-pointer mb-4 md:hidden"
+            @click="navigateToBerita(latestNews[0].id, latestNews[0].judul)"
+          >
+            <img 
+              :src="(latestNews[0].images && latestNews[0].images.length > 0) ? latestNews[0].images[0] : '/images/themes/photo.jpg'"
+              :alt="latestNews[0].judul" 
+              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent flex flex-col justify-end p-5">
+              <span class="bg-blue-600 text-white text-[11px] font-bold px-2.5 py-0.5 rounded w-max mb-2">
+                {{ latestNews[0].kategori }}
+              </span>
+              <h2 class="text-base sm:text-lg font-bold text-white mb-2 leading-snug line-clamp-3">
+                {{ latestNews[0].judul }}
+              </h2>
+              <div class="flex items-center text-gray-300 text-xs gap-3">
+                <span class="flex items-center gap-1 truncate">
+                  <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                  <span class="truncate">{{ getPenulisName(latestNews[0]) }}</span>
+                </span>
+                <span class="w-1 h-1 bg-gray-400 rounded-full"></span>
+                <span class="flex items-center gap-1 shrink-0">
+                  <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  {{ formatDateOnly(latestNews[0].waktu) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
           <div class="space-y-4">
             <div 
-              v-for="berita in latestNews" 
+              v-for="(berita, idx) in latestNews" 
               :key="berita.id"
-              class="flex gap-4 cursor-pointer group"
+              :class="[idx === 0 ? 'hidden md:flex' : 'flex', 'gap-4 cursor-pointer group items-center']"
               @click="navigateToBerita(berita.id, berita.judul)"
             >
               <div class="relative w-24 h-24 shrink-0 overflow-hidden rounded-lg">
@@ -57,21 +167,40 @@
                   class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                 />
               </div>
-              <div class="flex flex-col justify-center">
-                <h4 class="font-semibold text-gray-800 line-clamp-2 group-hover:text-blue-600 transition-colors">
+              <div class="flex flex-col justify-center min-w-0">
+                <h4 class="font-semibold text-gray-800 line-clamp-2 group-hover:text-blue-600 transition-colors mb-1">
                   {{ berita.judul }}
                 </h4>
-                <span class="text-xs text-gray-500 mt-2 flex items-center gap-1">
-                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                  {{ berita.waktu }}
-                </span>
+                <div class="flex items-center text-xs text-gray-500 gap-2 flex-wrap">
+                  <span class="flex items-center gap-1 truncate max-w-[120px]">
+                    <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    <span class="truncate">{{ getPenulisName(berita) }}</span>
+                  </span>
+                  <span class="w-1 h-1 bg-gray-300 rounded-full"></span>
+                  <span class="flex items-center gap-1 shrink-0">
+                    <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    {{ formatDateOnly(berita.waktu) }}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      
+      <!-- Section Iklan Responsif di atas Kategori (Lokal, Nasional, Politik) -->
+      <div class="bg-gradient-to-r from-gray-50 via-gray-100 to-gray-50 border border-dashed border-gray-300 rounded-xl p-6 sm:p-8 mb-8 sm:mb-12 relative overflow-hidden flex flex-col items-center justify-center min-h-[180px] sm:min-h-[200px] md:min-h-[220px] text-center shadow-sm">
+        <span class="absolute top-3 right-3 text-[11px] uppercase tracking-widest text-gray-400 font-bold bg-white/90 px-2.5 py-0.5 rounded border border-gray-200 shadow-2xs">SPONSORED / IKLAN</span>
+        <div class="flex flex-col items-center gap-2 z-10 my-auto">
+          <svg class="w-9 h-9 sm:w-10 sm:h-10 text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+          </svg>
+          <span class="text-sm sm:text-base font-bold text-gray-600 tracking-wider uppercase">Space Ads Available</span>
+          <p class="text-xs sm:text-sm text-gray-400 max-w-md px-2">Contact Admin for more information</p>
+        </div>
+      </div>
+
+      <!-- Category Sections (Lokal, Nasional, Politik) -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
         <template v-for="(categoryList, categoryName) in categoryNews" :key="categoryName">
           <div>
@@ -81,29 +210,68 @@
             >
               <div class="flex items-center gap-2">
                 <div class="w-1.5 h-6 bg-blue-600"></div>
-                <h3 class="text-lg font-bold text-gray-800 uppercase">{{ categoryName }}</h3>
+                <h3 class="text-lg font-bold text-gray-800 capitalize">{{ categoryName }}</h3>
               </div>
               <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+            </div>
+
+            <!-- Mobile Main Card (6 Berita Utama Style) -->
+            <div 
+              v-if="categoryList.length > 0"
+              class="relative rounded-xl overflow-hidden shadow-lg h-72 sm:h-80 group cursor-pointer mb-4 md:hidden"
+              @click="navigateToBerita(categoryList[0].id, categoryList[0].judul)"
+            >
+              <img 
+                :src="(categoryList[0].images && categoryList[0].images.length > 0) ? categoryList[0].images[0] : '/images/themes/photo.jpg'"
+                :alt="categoryList[0].judul" 
+                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent flex flex-col justify-end p-5">
+                <span class="bg-blue-600 text-white text-[11px] font-bold px-2.5 py-0.5 rounded w-max mb-2 capitalize">
+                  {{ categoryList[0].kategori }}
+                </span>
+                <h2 class="text-base sm:text-lg font-bold text-white mb-2 leading-snug line-clamp-3">
+                  {{ categoryList[0].judul }}
+                </h2>
+                <div class="flex items-center text-gray-300 text-xs gap-3">
+                  <span class="flex items-center gap-1 truncate">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    <span class="truncate">{{ getPenulisName(categoryList[0]) }}</span>
+                  </span>
+                  <span class="w-1 h-1 bg-gray-400 rounded-full"></span>
+                  <span class="flex items-center gap-1 shrink-0">
+                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    {{ formatDateOnly(categoryList[0].waktu) }}
+                  </span>
+                </div>
+              </div>
             </div>
             
             <div class="space-y-5">
               <div 
-                v-for="berita in categoryList" 
+                v-for="(berita, idx) in categoryList" 
                 :key="berita.id"
-                class="flex gap-4 cursor-pointer group"
+                :class="[idx === 0 ? 'hidden md:flex' : 'flex', 'gap-4 cursor-pointer group items-center']"
                 @click="navigateToBerita(berita.id, berita.judul)"
               >
                 <div class="w-20 h-20 shrink-0 overflow-hidden rounded-lg">
                   <img :src="(berita.images && berita.images.length > 0) ? berita.images[0] : '/images/themes/photo.jpg'" :alt="berita.judul" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
                 </div>
-                <div class="flex flex-col justify-center">
-                  <h4 class="font-medium text-sm text-gray-800 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                <div class="flex flex-col justify-center min-w-0">
+                  <h4 class="font-medium text-sm text-gray-800 line-clamp-2 group-hover:text-blue-600 transition-colors mb-1">
                     {{ berita.judul }}
                   </h4>
-                  <span class="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    {{ berita.waktu }}
-                  </span>
+                  <div class="flex items-center text-xs text-gray-500 gap-2 flex-wrap">
+                    <span class="flex items-center gap-1 truncate max-w-[120px]">
+                      <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                      <span class="truncate">{{ getPenulisName(berita) }}</span>
+                    </span>
+                    <span class="w-1 h-1 bg-gray-300 rounded-full"></span>
+                    <span class="flex items-center gap-1 shrink-0">
+                      <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                      {{ formatDateOnly(berita.waktu) }}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -112,7 +280,20 @@
       </div>
 
       
-      <div class="bg-white rounded-xl shadow-md p-8 mb-12">
+      <!-- Section Iklan Responsif di atas Pasinfo Jelajah -->
+      <div class="bg-gradient-to-r from-gray-50 via-gray-100 to-gray-50 border border-dashed border-gray-300 rounded-xl p-6 sm:p-8 mb-8 sm:mb-12 relative overflow-hidden flex flex-col items-center justify-center min-h-[180px] sm:min-h-[200px] md:min-h-[220px] text-center shadow-sm">
+        <span class="absolute top-3 right-3 text-[11px] uppercase tracking-widest text-gray-400 font-bold bg-white/90 px-2.5 py-0.5 rounded border border-gray-200 shadow-2xs">SPONSORED / IKLAN</span>
+        <div class="flex flex-col items-center gap-2 z-10 my-auto">
+          <svg class="w-9 h-9 sm:w-10 sm:h-10 text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+          </svg>
+          <span class="text-sm sm:text-base font-bold text-gray-600 tracking-wider uppercase">Space Ads Available</span>
+          <p class="text-xs sm:text-sm text-gray-400 max-w-md px-2">Contact Admin for more information</p>
+        </div>
+      </div>
+
+      <!-- Section Pasinfo Jelajah -->
+      <div class="bg-white rounded-xl shadow-md p-8 mb-8">
         <div class="text-center mb-8">
           <h2 class="text-3xl font-extrabold text-blue-900 mb-2">Pasinfo Jelajah</h2>
           <p class="text-gray-600">Ingin mengenal Pasuruan lebih dalam?</p>
@@ -131,18 +312,75 @@
           </div>
         </div>
       </div>
+
+      <!-- Section Iklan Responsif di bawah Pasinfo Jelajah -->
+      <div class="bg-gradient-to-r from-gray-50 via-gray-100 to-gray-50 border border-dashed border-gray-300 rounded-xl p-6 sm:p-8 mb-0 sm:mb-2 relative overflow-hidden flex flex-col items-center justify-center min-h-[180px] sm:min-h-[200px] md:min-h-[220px] text-center shadow-sm">
+        <span class="absolute top-3 right-3 text-[11px] uppercase tracking-widest text-gray-400 font-bold bg-white/90 px-2.5 py-0.5 rounded border border-gray-200 shadow-2xs">SPONSORED / IKLAN</span>
+        <div class="flex flex-col items-center gap-2 z-10 my-auto">
+          <svg class="w-9 h-9 sm:w-10 sm:h-10 text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+          </svg>
+          <span class="text-sm sm:text-base font-bold text-gray-600 tracking-wider uppercase">Space Ads Available</span>
+          <p class="text-xs sm:text-sm text-gray-400 max-w-md px-2">Contact Admin for more information</p>
+        </div>
+      </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { createSlug } from '../utils'
 
 const router = useRouter()
 
+const getPenulisName = (item: any): string => {
+  if (!item) return 'Redaksi Pasinfo'
+  if (typeof item.penulis === 'string' && item.penulis.trim() !== '') return item.penulis.trim()
+  if (item.penulis && typeof item.penulis === 'object' && item.penulis.name) return item.penulis.name
+  if (item.Author && typeof item.Author === 'object' && item.Author.name) return item.Author.name
+  if (item.author && typeof item.author === 'object' && item.author.name) return item.author.name
+  if (item.author_name && typeof item.author_name === 'string' && item.author_name.trim() !== '') return item.author_name.trim()
+  if (item.source && typeof item.source === 'string' && item.source.trim() !== '') return item.source.trim()
+  return 'Redaksi Pasinfo'
+}
+
+const formatDateOnly = (waktuStr?: string): string => {
+  if (!waktuStr) return ''
+  let clean = waktuStr.replace(/\s*WIB\s*/gi, '').trim()
+  clean = clean.replace(/,?\s+\d{1,2}:\d{2}(:\d{2})?$/, '').trim()
+  return clean
+}
+
 const featuredNews = ref<any[]>([])
 const latestNews = ref<any[]>([])
+
+const currentSlide = ref(0)
+let sliderInterval: any = null
+
+const nextSlide = () => {
+  if (featuredNews.value.length > 0) {
+    currentSlide.value = (currentSlide.value + 1) % featuredNews.value.length
+  }
+}
+
+const prevSlide = () => {
+  if (featuredNews.value.length > 0) {
+    currentSlide.value = (currentSlide.value - 1 + featuredNews.value.length) % featuredNews.value.length
+  }
+}
+
+const startAutoSlider = () => {
+  stopAutoSlider()
+  sliderInterval = setInterval(nextSlide, 4000)
+}
+
+const stopAutoSlider = () => {
+  if (sliderInterval) {
+    clearInterval(sliderInterval)
+    sliderInterval = null
+  }
+}
 
 const categoryNews = ref<Record<string, any[]>>({
   lokal: [],
@@ -158,14 +396,19 @@ onMounted(async () => {
       featuredNews.value = result.data.slice(0, 6)
       latestNews.value = result.data.slice(6, 14)
 
-
       categoryNews.value.lokal    = result.data.filter((n: any) => n.kategori.toLowerCase() === 'lokal').slice(0, 4)
       categoryNews.value.nasional = result.data.filter((n: any) => n.kategori.toLowerCase() === 'nasional').slice(0, 4)
       categoryNews.value.politik  = result.data.filter((n: any) => n.kategori.toLowerCase() === 'politik').slice(0, 4)
+
+      startAutoSlider()
     }
   } catch (err) {
     console.error('Failed to fetch news:', err)
   }
+})
+
+onUnmounted(() => {
+  stopAutoSlider()
 })
 
 const jelajahItems = ref([

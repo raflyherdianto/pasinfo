@@ -23,8 +23,8 @@ backend/*.db
 backend/wildan-news.db
 
 # Editor directories and files
-.vscode/*
-!.vscode/extensions.json
+.vscode
+.vscode/
 .idea
 .DS_Store
 *.suo

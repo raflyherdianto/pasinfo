@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,23 +17,9 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 	"wildan-news-backend/internal/database"
+	"wildan-news-backend/internal/middleware"
 	"wildan-news-backend/internal/models"
 )
-
-// ---------------------------------------------------------------------------
-// JWT secret — shared from middleware via this package-level var
-// Loaded at init() time from ENV; panics if missing (same guard as middleware).
-// ---------------------------------------------------------------------------
-
-var jwtSecret []byte
-
-func init() {
-	secret := os.Getenv("JWT_SECRET")
-	if secret == "" {
-		panic("[FATAL] JWT_SECRET environment variable is not set.")
-	}
-	jwtSecret = []byte(secret)
-}
 
 // ---------------------------------------------------------------------------
 // Input structs
@@ -207,7 +194,7 @@ func Login(c *fiber.Ctx) error {
 		"iat":     time.Now().Unix(),
 	})
 
-	t, err := token.SignedString(jwtSecret)
+	t, err := token.SignedString(middleware.GetJWTSecret())
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"success": false, "message": "Authentication failed",
@@ -355,7 +342,9 @@ func detectMIME(buf []byte) string {
 		buf[8] == 0x57 && buf[9] == 0x45 && buf[10] == 0x42 && buf[11] == 0x50 {
 		return "image/webp"
 	}
-	return "application/octet-stream"
+	// Standard library MIME inspection fallback
+	contentType := http.DetectContentType(buf)
+	return contentType
 }
 
 // randomHex returns n cryptographically-random hex bytes as a string.

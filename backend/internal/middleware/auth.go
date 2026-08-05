@@ -9,16 +9,24 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/joho/godotenv"
 )
 
 // ---------------------------------------------------------------------------
-// JWT secret — loaded once at startup from env; panics if missing/short
+// JWT secret — loaded lazily from env; panics if missing/short
 // ---------------------------------------------------------------------------
 
 var jwtSecret []byte
 
-func init() {
+func GetJWTSecret() []byte {
+	if len(jwtSecret) > 0 {
+		return jwtSecret
+	}
 	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		_ = godotenv.Load()
+		secret = os.Getenv("JWT_SECRET")
+	}
 	if secret == "" {
 		panic("[FATAL] JWT_SECRET environment variable is not set. Refusing to start.")
 	}
@@ -26,6 +34,7 @@ func init() {
 		panic("[FATAL] JWT_SECRET must be at least 32 characters long.")
 	}
 	jwtSecret = []byte(secret)
+	return jwtSecret
 }
 
 // ---------------------------------------------------------------------------
@@ -157,7 +166,7 @@ func Protected() fiber.Handler {
 				if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 					return nil, fiber.ErrUnauthorized
 				}
-				return jwtSecret, nil
+				return GetJWTSecret(), nil
 			},
 			jwt.WithValidMethods([]string{"HS256"}),
 		)

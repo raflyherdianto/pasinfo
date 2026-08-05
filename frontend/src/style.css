@@ -10,3 +10,64 @@
     display: none;
   }
 }
+
+/* Vue Select Custom Overrides — Prevent text truncation & fix action buttons (X and Arrow) */
+.v-select .vs__dropdown-toggle {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  min-height: 42px !important;
+  height: auto !important;
+  padding: 4px 8px !important;
+}
+
+.v-select .vs__selected-options {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+}
+
+.v-select .vs__selected {
+  white-space: normal !important;
+  word-break: break-word !important;
+  text-overflow: unset !important;
+  max-width: 100% !important;
+  overflow: visible !important;
+  height: auto !important;
+  margin: 2px 4px 2px 0 !important;
+}
+
+.v-select .vs__actions {
+  display: flex !important;
+  align-items: center !important;
+  flex-shrink: 0 !important;
+  margin-left: auto !important;
+  padding: 0 4px !important;
+  align-self: flex-start !important;
+  margin-top: 6px !important;
+}
+
+.v-select .vs__clear,
+.v-select .vs__open-indicator {
+  cursor: pointer !important;
+}
+
+.v-select .vs__dropdown-option {
+  white-space: normal !important;
+  word-break: break-word !important;
+  text-overflow: unset !important;
+  padding: 8px 12px !important;
+}
+
+/* Quill Editor Full Container Clickable Focus */
+.ql-container.ql-snow {
+  min-height: 350px !important;
+  cursor: text !important;
+}
+
+.ql-editor {
+  min-height: 350px !important;
+  cursor: text !important;
+}
