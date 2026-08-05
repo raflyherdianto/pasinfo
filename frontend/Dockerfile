@@ -15,11 +15,13 @@ FROM node:24-alpine AS builder
 
 WORKDIR /app
 
+ARG VITE_API_URL=https://api.pasuruaninfo.com
+ENV VITE_API_URL=$VITE_API_URL
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Build production bundle
-# VITE_* env vars are baked in at build time — set them in .env on VM
+# Build production bundle (Vite bakes VITE_API_URL into the bundle)
 RUN npm run build
 
 # =============================================================================

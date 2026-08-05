@@ -8,7 +8,8 @@ import axios from 'axios'
 // Intercept all fetch calls to dynamically replace hardcoded localhost with VITE_API_URL in production
 const originalFetch = window.fetch;
 window.fetch = function (input, init) {
-  const apiUrl = (import.meta.env.VITE_API_URL as string) || 'http://localhost:8080';
+  const defaultUrl = import.meta.env.PROD ? 'https://api.pasuruaninfo.com' : 'http://localhost:8080';
+  const apiUrl = (import.meta.env.VITE_API_URL as string) || defaultUrl;
   if (typeof input === 'string' && input.startsWith('http://localhost:8080')) {
     input = input.replace('http://localhost:8080', apiUrl);
   } else if (input instanceof Request && input.url.startsWith('http://localhost:8080')) {
@@ -20,7 +21,8 @@ window.fetch = function (input, init) {
 
 // Intercept all axios requests to dynamically replace hardcoded localhost with VITE_API_URL in production
 axios.interceptors.request.use((config) => {
-  const apiUrl = (import.meta.env.VITE_API_URL as string) || 'http://localhost:8080';
+  const defaultUrl = import.meta.env.PROD ? 'https://api.pasuruaninfo.com' : 'http://localhost:8080';
+  const apiUrl = (import.meta.env.VITE_API_URL as string) || defaultUrl;
   if (config.url && config.url.startsWith('http://localhost:8080')) {
     config.url = config.url.replace('http://localhost:8080', apiUrl);
   }
