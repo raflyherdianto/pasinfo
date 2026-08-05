@@ -53,8 +53,9 @@ RUN addgroup --system --gid 10001 pasinfo \
 
 WORKDIR /app
 
-# ── Copy binary from builder (owned by the non-root user) ────────────────────
+# ── Copy binary & Wilayah CSV datasets from builder (owned by non-root user) ──
 COPY --from=builder --chown=pasinfo:pasinfo /app/bin/api ./api
+COPY --from=builder --chown=pasinfo:pasinfo /app/data/wilayah ./data/wilayah
 
 # ── Upload directory for images (volume-mounted in docker-compose) ────────────
 RUN mkdir -p /app/uploads/images \
