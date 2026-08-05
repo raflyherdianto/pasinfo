@@ -1,6 +1,6 @@
 # =============================================================================
-# GitHub Actions — Backend CI/CD (Build & Push to GHCR)
-# Watchtower on Host VM will automatically pull and deploy the new image
+# GitHub Actions — Backend CI/CD (Build & Push ARM64 to GHCR)
+# Watchtower on Host ARM VM will automatically pull and deploy the new image
 # =============================================================================
 
 name: "🚀 Build & Push Backend to GHCR"
@@ -32,6 +32,9 @@ jobs:
       - name: "⬇️ Checkout repository"
         uses: actions/checkout@v4
 
+      - name: "🌐 Set up QEMU for ARM64 cross-compilation"
+        uses: docker/setup-qemu-action@v3
+
       - name: "🔧 Set up Docker Buildx"
         uses: docker/setup-buildx-action@v3
 
@@ -51,11 +54,12 @@ jobs:
             type=raw,value=latest,enable=true
             type=sha,prefix=,format=short
 
-      - name: "🐳 Build and Push Backend Docker Image"
+      - name: "🐳 Build and Push Backend ARM64 Docker Image"
         uses: docker/build-push-action@v6
         with:
           context: ./backend
           file: ./backend/Dockerfile
+          platforms: linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
