@@ -459,6 +459,40 @@ const setMetaTag = (attrName: string, attrVal: string, content: string) => {
   element.setAttribute('content', content)
 }
 
+const getPenulisName = (item: any): string => {
+  if (!item) return 'Redaksi Pasuruan Info'
+  if (typeof item.penulis === 'string' && item.penulis.trim() !== '') return item.penulis.trim()
+  if (item.penulis && typeof item.penulis === 'object' && item.penulis.name) return item.penulis.name
+  if (item.Author && typeof item.Author === 'object' && item.Author.name) return item.Author.name
+  if (item.author && typeof item.author === 'object' && item.author.name) return item.author.name
+  if (item.author_name && typeof item.author_name === 'string' && item.author_name.trim() !== '') return item.author_name.trim()
+  if (item.source && typeof item.source === 'string' && item.source.trim() !== '') return item.source.trim()
+  return 'Redaksi Pasuruan Info'
+}
+
+const getImageUrl = (input: any): string => {
+  if (!input) return `${window.location.origin}/images/themes/photo.jpg`
+  if (typeof input === 'string') {
+    const trimmed = input.trim()
+    if (!trimmed) return `${window.location.origin}/images/themes/photo.jpg`
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed
+    if (trimmed.startsWith('/')) return `${window.location.origin}${trimmed}`
+    return `${window.location.origin}/${trimmed}`
+  }
+  if (Array.isArray(input) && input.length > 0) {
+    return getImageUrl(input[0])
+  }
+  if (typeof input === 'object') {
+    if (input.images && Array.isArray(input.images) && input.images.length > 0) {
+      return getImageUrl(input.images[0])
+    }
+    if (input.gambar) return getImageUrl(input.gambar)
+    if (input.image) return getImageUrl(input.image)
+    if (input.image_path) return getImageUrl(input.image_path)
+  }
+  return `${window.location.origin}/images/themes/photo.jpg`
+}
+
 const updateMetaAndSchema = (item: any) => {
   if (!item) return
   const fullTitle = `${item.judul} - Pasuruan Info`
@@ -467,7 +501,7 @@ const updateMetaAndSchema = (item: any) => {
   const rawExcerpt = item.ringkasan || item.deskripsi || item.isi || item.judul
   const cleanExcerpt = rawExcerpt.replace(/<[^>]*>?/gm, '').substring(0, 160).trim()
   const authorName = getPenulisName(item)
-  const imageUrl = getImageUrl(item.gambar || item.image)
+  const imageUrl = getImageUrl(item)
   const pageUrl = window.location.href
   const dateIso = item.waktu ? new Date(item.waktu).toISOString() : new Date().toISOString()
 
@@ -673,17 +707,6 @@ const shareInstagram = () => {
       window.open('https://www.instagram.com', '_blank')
     }
   })
-}
-
-const getPenulisName = (item: any): string => {
-  if (!item) return 'Redaksi Pasuruan Info'
-  if (typeof item.penulis === 'string' && item.penulis.trim() !== '') return item.penulis.trim()
-  if (item.penulis && typeof item.penulis === 'object' && item.penulis.name) return item.penulis.name
-  if (item.Author && typeof item.Author === 'object' && item.Author.name) return item.Author.name
-  if (item.author && typeof item.author === 'object' && item.author.name) return item.author.name
-  if (item.author_name && typeof item.author_name === 'string' && item.author_name.trim() !== '') return item.author_name.trim()
-  if (item.source && typeof item.source === 'string' && item.source.trim() !== '') return item.source.trim()
-  return 'Redaksi Pasuruan Info'
 }
 
 const formatDateOnly = (waktuStr?: string): string => {
