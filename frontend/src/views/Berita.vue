@@ -493,69 +493,87 @@ const getImageUrl = (input: any): string => {
   return `${window.location.origin}/images/themes/photo.jpg`
 }
 
-const updateMetaAndSchema = (item: any) => {
-  if (!item) return
-  const fullTitle = `${item.judul} - Pasuruan Info`
-  document.title = fullTitle
-
-  const rawExcerpt = item.ringkasan || item.deskripsi || item.isi || item.judul
-  const cleanExcerpt = rawExcerpt.replace(/<[^>]*>?/gm, '').substring(0, 160).trim()
-  const authorName = getPenulisName(item)
-  const imageUrl = getImageUrl(item)
-  const pageUrl = window.location.href
-  const dateIso = item.waktu ? new Date(item.waktu).toISOString() : new Date().toISOString()
-
-  setMetaTag('name', 'description', cleanExcerpt)
-  setMetaTag('name', 'author', authorName)
-  setMetaTag('name', 'keywords', `${item.kategori || 'Berita'}, Berita Pasuruan, Pasuruan Info, ${item.judul.split(' ').slice(0, 5).join(' ')}`)
-
-  setMetaTag('property', 'og:type', 'article')
-  setMetaTag('property', 'og:title', fullTitle)
-  setMetaTag('property', 'og:description', cleanExcerpt)
-  setMetaTag('property', 'og:image', imageUrl)
-  setMetaTag('property', 'og:url', pageUrl)
-  setMetaTag('property', 'article:published_time', dateIso)
-  setMetaTag('property', 'article:author', authorName)
-  setMetaTag('property', 'article:section', item.kategori || 'Berita')
-
-  setMetaTag('name', 'twitter:card', 'summary_large_image')
-  setMetaTag('name', 'twitter:title', fullTitle)
-  setMetaTag('name', 'twitter:description', cleanExcerpt)
-  setMetaTag('name', 'twitter:image', imageUrl)
-
-  let schemaScript = document.getElementById('news-article-schema')
-  if (!schemaScript) {
-    schemaScript = document.createElement('script')
-    schemaScript.id = 'news-article-schema'
-    schemaScript.setAttribute('type', 'application/ld+json')
-    document.head.appendChild(schemaScript)
+const getSafeIsoDate = (rawDate: any): string => {
+  if (!rawDate) return new Date().toISOString()
+  if (rawDate instanceof Date) {
+    return isNaN(rawDate.getTime()) ? new Date().toISOString() : rawDate.toISOString()
   }
-  const schemaData = {
-    '@context': 'https://schema.org',
-    '@type': 'NewsArticle',
-    'headline': item.judul,
-    'description': cleanExcerpt,
-    'image': [imageUrl],
-    'datePublished': dateIso,
-    'dateModified': dateIso,
-    'author': {
-      '@type': 'Person',
-      'name': authorName
-    },
-    'publisher': {
-      '@type': 'Organization',
-      'name': 'Pasuruan Info',
-      'logo': {
-        '@type': 'ImageObject',
-        'url': `${window.location.origin}/Logo%20favicon.png`
-      }
-    },
-    'mainEntityOfPage': {
-      '@type': 'WebPage',
-      '@id': pageUrl
+  if (typeof rawDate === 'string') {
+    const parsed = new Date(rawDate)
+    if (!isNaN(parsed.getTime())) {
+      return parsed.toISOString()
     }
   }
-  schemaScript.textContent = JSON.stringify(schemaData)
+  return new Date().toISOString()
+}
+
+const updateMetaAndSchema = (item: any) => {
+  if (!item) return
+  try {
+    const fullTitle = `${item.judul || 'Berita'} - Pasuruan Info`
+    document.title = fullTitle
+
+    const rawExcerpt = item.ringkasan || item.deskripsi || item.isi || item.judul || ''
+    const cleanExcerpt = rawExcerpt.replace(/<[^>]*>?/gm, '').substring(0, 160).trim()
+    const authorName = getPenulisName(item)
+    const imageUrl = getImageUrl(item)
+    const pageUrl = window.location.href
+    const dateIso = getSafeIsoDate(item.created_at || item.CreatedAt || item.waktu)
+
+    setMetaTag('name', 'description', cleanExcerpt)
+    setMetaTag('name', 'author', authorName)
+    setMetaTag('name', 'keywords', `${item.kategori || 'Berita'}, Berita Pasuruan, Pasuruan Info, ${(item.judul || '').split(' ').slice(0, 5).join(' ')}`)
+
+    setMetaTag('property', 'og:type', 'article')
+    setMetaTag('property', 'og:title', fullTitle)
+    setMetaTag('property', 'og:description', cleanExcerpt)
+    setMetaTag('property', 'og:image', imageUrl)
+    setMetaTag('property', 'og:url', pageUrl)
+    setMetaTag('property', 'article:published_time', dateIso)
+    setMetaTag('property', 'article:author', authorName)
+    setMetaTag('property', 'article:section', item.kategori || 'Berita')
+
+    setMetaTag('name', 'twitter:card', 'summary_large_image')
+    setMetaTag('name', 'twitter:title', fullTitle)
+    setMetaTag('name', 'twitter:description', cleanExcerpt)
+    setMetaTag('name', 'twitter:image', imageUrl)
+
+    let schemaScript = document.getElementById('news-article-schema')
+    if (!schemaScript) {
+      schemaScript = document.createElement('script')
+      schemaScript.id = 'news-article-schema'
+      schemaScript.setAttribute('type', 'application/ld+json')
+      document.head.appendChild(schemaScript)
+    }
+    const schemaData = {
+      '@context': 'https://schema.org',
+      '@type': 'NewsArticle',
+      'headline': item.judul || '',
+      'description': cleanExcerpt,
+      'image': [imageUrl],
+      'datePublished': dateIso,
+      'dateModified': dateIso,
+      'author': {
+        '@type': 'Person',
+        'name': authorName
+      },
+      'publisher': {
+        '@type': 'Organization',
+        'name': 'Pasuruan Info',
+        'logo': {
+          '@type': 'ImageObject',
+          'url': `${window.location.origin}/Logo%20favicon.png`
+        }
+      },
+      'mainEntityOfPage': {
+        '@type': 'WebPage',
+        '@id': pageUrl
+      }
+    }
+    schemaScript.textContent = JSON.stringify(schemaData)
+  } catch (e) {
+    console.warn('Error updating meta tags or schema:', e)
+  }
 }
 
 const props = defineProps<{ id: string | number }>()
