@@ -20,15 +20,74 @@
         </div>
         
         <div>
-          <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-          <input 
-            id="email" 
-            v-model="email"
-            type="email" 
-            required 
-            class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" 
-            placeholder="Masukkan email"
-          >
+          <div class="flex justify-between items-center mb-1">
+            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+            <span v-if="isEmailVerified" class="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+              <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              Email Terverifikasi
+            </span>
+          </div>
+
+          <div class="flex gap-2">
+            <input 
+              id="email" 
+              v-model="email"
+              type="email" 
+              required 
+              :disabled="isEmailVerified"
+              class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm disabled:bg-gray-100 disabled:text-gray-500" 
+              placeholder="Masukkan email"
+              @input="onEmailChange"
+            >
+            <button 
+              v-if="!isEmailVerified"
+              type="button" 
+              @click="handleSendEmailOTP"
+              :disabled="isSendingOTP || !email"
+              class="flex-shrink-0 px-3.5 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 rounded-md transition-colors shadow-sm focus:outline-none"
+            >
+              <span v-if="isSendingOTP">Mengirim...</span>
+              <span v-else-if="otpSent">Kirim Ulang</span>
+              <span v-else>Verifikasi</span>
+            </button>
+            <button 
+              v-else
+              type="button" 
+              @click="handleChangeEmail"
+              class="flex-shrink-0 px-3 py-2 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors focus:outline-none"
+            >
+              Ubah
+            </button>
+          </div>
+
+          <!-- Section Input OTP Verifikasi Email -->
+          <div v-if="otpSent && !isEmailVerified" class="mt-3 p-3 bg-blue-50/70 border border-blue-200 rounded-lg space-y-2">
+            <div class="flex justify-between items-center">
+              <label for="reg_otp" class="block text-xs font-bold text-blue-900">Masukkan 6 Digit Kode OTP dari Email:</label>
+              <span class="text-[11px] text-blue-600 font-medium">Berlaku 5 menit</span>
+            </div>
+            <div class="flex gap-2">
+              <input 
+                id="reg_otp" 
+                v-model="otpCode"
+                type="text" 
+                maxlength="6"
+                placeholder="000000"
+                class="w-full px-3 py-1.5 text-center font-mono font-bold tracking-widest text-sm bg-white border border-blue-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+              <button 
+                type="button" 
+                @click="handleVerifyEmailOTP"
+                :disabled="isVerifyingOTP || otpCode.length < 6"
+                class="flex-shrink-0 px-4 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 rounded-md transition-colors shadow-sm focus:outline-none"
+              >
+                <span v-if="isVerifyingOTP">Memeriksa...</span>
+                <span v-else>Verifikasi OTP</span>
+              </button>
+            </div>
+          </div>
         </div>
 
         <div>
@@ -39,7 +98,7 @@
             type="tel" 
             required 
             class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm" 
-            placeholder="Masukkan nomor telepon"
+            placeholder="081234567890"
           >
         </div>
 
@@ -104,21 +163,21 @@
         </div>
         
         <div>
-          <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-          <div class="mt-1 relative">
+          <label for="password" class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
+          <div class="relative">
             <input 
               id="password" 
               v-model="password"
               :type="showPassword ? 'text' : 'password'" 
               required 
-              class="appearance-none block w-full pr-10 px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              placeholder="Minimal 6 karakter"
+              class="w-full px-3.5 py-2 pr-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+              placeholder="Masukkan password aman"
             >
             <button 
               type="button" 
               @click="showPassword = !showPassword"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
-              aria-label="Toggle password visibility"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none p-1"
+              :title="showPassword ? 'Sembunyikan password' : 'Tampilkan password'"
             >
               <svg v-if="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -129,24 +188,43 @@
               </svg>
             </button>
           </div>
+          <div v-if="password" class="mt-2 space-y-1">
+            <div class="flex justify-between items-center text-xs font-semibold">
+              <span class="text-gray-500">Kekuatan Password:</span>
+              <span :class="passwordStrength.color">{{ passwordStrength.label }}</span>
+            </div>
+            <div class="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+              <div class="h-full transition-all duration-300 rounded-full" :class="passwordStrength.barColor" :style="{ width: passwordStrength.percent }"></div>
+            </div>
+          </div>
+          <p class="text-xs text-gray-500 mt-1.5 flex items-center gap-1">
+            <svg class="w-3.5 h-3.5 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span>Minimal 8 karakter, kombinasi huruf kapital (A-Z), angka (0-9) &amp; simbol (!@#$%^&*).</span>
+          </p>
         </div>
         
         <div>
-          <label for="confirm_password" class="block text-sm font-medium text-gray-700">Konfirmasi Password</label>
-          <div class="mt-1 relative">
+          <label for="confirm_password" class="block text-sm font-semibold text-gray-700 mb-1">Konfirmasi Password</label>
+          <div class="relative">
             <input 
               id="confirm_password" 
               v-model="confirmPassword"
               :type="showConfirmPassword ? 'text' : 'password'" 
               required 
-              class="appearance-none block w-full pr-10 px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              class="w-full px-3.5 py-2 pr-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all"
+              :class="{
+                'border-emerald-500 focus:ring-emerald-500 focus:border-emerald-500 bg-emerald-50/20': passwordMatch === true,
+                'border-red-500 focus:ring-red-500 focus:border-red-500 bg-red-50/20': passwordMatch === false
+              }"
               placeholder="Ulangi password"
             >
             <button 
               type="button" 
               @click="showConfirmPassword = !showConfirmPassword"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
-              aria-label="Toggle confirm password visibility"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none p-1"
+              :title="showConfirmPassword ? 'Sembunyikan password' : 'Tampilkan password'"
             >
               <svg v-if="!showConfirmPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -156,6 +234,20 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858-5.908a10.03 10.03 0 013.982-.863c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21M3 3l18 18"/>
               </svg>
             </button>
+          </div>
+          <div v-if="confirmPassword" class="mt-1.5">
+            <p v-if="passwordMatch" class="text-xs font-semibold text-emerald-600 flex items-center gap-1">
+              <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span>Password cocok!</span>
+            </p>
+            <p v-else class="text-xs font-semibold text-red-600 flex items-center gap-1">
+              <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+              <span>Password tidak cocok. Silakan periksa kembali.</span>
+            </p>
           </div>
         </div>
 
@@ -211,7 +303,7 @@
         <div class="pt-2">
           <button 
             type="submit" 
-            :disabled="isLoading || !isVerified"
+            :disabled="isLoading || !isVerified || !isEmailVerified || passwordMatch === false"
             class="group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:bg-blue-400"
           >
             <span v-if="isLoading">Mendaftar...</span>
@@ -231,7 +323,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import vSelect from 'vue-select';
@@ -249,6 +341,135 @@ const confirmPassword = ref('');
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 const isLoading = ref(false);
+
+// Email OTP verification states
+const isEmailVerified = ref(false);
+const otpSent = ref(false);
+const otpCode = ref('');
+const isSendingOTP = ref(false);
+const isVerifyingOTP = ref(false);
+
+const onEmailChange = () => {
+  isEmailVerified.value = false;
+  otpSent.value = false;
+  otpCode.value = '';
+};
+
+const handleChangeEmail = () => {
+  isEmailVerified.value = false;
+  otpSent.value = false;
+  otpCode.value = '';
+};
+
+const handleSendEmailOTP = async () => {
+  if (!email.value) return;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email.value)) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Format Email Tidak Valid',
+      text: 'Mohon masukkan format email yang benar.',
+      confirmButtonColor: '#2563eb'
+    });
+    return;
+  }
+
+  isSendingOTP.value = true;
+  try {
+    const response = await axios.post('http://localhost:8080/api/v1/auth/send-register-otp', {
+      email: email.value,
+      name: nama.value || 'Calon Penulis'
+    });
+
+    if (response.data.success) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Kode OTP Terkirim',
+        text: response.data.message || 'Kode OTP telah dikirimkan ke email Anda (berlaku 5 menit). Silakan periksa inbox atau spam.',
+        confirmButtonColor: '#2563eb'
+      });
+      otpSent.value = true;
+    }
+  } catch (error: any) {
+    if (error.response?.data?.active_otp_exists || error.response?.status === 429) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Mohon Tunggu',
+        text: error.response?.data?.message || 'Kode OTP sebelumnya masih aktif. Mohon tunggu sebelum meminta kode baru.',
+        confirmButtonColor: '#2563eb'
+      });
+      otpSent.value = true;
+    } else {
+      const msg = error.response?.data?.message || 'Gagal mengirim kode OTP. Silakan periksa email Anda.';
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal Mengirim OTP',
+        text: msg,
+        confirmButtonColor: '#2563eb'
+      });
+    }
+  } finally {
+    isSendingOTP.value = false;
+  }
+};
+
+const handleVerifyEmailOTP = async () => {
+  if (!otpCode.value || otpCode.value.length < 6) return;
+  isVerifyingOTP.value = true;
+
+  try {
+    const response = await axios.post('http://localhost:8080/api/v1/auth/verify-otp', {
+      email: email.value,
+      otp: otpCode.value
+    });
+
+    if (response.data.success) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Email Terverifikasi!',
+        text: 'Email Anda telah berhasil diverifikasi. Silakan lengkapi formulir pendaftaran.',
+        confirmButtonColor: '#2563eb'
+      });
+      isEmailVerified.value = true;
+    }
+  } catch (error: any) {
+    const msg = error.response?.data?.message || 'Kode OTP tidak valid atau telah kadaluwarsa.';
+    Swal.fire({
+      icon: 'error',
+      title: 'Verifikasi Gagal',
+      text: msg,
+      confirmButtonColor: '#2563eb'
+    });
+  } finally {
+    isVerifyingOTP.value = false;
+  }
+};
+
+const passwordStrength = computed(() => {
+  const pwd = password.value;
+  if (!pwd) return { label: '', color: '', barColor: '', percent: '0%' };
+  
+  let score = 0;
+  if (pwd.length >= 8) score += 1;
+  if (/[A-Z]/.test(pwd)) score += 1;
+  if (/[0-9]/.test(pwd)) score += 1;
+  if (/[!@#$%^&*(),.?":{}|<>]/.test(pwd)) score += 1;
+
+  if (score <= 1) {
+    return { label: 'Sangat Lemah', color: 'text-red-600', barColor: 'bg-red-500', percent: '25%' };
+  } else if (score === 2) {
+    return { label: 'Lemah', color: 'text-amber-600', barColor: 'bg-amber-500', percent: '50%' };
+  } else if (score === 3) {
+    return { label: 'Sedang', color: 'text-blue-600', barColor: 'bg-blue-500', percent: '75%' };
+  } else {
+    return { label: 'Kuat', color: 'text-emerald-600', barColor: 'bg-emerald-500', percent: '100%' };
+  }
+});
+
+const passwordMatch = computed(() => {
+  if (!confirmPassword.value) return null;
+  return password.value === confirmPassword.value;
+});
 
 
 const isVerified = ref(false);
@@ -499,6 +720,16 @@ const clearVillages = () => {
 }
 
 const handleRegister = async () => {
+  if (!isEmailVerified.value) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Email Belum Terverifikasi',
+      text: 'Silakan klik tombol Verifikasi pada kolom Email dan masukkan kode OTP terlebih dahulu!',
+      confirmButtonColor: '#2563eb'
+    });
+    return;
+  }
+
   if (!isVerified.value) {
     Swal.fire({
       icon: 'warning',
@@ -546,11 +777,28 @@ const handleRegister = async () => {
     });
     
     if (response.data.success) {
+      let timerInterval: any;
       Swal.fire({
         icon: 'success',
-        title: 'Registrasi Sukses',
-        text: 'Registrasi Penulis berhasil! Silakan masuk.',
-        confirmButtonColor: '#2563eb'
+        title: 'Registrasi Penulis Berhasil!',
+        html: 'Akun Penulis Anda telah aktif dan siap digunakan.<br>Mengarahkan ke halaman <b>Login Penulis</b> dalam <b style="color: #2563eb; font-size: 1.1em;">5</b> detik...',
+        timer: 5000,
+        timerProgressBar: true,
+        confirmButtonText: 'Masuk Sekarang',
+        confirmButtonColor: '#2563eb',
+        allowOutsideClick: false,
+        didOpen: () => {
+          const timerEl = Swal.getHtmlContainer()?.querySelector('b:last-of-type');
+          timerInterval = setInterval(() => {
+            if (timerEl) {
+              const remaining = Math.ceil((Swal.getTimerLeft() || 0) / 1000);
+              timerEl.textContent = remaining.toString();
+            }
+          }, 250);
+        },
+        willClose: () => {
+          clearInterval(timerInterval);
+        }
       }).then(() => {
         router.push('/login-penulis');
       });

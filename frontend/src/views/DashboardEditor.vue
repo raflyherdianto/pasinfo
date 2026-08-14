@@ -26,8 +26,8 @@
             <span class="text-xs text-gray-500 font-medium uppercase tracking-wider">Tugas</span>
           </div>
           <div class="flex flex-col border-l border-gray-100">
-            <span class="text-2xl font-bold text-gray-800">{{ notifikasiList.length }}</span>
-            <span class="text-xs text-gray-500 font-medium uppercase tracking-wider">Notif</span>
+            <span class="text-2xl font-bold text-gray-800">{{ unreadNotifikasiCount }}</span>
+            <span class="text-xs text-gray-500 font-medium uppercase tracking-wider">Notif Baru</span>
           </div>
         </div>
       </div>
@@ -77,20 +77,19 @@
         
         <div v-else class="p-6">
 
-          <div class="prose max-w-none mb-8">
-            <h1 class="text-3xl font-extrabold text-gray-900 mb-4">{{ selectedBerita.judul || selectedBerita.Title }}</h1>
-            <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-6 pb-4 border-b border-gray-100">
+          <div class="prose max-w-none mb-6">
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-3">{{ selectedBerita.judul || selectedBerita.Title }}</h1>
+            <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-4 pb-3 border-b border-gray-100">
               <span><strong>Kategori:</strong> {{ selectedBerita.kategori?.name || selectedBerita.Category?.name || 'Umum' }}</span>
               <span><strong>Penulis:</strong> {{ selectedBerita.penulis?.name || selectedBerita.Author?.name || ('Penulis ID: ' + (selectedBerita.author_id || selectedBerita.AuthorID)) }}</span>
               <span><strong>Tgl:</strong> {{ formatDate(selectedBerita.created_at || selectedBerita.CreatedAt) }}</span>
             </div>
             
-            <div class="relative w-full rounded-xl overflow-hidden mb-6 bg-gray-100 min-h-[300px] max-h-[500px] flex items-center justify-center group border border-gray-200/50">
-              <span v-if="!currentImages || currentImages.length === 0" class="text-gray-400">Tidak ada gambar</span>
-              <div v-else class="w-full h-full relative flex items-center justify-center">
+            <div v-if="currentImages && currentImages.length > 0" class="relative w-full rounded-xl overflow-hidden mb-3 bg-gray-100 min-h-[240px] max-h-[480px] flex items-center justify-center group border border-gray-200/50">
+              <div class="w-full h-full relative flex items-center justify-center">
                 <img :src="currentImages[activeImgIndex]?.image_path || currentImages[activeImgIndex]?.ImagePath" 
                      alt="News Image" 
-                     class="max-w-full max-h-[500px] object-contain rounded shadow">
+                     class="max-w-full max-h-[480px] object-contain rounded shadow">
                 
                 <template v-if="currentImages.length > 1">
                   <button @click="prevImage" 
@@ -112,14 +111,14 @@
                 </template>
               </div>
             </div>
-            <p v-if="currentImages && currentImages[activeImgIndex] && (currentImages[activeImgIndex].image_caption || currentImages[activeImgIndex].ImageCaption)" class="text-center text-sm text-gray-500 italic mt-2">
+            <p v-if="currentImages && currentImages[activeImgIndex] && (currentImages[activeImgIndex].image_caption || currentImages[activeImgIndex].ImageCaption)" class="text-center text-sm text-gray-500 italic mt-1.5 mb-3">
               {{ currentImages[activeImgIndex].image_caption || currentImages[activeImgIndex].ImageCaption }}
             </p>
-            <p v-else-if="selectedBerita.image_caption || selectedBerita.ImageCaption" class="text-center text-sm text-gray-500 italic mt-2">
+            <p v-else-if="selectedBerita.image_caption || selectedBerita.ImageCaption" class="text-center text-sm text-gray-500 italic mt-1.5 mb-3">
               {{ selectedBerita.image_caption || selectedBerita.ImageCaption }}
             </p>
 
-            <div class="mt-8 bg-gray-50 p-6 rounded-xl border border-gray-100 article-content" v-html="formatArticleContent(selectedBerita.konten || selectedBerita.Content)"></div>
+            <div class="mt-2 bg-gray-50 p-5 sm:p-6 rounded-xl border border-gray-100 article-content" v-html="formatArticleContent(selectedBerita.konten || selectedBerita.Content)"></div>
           </div>
 
           <div class="bg-blue-50 border border-blue-100 rounded-xl p-5 mb-6">
@@ -144,22 +143,27 @@
     
     <div class="w-full lg:w-1/4 flex flex-col gap-6">
       <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-        <h4 class="font-bold text-gray-800 mb-4 flex items-center space-x-2">
-          <i class="fas fa-bell text-gray-500"></i> <span>Notifikasi</span>
+        <h4 class="font-bold text-gray-800 mb-4 flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <i class="fas fa-bell text-gray-500"></i> <span>Notifikasi</span>
+          </div>
+          <span v-if="unreadNotifikasiCount > 0" class="px-2 py-0.5 text-xs font-bold bg-blue-100 text-blue-700 rounded-full">
+            {{ unreadNotifikasiCount }} Baru
+          </span>
         </h4>
         <div class="space-y-4">
-          <div v-for="notif in notifikasiList" :key="notif.ID"
-               @click="openNotifikasi(notif.ID)"
+          <div v-for="notif in notifikasiList" :key="notif.id || notif.ID"
+               @click="openNotifikasi(notif.id || notif.ID)"
                class="flex gap-3 cursor-pointer p-2 -mx-2 rounded-lg hover:bg-gray-50 transition-colors relative"
-               :class="{ 'opacity-70': notif.is_read }">
-            <div v-if="!notif.is_read" class="absolute w-2 h-2 bg-blue-500 rounded-full top-3 right-0"></div>
+               :class="{ 'opacity-70': notif.is_read || notif.IsRead }">
+            <div v-if="!notif.is_read && !notif.IsRead" class="absolute w-2 h-2 bg-blue-500 rounded-full top-3 right-0"></div>
             <div class="mt-1 shrink-0">
               <i class="fas fa-info-circle text-blue-500 text-lg"></i>
             </div>
             <div>
-              <p class="text-sm font-bold text-gray-800" :class="{ 'text-gray-600': notif.is_read }">{{ notif.title }}</p>
-              <p class="text-xs text-gray-600 mt-0.5 line-clamp-2">{{ notif.message }}</p>
-              <span class="text-[10px] text-gray-400 mt-1 block">{{ formatDate(notif.CreatedAt) }}</span>
+              <p class="text-sm font-bold text-gray-800" :class="{ 'text-gray-600': notif.is_read || notif.IsRead }">{{ notif.title || notif.Title }}</p>
+              <p class="text-xs text-gray-600 mt-0.5 line-clamp-2">{{ notif.message || notif.Message }}</p>
+              <span class="text-[10px] text-gray-400 mt-1 block">{{ formatDate(notif.created_at || notif.CreatedAt) }}</span>
             </div>
           </div>
           <div v-if="notifikasiList.length === 0" class="text-sm text-gray-500 text-center py-4">
@@ -284,7 +288,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { sanitizeHTML } from '../utils/sanitize'
 import Swal from 'sweetalert2'
 import vSelect from 'vue-select'
@@ -349,7 +353,27 @@ const reviewMessage = ref('')
 const isSubmitting = ref(false)
 const notifikasiList = ref<any[]>([])
 
+const unreadNotifikasiCount = computed(() => {
+  return notifikasiList.value.filter(n => !n.is_read && !n.IsRead).length
+})
+
+const handleNotifReadSync = (e: any) => {
+  const notifId = e.detail?.id
+  if (notifId) {
+    const notif = notifikasiList.value.find(n => (n.id || n.ID) === notifId)
+    if (notif) {
+      notif.is_read = true
+      notif.IsRead = true
+    }
+  } else {
+    fetchNotifikasi()
+  }
+}
+
 onMounted(async () => {
+  window.addEventListener('notification-read', handleNotifReadSync)
+  window.addEventListener('notifications-updated', fetchNotifikasi)
+
   const localUserData = localStorage.getItem('userData')
   const token = localStorage.getItem('token')
   if (localUserData) {
@@ -399,6 +423,11 @@ onMounted(async () => {
   }
 })
 
+onUnmounted(() => {
+  window.removeEventListener('notification-read', handleNotifReadSync)
+  window.removeEventListener('notifications-updated', fetchNotifikasi)
+})
+
 const fetchPendingNews = async () => {
   const token = localStorage.getItem('token')
   if (!token) return
@@ -425,16 +454,18 @@ const fetchNotifikasi = async () => {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     const json = await res.json()
-    if (json.success) {
+    if (json.success && json.data) {
       notifikasiList.value = json.data
     }
   } catch (err) {}
 }
 
 const openNotifikasi = async (id: number) => {
-  const notif = notifikasiList.value.find(n => n.ID === id)
-  if (notif && !notif.is_read) {
+  const notif = notifikasiList.value.find(n => (n.id || n.ID) === id)
+  if (notif && (!notif.is_read || !notif.IsRead)) {
     notif.is_read = true
+    notif.IsRead = true
+    window.dispatchEvent(new CustomEvent('notification-read', { detail: { id } }))
     const token = localStorage.getItem('token')
     await fetch(`http://localhost:8080/api/v1/notifications/${id}/read`, {
       method: 'PUT',
@@ -790,11 +821,18 @@ const handleProfilePhotoUpload = async (e: Event) => {
 </script>
 
 <style scoped>
+.article-content :deep(> *:first-child) {
+  margin-top: 0 !important;
+}
+.article-content :deep(p:first-child) {
+  margin-top: 0 !important;
+}
 .article-content :deep(p) {
-  margin-bottom: 0.5rem;
-  line-height: 1.5;
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  line-height: 1.6;
 }
 .article-content :deep(p:last-child) {
-  margin-bottom: 0;
+  margin-bottom: 0 !important;
 }
 </style>

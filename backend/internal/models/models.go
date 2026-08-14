@@ -2,29 +2,31 @@ package models
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type User struct {
-	gorm.Model
-	Name       string `json:"name"`
-	Email      string `json:"email" gorm:"unique"`
-	Password   string `json:"-"` // Not returning password in JSON
-	Role       string `json:"role"` // "member", "penulis", "editor", "admin"
-	Phone      string `json:"phone"`
-	Provinsi   string `json:"provinsi"`
-	KotaKab    string `json:"kota_kab"`
-	Kecamatan  string `json:"kecamatan"`
-	Kelurahan  string `json:"kelurahan"`
-	Alamat     string `json:"alamat"`
-	Photo      string `json:"photo"`
-	IsVerified int    `json:"is_verified"`
-	TotalXP    int    `json:"total_xp"`
+	ID         uint      `gorm:"primaryKey" json:"id"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
+	Name       string    `json:"name"`
+	Email      string    `json:"email" gorm:"unique"`
+	Password   string    `json:"-"` // Not returning password in JSON
+	Role       string    `json:"role"` // "member", "penulis", "editor", "admin"
+	Phone      string    `json:"phone"`
+	Provinsi   string    `json:"provinsi"`
+	KotaKab    string    `json:"kota_kab"`
+	Kecamatan  string    `json:"kecamatan"`
+	Kelurahan  string    `json:"kelurahan"`
+	Alamat     string    `json:"alamat"`
+	Photo      string    `json:"photo"`
+	IsVerified int       `json:"is_verified"`
+	TotalXP    int       `json:"total_xp"`
 }
 
 type News struct {
-	gorm.Model
+	ID         uint        `gorm:"primaryKey" json:"id"`
+	CreatedAt  time.Time   `json:"created_at"`
+	UpdatedAt  time.Time   `json:"updated_at"`
 	Title      string      `json:"judul"`
 	CategoryID uint        `json:"category_id"`
 	Category   Category    `json:"kategori" gorm:"foreignKey:CategoryID"`
@@ -91,9 +93,11 @@ type Village struct {
 }
 
 type Category struct {
-	gorm.Model
-	Name string `json:"name" gorm:"unique"`
-	Slug string `json:"slug" gorm:"unique"`
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Name      string    `json:"name" gorm:"unique"`
+	Slug      string    `json:"slug" gorm:"unique"`
 }
 
 type NewsImage struct {
@@ -104,22 +108,54 @@ type NewsImage struct {
 }
 
 type Notification struct {
-	gorm.Model
-	UserID  uint   `json:"user_id"`
-	User    User   `json:"user" gorm:"foreignKey:UserID"`
-	NewsID  *uint  `json:"news_id"` // Optional reference to the news article
-	News    *News  `json:"news" gorm:"foreignKey:NewsID"`
-	Title   string `json:"title"`
-	Message string `json:"message"`
-	Type    string `json:"type"`    // e.g., "info", "warning", "success"
-	IsRead  bool   `json:"is_read" gorm:"default:false"`
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	UserID    uint      `json:"user_id"`
+	User      User      `json:"user" gorm:"foreignKey:UserID"`
+	NewsID    *uint     `json:"news_id"` // Optional reference to the news article
+	News      *News     `json:"news" gorm:"foreignKey:NewsID"`
+	Title     string    `json:"title"`
+	Message   string    `json:"message"`
+	Type      string    `json:"type"` // e.g., "info", "warning", "success"
+	IsRead    bool      `json:"is_read" gorm:"default:false"`
 }
 
 type History struct {
-	gorm.Model
-	UserID       uint   `json:"user_id"`
-	User         User   `json:"-" gorm:"foreignKey:UserID"`
-	NewsID       uint   `json:"news_id"`
-	News         News   `json:"news" gorm:"foreignKey:NewsID"`
-	ActivityType string `json:"activity_type"` // "read" or "bookmark"
+	ID           uint      `gorm:"primaryKey" json:"id"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+	UserID       uint      `json:"user_id"`
+	User         User      `json:"-" gorm:"foreignKey:UserID"`
+	NewsID       uint      `json:"news_id"`
+	News         News      `json:"news" gorm:"foreignKey:NewsID"`
+	ActivityType string    `json:"activity_type"` // "read" or "bookmark"
 }
+
+type Ad struct {
+	ID          uint      `gorm:"primaryKey" json:"id"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	Title       string    `json:"title"`
+	Slot        string    `json:"slot"`        // "header_top", "home_sidebar", "home_feed", "berita_inline", "berita_bottom", "wisata_banner"
+	ImageURL    string    `json:"image_url"`   // Direct URL or Base64 / upload path
+	RedirectURL string    `json:"redirect_url"`
+	Status      string    `json:"status" gorm:"default:'Aktif'"` // "Aktif", "Non-Aktif"
+}
+
+type VerifyOTP struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	Email     string    `json:"email" gorm:"index"`
+	OTP       string    `json:"otp"`
+	ExpiresAt time.Time `json:"expires_at"`
+	IsUsed    bool      `json:"is_used" gorm:"default:false"`
+}
+
+func (VerifyOTP) TableName() string {
+	return "verify_otps"
+}
+
+// PasswordResetOTP is an alias for VerifyOTP for backward compatibility
+type PasswordResetOTP = VerifyOTP
+

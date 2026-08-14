@@ -5,6 +5,8 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"log"
+	"math/big"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -19,6 +21,7 @@ import (
 	"wildan-news-backend/internal/database"
 	"wildan-news-backend/internal/middleware"
 	"wildan-news-backend/internal/models"
+	"wildan-news-backend/internal/utils"
 )
 
 // ---------------------------------------------------------------------------
@@ -30,17 +33,39 @@ type RegisterInput struct {
 	Email     string `json:"email"`
 	Phone     string `json:"phone"`
 	Password  string `json:"password"`
+	Role      string `json:"role"`
 	Provinsi  string `json:"provinsi"`
 	KotaKab   string `json:"kota_kab"`
 	Kecamatan string `json:"kecamatan"`
 	Kelurahan string `json:"kelurahan"`
 	Alamat    string `json:"alamat"`
-	// Role and IsVerified are NOT accepted from client — set server-side
+	IsVerified int   `json:"is_verified"`
 }
 
 type LoginInput struct {
+	Email        string `json:"email"`
+	Password     string `json:"password"`
+	ExpectedRole string `json:"expected_role"`
+}
+
+type ForgotPasswordInput struct {
+	Email string `json:"email"`
+}
+
+type VerifyOTPInput struct {
+	Email string `json:"email"`
+	OTP   string `json:"otp"`
+}
+
+type ResetPasswordInput struct {
 	Email    string `json:"email"`
+	OTP      string `json:"otp"`
 	Password string `json:"password"`
+}
+
+type SendRegisterOTPInput struct {
+	Email string `json:"email"`
+	Name  string `json:"name"`
 }
 
 // ---------------------------------------------------------------------------
@@ -118,18 +143,23 @@ func Register(c *fiber.Ctx) error {
 		})
 	}
 
+	role := "member"
+	if input.Role == "penulis" {
+		role = "penulis"
+	}
+
 	user := models.User{
 		Name:       input.Name,
 		Email:      input.Email,
 		Phone:      input.Phone,
 		Password:   string(hashedPassword),
-		Role:       "member", // ALWAYS assign member — role cannot be supplied by client
+		Role:       role,
 		Provinsi:   input.Provinsi,
 		KotaKab:    input.KotaKab,
 		Kecamatan:  input.Kecamatan,
 		Kelurahan:  input.Kelurahan,
 		Alamat:     input.Alamat,
-		IsVerified: 0, // must be verified through admin flow
+		IsVerified: 1, // Verified through OTP verification
 	}
 
 	if err := database.DB.Create(&user).Error; err != nil {
@@ -138,6 +168,16 @@ func Register(c *fiber.Ctx) error {
 			"success": false, "message": "Registration failed",
 		})
 	}
+
+	// Send Welcome Registration Notification Email asynchronously
+	go func(toEmail, name, role string) {
+		wibTime := utils.FormatWIB(time.Now())
+		if err := utils.SendWelcomeRegistrationEmail(toEmail, name, role, wibTime); err != nil {
+			log.Printf("[Email Error] Failed to send welcome registration email to %s: %v", toEmail, err)
+		} else {
+			log.Printf("[Email Success] Welcome registration email successfully sent to %s", toEmail)
+		}
+	}(user.Email, user.Name, user.Role)
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"success": true,
@@ -183,6 +223,36 @@ func Login(c *fiber.Ctx) error {
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"success": false, "message": "Invalid credentials",
+		})
+	}
+
+	// Strict Role Check for specific login portals
+	if input.ExpectedRole != "" && user.Role != input.ExpectedRole {
+		roleTitleMap := map[string]string{
+			"member":  "Member / Pembaca",
+			"penulis": "Penulis",
+			"editor":  "Editor",
+			"admin":   "Administrator",
+		}
+		userRoleTitle := roleTitleMap[user.Role]
+		if userRoleTitle == "" {
+			userRoleTitle = user.Role
+		}
+		expectedRoleTitle := roleTitleMap[input.ExpectedRole]
+		if expectedRoleTitle == "" {
+			expectedRoleTitle = input.ExpectedRole
+		}
+		loginUrlMap := map[string]string{
+			"member":  "/login",
+			"penulis": "/login-penulis",
+			"editor":  "/login-editor",
+			"admin":   "/login-admin",
+		}
+		targetLoginURL := loginUrlMap[user.Role]
+
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
+			"success": false,
+			"message": fmt.Sprintf("Akses ditolak: Akun Anda terdaftar sebagai %s. Halaman ini khusus untuk %s. Silakan masuk melalui halaman login %s (%s).", userRoleTitle, expectedRoleTitle, userRoleTitle, targetLoginURL),
 		})
 	}
 
@@ -352,4 +422,317 @@ func randomHex(n int) string {
 	b := make([]byte, n)
 	_, _ = cryptorand.Read(b)
 	return hex.EncodeToString(b)
+}
+
+// ---------------------------------------------------------------------------
+// SendRegisterOTP
+// POST /api/v1/auth/send-register-otp
+// ---------------------------------------------------------------------------
+
+func SendRegisterOTP(c *fiber.Ctx) error {
+	var input SendRegisterOTPInput
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false, "message": "Format request tidak valid",
+		})
+	}
+
+	email := strings.ToLower(strings.TrimSpace(input.Email))
+	if !isValidEmail(email) {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false, "message": "Format email tidak valid",
+		})
+	}
+
+	// Check if already registered
+	var existing models.User
+	if err := database.DB.Where("email = ?", email).First(&existing).Error; err == nil {
+		return c.Status(fiber.StatusConflict).JSON(fiber.Map{
+			"success": false, "message": "Email sudah terdaftar. Silakan gunakan email lain atau masuk.",
+		})
+	}
+
+	// Check if there is an active OTP that has not expired yet
+	var activeOTP models.VerifyOTP
+	if err := database.DB.Where("email = ? AND is_used = ? AND expires_at > ?", email, false, time.Now()).Order("created_at desc").First(&activeOTP).Error; err == nil {
+		diff := time.Until(activeOTP.ExpiresAt)
+		totalSec := int(diff.Seconds())
+		mins := totalSec / 60
+		secs := totalSec % 60
+		var waitStr string
+		if mins > 0 {
+			waitStr = fmt.Sprintf("%d menit %d detik", mins, secs)
+		} else {
+			waitStr = fmt.Sprintf("%d detik", secs)
+		}
+		return c.Status(fiber.StatusTooManyRequests).JSON(fiber.Map{
+			"success":             false,
+			"message":             fmt.Sprintf("Kode OTP sebelumnya masih aktif. Mohon tunggu %s lagi sebelum meminta kode OTP baru.", waitStr),
+			"retry_after_seconds": totalSec,
+			"active_otp_exists":   true,
+		})
+	}
+
+	// Generate 6-digit numeric OTP
+	randNum, err := cryptorand.Int(cryptorand.Reader, big.NewInt(1000000))
+	var otpStr string
+	if err != nil {
+		otpStr = fmt.Sprintf("%06d", time.Now().UnixNano()%1000000)
+	} else {
+		otpStr = fmt.Sprintf("%06d", randNum.Int64())
+	}
+
+	// Invalidate any previous OTPs for this email
+	database.DB.Model(&models.VerifyOTP{}).
+		Where("email = ? AND is_used = ?", email, false).
+		Update("is_used", true)
+
+	otpRecord := models.VerifyOTP{
+		Email:     email,
+		OTP:       otpStr,
+		ExpiresAt: time.Now().Add(5 * time.Minute),
+		IsUsed:    false,
+	}
+
+	if err := database.DB.Create(&otpRecord).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false, "message": "Gagal membuat kode OTP verifikasi",
+		})
+	}
+
+	userName := strings.TrimSpace(input.Name)
+	if userName == "" {
+		userName = "Calon Pengguna Pasuruan Info"
+	}
+
+	// Send OTP email asynchronously
+	go func(toEmail, name, otpCode string) {
+		log.Printf("\n========================================================================\n[EMAIL REGISTER OTP]\nTarget: %s\nOTP Code: %s\n========================================================================", toEmail, otpCode)
+		if err := utils.SendRegisterOTPEmail(toEmail, name, otpCode); err != nil {
+			log.Printf("[Email Error] Failed to send registration OTP to %s: %v", toEmail, err)
+		} else {
+			log.Printf("[Email Success] Registration OTP successfully delivered to %s", toEmail)
+		}
+	}(email, userName, otpStr)
+
+	return c.JSON(fiber.Map{
+		"success": true,
+		"message": "Kode OTP verifikasi telah dikirim ke email Anda (berlaku 5 menit). Silakan periksa inbox atau spam.",
+	})
+}
+
+// ---------------------------------------------------------------------------
+// ForgotPassword
+// POST /api/v1/auth/forgot-password
+// ---------------------------------------------------------------------------
+
+func ForgotPassword(c *fiber.Ctx) error {
+	var input ForgotPasswordInput
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false, "message": "Format request tidak valid",
+		})
+	}
+
+	email := strings.ToLower(strings.TrimSpace(input.Email))
+	if !isValidEmail(email) {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false, "message": "Format email tidak valid",
+		})
+	}
+
+	var user models.User
+	if err := database.DB.Where("email = ?", email).First(&user).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"success": false, "message": "Email tidak terdaftar di dalam database kami",
+		})
+	}
+
+	// Check if there is an active OTP that has not expired yet
+	var activeOTP models.VerifyOTP
+	if err := database.DB.Where("email = ? AND is_used = ? AND expires_at > ?", email, false, time.Now()).Order("created_at desc").First(&activeOTP).Error; err == nil {
+		diff := time.Until(activeOTP.ExpiresAt)
+		totalSec := int(diff.Seconds())
+		mins := totalSec / 60
+		secs := totalSec % 60
+		var waitStr string
+		if mins > 0 {
+			waitStr = fmt.Sprintf("%d menit %d detik", mins, secs)
+		} else {
+			waitStr = fmt.Sprintf("%d detik", secs)
+		}
+		return c.Status(fiber.StatusTooManyRequests).JSON(fiber.Map{
+			"success":             false,
+			"message":             fmt.Sprintf("Kode OTP sebelumnya masih aktif. Mohon tunggu %s lagi sebelum meminta kode OTP baru.", waitStr),
+			"retry_after_seconds": totalSec,
+			"active_otp_exists":   true,
+		})
+	}
+
+	// Generate 6-digit numeric OTP
+	randNum, err := cryptorand.Int(cryptorand.Reader, big.NewInt(1000000))
+	var otpStr string
+	if err != nil {
+		otpStr = fmt.Sprintf("%06d", time.Now().UnixNano()%1000000)
+	} else {
+		otpStr = fmt.Sprintf("%06d", randNum.Int64())
+	}
+
+	// Invalidate any previous OTPs for this email
+	database.DB.Model(&models.VerifyOTP{}).
+		Where("email = ? AND is_used = ?", email, false).
+		Update("is_used", true)
+
+	otpRecord := models.VerifyOTP{
+		Email:     email,
+		OTP:       otpStr,
+		ExpiresAt: time.Now().Add(5 * time.Minute),
+		IsUsed:    false,
+	}
+
+	if err := database.DB.Create(&otpRecord).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false, "message": "Gagal membuat kode OTP pemulihan",
+		})
+	}
+
+	// Send OTP email asynchronously
+	go func(toEmail, userName, otpCode string) {
+		log.Printf("\n========================================================================\n[EMAIL PASSWORD RESET OTP]\nTarget: %s\nOTP Code: %s\n========================================================================", toEmail, otpCode)
+		if err := utils.SendOTPEmail(toEmail, userName, otpCode); err != nil {
+			log.Printf("[Email Error] Failed to send OTP to %s: %v", toEmail, err)
+		} else {
+			log.Printf("[Email Success] Password Reset OTP successfully delivered to %s", toEmail)
+		}
+	}(user.Email, user.Name, otpStr)
+
+	return c.JSON(fiber.Map{
+		"success": true,
+		"message": "Kode OTP telah dikirim ke email Anda. Silakan periksa inbox atau folder spam.",
+	})
+}
+
+// ---------------------------------------------------------------------------
+// VerifyOTP
+// POST /api/v1/auth/verify-otp
+// ---------------------------------------------------------------------------
+
+func VerifyOTP(c *fiber.Ctx) error {
+	var input VerifyOTPInput
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false, "message": "Format request tidak valid",
+		})
+	}
+
+	email := strings.ToLower(strings.TrimSpace(input.Email))
+	otp := strings.TrimSpace(input.OTP)
+
+	var otpRecord models.VerifyOTP
+	err := database.DB.Where("email = ? AND otp = ? AND is_used = ? AND expires_at > ?", email, otp, false, time.Now()).First(&otpRecord).Error
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false, "message": "Kode OTP tidak valid atau telah kadaluwarsa",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"success": true,
+		"message": "Kode OTP valid",
+	})
+}
+
+// ---------------------------------------------------------------------------
+// ResetPassword
+// POST /api/v1/auth/reset-password
+// ---------------------------------------------------------------------------
+
+func ResetPassword(c *fiber.Ctx) error {
+	var input ResetPasswordInput
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false, "message": "Format request tidak valid",
+		})
+	}
+
+	email := strings.ToLower(strings.TrimSpace(input.Email))
+	otp := strings.TrimSpace(input.OTP)
+
+	if len(input.Password) < 8 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false, "message": "Password minimal 8 karakter",
+		})
+	}
+
+	var otpRecord models.VerifyOTP
+	err := database.DB.Where("email = ? AND otp = ? AND is_used = ? AND expires_at > ?", email, otp, false, time.Now()).First(&otpRecord).Error
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"success": false, "message": "Kode OTP tidak valid atau telah kadaluwarsa",
+		})
+	}
+
+	var user models.User
+	if err := database.DB.Where("email = ?", email).First(&user).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"success": false, "message": "Akun tidak ditemukan dalam database",
+		})
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), 12)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false, "message": "Gagal memperbarui password",
+		})
+	}
+
+	user.Password = string(hashedPassword)
+	if err := database.DB.Save(&user).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false, "message": "Gagal menyimpan password baru",
+		})
+	}
+
+	// Mark OTP as used
+	otpRecord.IsUsed = true
+	database.DB.Save(&otpRecord)
+
+	formattedWibTime := formatWIBTime(time.Now())
+
+	// Send password reset notification email asynchronously
+	go func(toEmail, userName, wibTime string) {
+		if err := utils.SendPasswordChangedEmail(toEmail, userName, wibTime); err != nil {
+			log.Printf("[Email Error] Failed to send password reset notification to %s: %v", toEmail, err)
+		}
+	}(user.Email, user.Name, formattedWibTime)
+
+	return c.JSON(fiber.Map{
+		"success": true,
+		"message": "Password berhasil diubah. Silakan login kembali dengan password baru Anda.",
+	})
+}
+
+// formatWIBTime formats time into Indonesian WIB date/time format (GMT+7)
+func formatWIBTime(t time.Time) string {
+	wibLocation := time.FixedZone("WIB", 7*3600)
+	tWib := t.In(wibLocation)
+
+	months := map[time.Month]string{
+		time.January:   "Januari",
+		time.February:  "Februari",
+		time.March:     "Maret",
+		time.April:     "April",
+		time.May:       "Mei",
+		time.June:      "Juni",
+		time.July:      "Juli",
+		time.August:    "Agustus",
+		time.September: "September",
+		time.October:   "Oktober",
+		time.November:  "November",
+		time.December:  "Desember",
+	}
+
+	return fmt.Sprintf("%d %s %d, %02d:%02d:%02d WIB",
+		tWib.Day(), months[tWib.Month()], tWib.Year(),
+		tWib.Hour(), tWib.Minute(), tWib.Second())
 }

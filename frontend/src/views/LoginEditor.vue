@@ -25,8 +25,13 @@
           </div>
           
           <div>
-            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-            <div class="mt-1 relative">
+            <div class="flex justify-between items-center mb-1">
+              <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+              <router-link to="/lupa-password" class="text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors">
+                Lupa Password?
+              </router-link>
+            </div>
+            <div class="relative">
               <input 
                 id="password" 
                 v-model="password"
@@ -302,17 +307,18 @@ const handleLogin = async () => {
   try {
     const response = await axios.post('http://localhost:8080/api/v1/auth/login', {
       email: email.value,
-      password: password.value
+      password: password.value,
+      expected_role: 'editor'
     });
     
     if (response.data.success) {
       const user = response.data.data.user;
       
-      if (user.role !== 'editor' && user.role !== 'admin') {
+      if (user.role !== 'editor') {
         Swal.fire({
           icon: 'error',
           title: 'Akses Ditolak',
-          text: 'Akun ini bukan editor.',
+          text: `Halaman ini khusus untuk Editor Redaksi. Akun Anda terdaftar sebagai ${user.role}. Silakan masuk melalui halaman login yang sesuai.`,
           confirmButtonColor: '#2563eb'
         });
         initCaptcha();

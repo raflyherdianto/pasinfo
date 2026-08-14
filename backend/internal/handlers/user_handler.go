@@ -28,16 +28,19 @@ func GetUsers(c *fiber.Ctx) error {
 	var safeUsers []fiber.Map
 	for _, u := range users {
 		safeUsers = append(safeUsers, fiber.Map{
-			"id":        u.ID,
-			"name":      u.Name,
-			"email":     u.Email,
-			"role":      u.Role,
-			"provinsi":  u.Provinsi,
-			"kota_kab":  u.KotaKab,
-			"kecamatan": u.Kecamatan,
-			"kelurahan": u.Kelurahan,
-			"photo":     u.Photo,
-			"created_at": u.CreatedAt,
+			"id":          u.ID,
+			"name":        u.Name,
+			"email":       u.Email,
+			"role":        u.Role,
+			"phone":       u.Phone,
+			"provinsi":    u.Provinsi,
+			"kota_kab":    u.KotaKab,
+			"kecamatan":   u.Kecamatan,
+			"kelurahan":   u.Kelurahan,
+			"alamat":      u.Alamat,
+			"photo":       u.Photo,
+			"is_verified": u.IsVerified,
+			"created_at":  u.CreatedAt,
 		})
 	}
 
@@ -50,14 +53,17 @@ func GetUsers(c *fiber.Ctx) error {
 // CreateUser creates a new user manually
 func CreateUser(c *fiber.Ctx) error {
 	var input struct {
-		Name      string `json:"name"`
-		Email     string `json:"email"`
-		Password  string `json:"password"`
-		Role      string `json:"role"`
-		Provinsi  string `json:"provinsi"`
-		KotaKab   string `json:"kota_kab"`
-		Kecamatan string `json:"kecamatan"`
-		Kelurahan string `json:"kelurahan"`
+		Name       string `json:"name"`
+		Email      string `json:"email"`
+		Password   string `json:"password"`
+		Role       string `json:"role"`
+		Phone      string `json:"phone"`
+		Provinsi   string `json:"provinsi"`
+		KotaKab    string `json:"kota_kab"`
+		Kecamatan  string `json:"kecamatan"`
+		Kelurahan  string `json:"kelurahan"`
+		Alamat     string `json:"alamat"`
+		IsVerified *int   `json:"is_verified"`
 	}
 
 	if err := c.BodyParser(&input); err != nil {
@@ -69,15 +75,23 @@ func CreateUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"success": false, "message": "Failed to hash password"})
 	}
 
+	isVerifiedVal := 0
+	if input.IsVerified != nil {
+		isVerifiedVal = *input.IsVerified
+	}
+
 	user := models.User{
-		Name:      input.Name,
-		Email:     input.Email,
-		Password:  string(hashedPassword),
-		Role:      input.Role,
-		Provinsi:  input.Provinsi,
-		KotaKab:   input.KotaKab,
-		Kecamatan: input.Kecamatan,
-		Kelurahan: input.Kelurahan,
+		Name:       input.Name,
+		Email:      input.Email,
+		Password:   string(hashedPassword),
+		Role:       input.Role,
+		Phone:      input.Phone,
+		Provinsi:   input.Provinsi,
+		KotaKab:    input.KotaKab,
+		Kecamatan:  input.Kecamatan,
+		Kelurahan:  input.Kelurahan,
+		Alamat:     input.Alamat,
+		IsVerified: isVerifiedVal,
 	}
 
 	if err := database.DB.Create(&user).Error; err != nil {
@@ -124,17 +138,18 @@ func UpdateUser(c *fiber.Ctx) error {
 	}
 
 	var input struct {
-		Name      string `json:"name"`
-		Email     string `json:"email"`
-		Password  string `json:"password"`
-		Role      string `json:"role"` // only honoured when callerRole == admin
-		Phone     string `json:"phone"`
-		Provinsi  string `json:"provinsi"`
-		KotaKab   string `json:"kota_kab"`
-		Kecamatan string `json:"kecamatan"`
-		Kelurahan string `json:"kelurahan"`
-		Alamat    string `json:"alamat"`
-		Photo     string `json:"photo"`
+		Name       string `json:"name"`
+		Email      string `json:"email"`
+		Password   string `json:"password"`
+		Role       string `json:"role"` // only honoured when callerRole == admin
+		Phone      string `json:"phone"`
+		Provinsi   string `json:"provinsi"`
+		KotaKab    string `json:"kota_kab"`
+		Kecamatan  string `json:"kecamatan"`
+		Kelurahan  string `json:"kelurahan"`
+		Alamat     string `json:"alamat"`
+		Photo      string `json:"photo"`
+		IsVerified *int   `json:"is_verified"`
 	}
 
 	if err := c.BodyParser(&input); err != nil {
@@ -187,6 +202,9 @@ func UpdateUser(c *fiber.Ctx) error {
 	}
 	if input.Photo != "" {
 		user.Photo = input.Photo
+	}
+	if input.IsVerified != nil && callerRole == "admin" {
+		user.IsVerified = *input.IsVerified
 	}
 
 	if err := database.DB.Save(&user).Error; err != nil {

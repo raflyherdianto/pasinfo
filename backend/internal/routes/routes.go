@@ -36,7 +36,11 @@ func SetupRoutes(app *fiber.App) {
 	// ── Auth endpoints (rate-limited: 10 req / 60s per IP) ───────────────────
 	auth := api.Group("/auth", middleware.RateLimiter(10, 60))
 	auth.Post("/register", handlers.Register)
+	auth.Post("/send-register-otp", handlers.SendRegisterOTP)
 	auth.Post("/login", handlers.Login)
+	auth.Post("/forgot-password", handlers.ForgotPassword)
+	auth.Post("/verify-otp", handlers.VerifyOTP)
+	auth.Post("/reset-password", handlers.ResetPassword)
 
 	// ── File upload (authenticated, rate-limited) ─────────────────────────────
 	upload := api.Group("/upload", middleware.Protected(), middleware.RateLimiter(20, 60))
@@ -123,4 +127,11 @@ func SetupRoutes(app *fiber.App) {
 	histories.Post("/", handlers.CreateHistory)
 	histories.Get("/", handlers.GetMyHistories)
 	histories.Delete("/", handlers.DeleteHistory)
+
+	// ── Ads ───────────────────────────────────────────────────────────────────
+	api.Get("/ads", handlers.GetAds)
+	api.Get("/ads/slot/:slot", handlers.GetActiveAdBySlot)
+	api.Post("/ads", middleware.Protected(), middleware.RoleMiddleware("admin"), handlers.CreateAd)
+	api.Put("/ads/:id", middleware.Protected(), middleware.RoleMiddleware("admin"), handlers.UpdateAd)
+	api.Delete("/ads/:id", middleware.Protected(), middleware.RoleMiddleware("admin"), handlers.DeleteAd)
 }

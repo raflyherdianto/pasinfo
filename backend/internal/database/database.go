@@ -75,6 +75,14 @@ func ConnectDB() {
 
 	log.Println("Connected to Database")
 	
+	// Rename password_reset_otps or verifiy_otps to verify_otps if old table exists
+	if DB.Migrator().HasTable("password_reset_otps") && !DB.Migrator().HasTable("verify_otps") {
+		_ = DB.Migrator().RenameTable("password_reset_otps", "verify_otps")
+	}
+	if DB.Migrator().HasTable("verifiy_otps") && !DB.Migrator().HasTable("verify_otps") {
+		_ = DB.Migrator().RenameTable("verifiy_otps", "verify_otps")
+	}
+
 	err = DB.AutoMigrate(
 		&models.User{}, 
 		&models.Category{}, 
@@ -86,9 +94,19 @@ func ConnectDB() {
 		&models.District{},
 		&models.Village{},
 		&models.History{},
+		&models.Ad{},
+		&models.VerifyOTP{},
 	)
 	if err != nil {
 		log.Fatal("Failed to migrate database. \n", err)
+	}
+
+	tablesWithDeletedAt := []string{"users", "news", "categories", "notifications", "histories"}
+	for _, tbl := range tablesWithDeletedAt {
+		if DB.Migrator().HasColumn(tbl, "deleted_at") {
+			DB.Migrator().DropColumn(tbl, "deleted_at")
+		}
+		_ = DB.Exec("ALTER TABLE " + tbl + " DROP COLUMN IF EXISTS deleted_at CASCADE;").Error
 	}
 
 	if !DB.Migrator().HasColumn("news_images", "image_caption") {

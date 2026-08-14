@@ -275,24 +275,14 @@
     
     <div class="w-full lg:w-1/4 flex flex-col gap-6">
       
-      <div @click="openChat" class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 cursor-pointer hover:shadow-md transition-shadow">
-        <div class="flex justify-between items-center mb-3">
-          <div class="flex items-center space-x-2 font-bold text-gray-800">
-            <i class="fas fa-comment-dots text-blue-600"></i>
-            <span>Konsultasi Editor</span>
-          </div>
-          <span class="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">1</span>
-        </div>
-        <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
-          <p class="text-sm text-gray-700 italic">"Berita Anda sedang direview, tunggu kabar selanjutnya."</p>
-          <p class="text-xs text-gray-400 mt-2 text-right">5 menit lalu</p>
-        </div>
-      </div>
-      
-      
       <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-        <h4 class="font-bold text-gray-800 mb-4 flex items-center space-x-2">
-          <i class="fas fa-bell text-gray-500"></i> <span>Notifikasi</span>
+        <h4 class="font-bold text-gray-800 mb-4 flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <i class="fas fa-bell text-gray-500"></i> <span>Notifikasi</span>
+          </div>
+          <span v-if="unreadNotifikasiCount > 0" class="px-2 py-0.5 text-xs font-bold bg-blue-100 text-blue-700 rounded-full">
+            {{ unreadNotifikasiCount }} Baru
+          </span>
         </h4>
         <div class="space-y-4">
           <div v-for="notif in notifikasiList" :key="notif.id"
@@ -428,7 +418,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
 import vSelect from 'vue-select'
@@ -510,6 +500,9 @@ const selectedDistrict = ref<any>(null)
 const selectedVillage = ref<any>(null)
 
 onMounted(async () => {
+  window.addEventListener('notification-read', handleNotifReadSync)
+  window.addEventListener('notifications-updated', fetchNotifikasi)
+
   const token = localStorage.getItem('token')
   const localUserData = localStorage.getItem('userData')
   if (localUserData) {
@@ -549,6 +542,11 @@ onMounted(async () => {
 
   fetchRiwayatBerita()
   fetchNotifikasi()
+})
+
+onUnmounted(() => {
+  window.removeEventListener('notification-read', handleNotifReadSync)
+  window.removeEventListener('notifications-updated', fetchNotifikasi)
 })
 
 const fetchRiwayatBerita = async () => {
@@ -598,16 +596,16 @@ const fetchNotifikasi = async () => {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     const json = await res.json()
-    if (json.success) {
+    if (json.success && json.data) {
       notifikasiList.value = json.data.map((n: any) => ({
-        id: n.ID,
-        judul: n.title,
-        isi: n.message,
-        waktu: formatDate(n.CreatedAt),
-        dibaca: n.is_read,
+        id: n.id || n.ID,
+        judul: n.title || n.Title,
+        isi: n.message || n.Message,
+        waktu: formatDate(n.created_at || n.CreatedAt),
+        dibaca: n.is_read !== undefined ? n.is_read : (n.IsRead !== undefined ? n.IsRead : false),
         news_id: n.news_id || n.NewsID,
-        icon: n.type === 'success' ? 'fa-check-circle' : n.type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle',
-        warna: n.type === 'success' ? '#16a34a' : n.type === 'warning' ? '#ea580c' : '#3b82f6'
+        icon: (n.type || n.Type) === 'success' ? 'fa-check-circle' : (n.type || n.Type) === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle',
+        warna: (n.type || n.Type) === 'success' ? '#16a34a' : (n.type || n.Type) === 'warning' ? '#ea580c' : '#3b82f6'
       }))
     }
   } catch (err) {
@@ -716,6 +714,20 @@ const computedXP = computed(() => {
 })
 
 const notifikasiList = ref<any[]>([])
+
+const unreadNotifikasiCount = computed(() => {
+  return notifikasiList.value.filter(n => !n.dibaca).length
+})
+
+const handleNotifReadSync = (e: any) => {
+  const notifId = e.detail?.id
+  if (notifId) {
+    const notif = notifikasiList.value.find(n => n.id === notifId)
+    if (notif) notif.dibaca = true
+  } else {
+    fetchNotifikasi()
+  }
+}
 
 const statusConfig = {
   draft: { label: 'Draft', color: '#6b7280', icon: 'fa-pen' },
@@ -1018,19 +1030,13 @@ const lihatSemua = () => {
   })
 }
 
-const openChat = () => {
-  Swal.fire({
-    icon: 'info',
-    title: 'Info Fitur',
-    text: 'Fitur chat dengan editor akan tersedia di tahap berikutnya',
-    confirmButtonColor: '#2563eb'
-  })
-}
+
 
 const openNotifikasi = async (id: number) => {
   const notif = notifikasiList.value.find(n => n.id === id)
   if (notif && !notif.dibaca) {
     notif.dibaca = true
+    window.dispatchEvent(new CustomEvent('notification-read', { detail: { id } }))
     const token = localStorage.getItem('token')
     await fetch(`http://localhost:8080/api/v1/notifications/${id}/read`, {
       method: 'PUT',

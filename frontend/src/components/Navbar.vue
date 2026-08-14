@@ -41,7 +41,7 @@ const updateAuthStatus = () => {
 
 const notifications = ref<any[]>([])
 const showNotifDropdown = ref(false)
-const unreadCount = computed(() => notifications.value.filter(n => !n.is_read).length)
+const unreadCount = computed(() => notifications.value.filter(n => !n.is_read && !n.IsRead).length)
 
 const fetchNotifications = async () => {
   const token = localStorage.getItem('token')
@@ -51,7 +51,7 @@ const fetchNotifications = async () => {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     const json = await res.json()
-    if (json.success) {
+    if (json.success && json.data) {
       notifications.value = json.data
     }
   } catch (err) {}
@@ -63,14 +63,29 @@ const toggleNotifDropdown = () => {
 }
 
 const markAsRead = async (id: number) => {
-  const notif = notifications.value.find(n => n.ID === id)
-  if (notif && !notif.is_read) {
+  const notif = notifications.value.find(n => (n.id || n.ID) === id)
+  if (notif && !notif.is_read && !notif.IsRead) {
     notif.is_read = true
+    notif.IsRead = true
+    window.dispatchEvent(new CustomEvent('notification-read', { detail: { id } }))
     const token = localStorage.getItem('token')
     await fetch(`http://localhost:8080/api/v1/notifications/${id}/read`, {
       method: 'PUT',
       headers: { 'Authorization': `Bearer ${token}` }
     })
+  }
+}
+
+const handleNotificationReadEvent = (e: any) => {
+  const notifId = e.detail?.id
+  if (notifId) {
+    const notif = notifications.value.find(n => (n.id || n.ID) === notifId)
+    if (notif) {
+      notif.is_read = true
+      notif.IsRead = true
+    }
+  } else {
+    fetchNotifications()
   }
 }
 
@@ -157,12 +172,16 @@ onMounted(() => {
   document.addEventListener('click', closeDropdown)
   window.addEventListener('scroll', handleScroll)
   window.addEventListener('auth-change', updateAuthStatus)
+  window.addEventListener('notification-read', handleNotificationReadEvent)
+  window.addEventListener('notifications-updated', fetchNotifications)
 })
 
 onUnmounted(() => {
   document.removeEventListener('click', closeDropdown)
   window.removeEventListener('scroll', handleScroll)
   window.removeEventListener('auth-change', updateAuthStatus)
+  window.removeEventListener('notification-read', handleNotificationReadEvent)
+  window.removeEventListener('notifications-updated', fetchNotifications)
 })
 
 const handleScroll = () => {
@@ -255,7 +274,7 @@ const goToNews = (id: number, judul: string) => {
       <div class="flex justify-between items-center">
         
         <div class="flex items-center cursor-pointer" @click="router.push('/')">
-          <img src="/logo.webp" alt="Pasinfo Logo" class="h-14 w-auto object-contain" />
+          <img src="/logo.webp" alt="Pasuruan Info Logo" class="h-14 w-auto object-contain" />
         </div>
 
         
@@ -368,10 +387,10 @@ const goToNews = (id: number, judul: string) => {
               <div v-if="showNotifDropdown" class="absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-xl py-2 z-10 border border-gray-100 max-h-96 overflow-y-auto">
                 <div class="px-4 py-2 border-b border-gray-100 font-bold text-gray-800">Notifikasi</div>
                 <div v-if="notifications.length === 0" class="px-4 py-4 text-center text-sm text-gray-500">Belum ada notifikasi</div>
-                <div v-for="notif in notifications" :key="notif.ID" @click="markAsRead(notif.ID)" class="px-4 py-3 border-b border-gray-50 hover:bg-gray-50 cursor-pointer" :class="{ 'bg-blue-50': !notif.is_read }">
-                  <p class="text-sm font-semibold text-gray-900">{{ notif.title }}</p>
-                  <p class="text-xs text-gray-600 mt-1">{{ notif.message }}</p>
-                  <p class="text-[10px] text-gray-400 mt-1">{{ formatDate(notif.CreatedAt) }}</p>
+                <div v-for="notif in notifications" :key="notif.id || notif.ID" @click="markAsRead(notif.id || notif.ID)" class="px-4 py-3 border-b border-gray-50 hover:bg-gray-50 cursor-pointer" :class="{ 'bg-blue-50/70': !notif.is_read && !notif.IsRead }">
+                  <p class="text-sm font-semibold text-gray-900">{{ notif.title || notif.Title }}</p>
+                  <p class="text-xs text-gray-600 mt-1">{{ notif.message || notif.Message }}</p>
+                  <p class="text-[10px] text-gray-400 mt-1">{{ formatDate(notif.created_at || notif.CreatedAt) }}</p>
                 </div>
               </div>
             </div>

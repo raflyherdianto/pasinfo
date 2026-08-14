@@ -2,55 +2,11 @@
   <div class="min-h-screen bg-gray-50/50 py-8 font-sans">
     <main class="container mx-auto px-4 max-w-7xl">
       
-      <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center space-x-3">
-            <span>Dashboard Admin Pasinfo</span>
-          </h1>
-          <p class="mt-2 text-gray-600">Portal manajemen konten, kategori, destinasi wisata, iklan, dan pengguna sistem</p>
-        </div>
-        <div class="flex items-center gap-3">
-          <button 
-            v-if="activeSection === 'users'"
-            @click="openUserCreateModal" 
-            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-5 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center space-x-2"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
-            </svg>
-            <span>Tambah Pengguna</span>
-          </button>
-          <button 
-            v-if="activeSection === 'categories'"
-            @click="openCategoryCreateModal" 
-            class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 px-5 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center space-x-2"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
-            <span>Tambah Kategori</span>
-          </button>
-          <button 
-            v-if="activeSection === 'wisata'"
-            @click="openWisataCreateModal" 
-            class="bg-rose-600 hover:bg-rose-700 text-white font-semibold py-2.5 px-5 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center space-x-2"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
-            <span>Tambah Wisata</span>
-          </button>
-          <button 
-            v-if="activeSection === 'iklan'"
-            @click="openIklanCreateModal" 
-            class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-5 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center space-x-2"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
-            <span>Tambah Iklan</span>
-          </button>
-        </div>
+      <div class="mb-8">
+        <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center space-x-3">
+          <span>Dashboard Admin Pasinfo</span>
+        </h1>
+        <p class="mt-2 text-gray-600">Portal manajemen konten, kategori, destinasi wisata, iklan, dan pengguna sistem</p>
       </div>
 
       
@@ -137,15 +93,14 @@
             v-for="sec in sections"
             :key="sec.id"
             @click="activeSection = sec.id"
-            class="px-5 py-3 rounded-xl font-bold transition-all flex items-center space-x-2"
+            class="px-5 py-3 rounded-xl font-bold transition-all text-center justify-center flex items-center"
             :class="[
               activeSection === sec.id
                 ? 'bg-blue-50 text-blue-600 border border-blue-100 shadow-sm'
                 : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50 border border-transparent'
             ]"
           >
-            <i class="fas" :class="sec.icon"></i>
-            <span>{{ sec.label }}</span>
+            {{ sec.label }}
           </button>
         </div>
       </div>
@@ -171,7 +126,7 @@
               {{ role }}
             </button>
           </div>
-          <div class="flex items-center gap-2 w-full sm:w-auto">
+          <div class="flex items-center gap-3 w-full sm:w-auto">
             <div class="relative w-full sm:w-64">
               <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -185,6 +140,15 @@
                 class="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500"
               />
             </div>
+            <button 
+              @click="openUserCreateModal" 
+              class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-xl shadow-xs hover:shadow transition-all flex items-center space-x-2 text-sm shrink-0"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+              </svg>
+              <span>Tambah Pengguna</span>
+            </button>
           </div>
         </div>
 
@@ -305,6 +269,15 @@
                 class="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500"
               />
             </div>
+            <button 
+              @click="openCategoryCreateModal" 
+              class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded-xl shadow-xs hover:shadow transition-all flex items-center space-x-2 text-sm shrink-0"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              <span>Tambah Kategori</span>
+            </button>
           </div>
         </div>
 
@@ -391,17 +364,83 @@
           <table class="min-w-full divide-y divide-gray-100">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Judul Berita</th>
-                <th class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Kategori</th>
-                <th class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Penulis</th>
-                <th class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Views</th>
-                <th class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Status</th>
-                <th class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Diperbarui</th>
+                <th @click="sortNews('title')" class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100/50 transition">
+                  <div class="flex items-center space-x-1.5">
+                    <span>Judul Berita</span>
+                    <span v-if="newsSortKey === 'title'">
+                      <svg v-if="newsSortOrder === 'asc'" class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+                      <svg v-else class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                    </span>
+                    <span v-else class="opacity-30">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
+                    </span>
+                  </div>
+                </th>
+                <th @click="sortNews('category')" class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100/50 transition">
+                  <div class="flex items-center space-x-1.5">
+                    <span>Kategori</span>
+                    <span v-if="newsSortKey === 'category'">
+                      <svg v-if="newsSortOrder === 'asc'" class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+                      <svg v-else class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                    </span>
+                    <span v-else class="opacity-30">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
+                    </span>
+                  </div>
+                </th>
+                <th @click="sortNews('author')" class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100/50 transition">
+                  <div class="flex items-center space-x-1.5">
+                    <span>Penulis</span>
+                    <span v-if="newsSortKey === 'author'">
+                      <svg v-if="newsSortOrder === 'asc'" class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+                      <svg v-else class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                    </span>
+                    <span v-else class="opacity-30">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
+                    </span>
+                  </div>
+                </th>
+                <th @click="sortNews('views')" class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100/50 transition">
+                  <div class="flex items-center space-x-1.5">
+                    <span>Views</span>
+                    <span v-if="newsSortKey === 'views'">
+                      <svg v-if="newsSortOrder === 'asc'" class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+                      <svg v-else class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                    </span>
+                    <span v-else class="opacity-30">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
+                    </span>
+                  </div>
+                </th>
+                <th @click="sortNews('status')" class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100/50 transition">
+                  <div class="flex items-center space-x-1.5">
+                    <span>Status</span>
+                    <span v-if="newsSortKey === 'status'">
+                      <svg v-if="newsSortOrder === 'asc'" class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+                      <svg v-else class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                    </span>
+                    <span v-else class="opacity-30">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
+                    </span>
+                  </div>
+                </th>
+                <th @click="sortNews('updated_at')" class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100/50 transition">
+                  <div class="flex items-center space-x-1.5">
+                    <span>Diperbarui</span>
+                    <span v-if="newsSortKey === 'updated_at'">
+                      <svg v-if="newsSortOrder === 'asc'" class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"></path></svg>
+                      <svg v-else class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                    </span>
+                    <span v-else class="opacity-30">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
+                    </span>
+                  </div>
+                </th>
                 <th class="px-6 py-4 text-right text-xs font-bold text-gray-400 uppercase tracking-wider">Aksi</th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-50">
-              <tr v-for="item in filteredNews" :key="item.id" class="hover:bg-gray-50/50 transition-colors">
+              <tr v-for="item in paginatedNews" :key="item.id" class="hover:bg-gray-50/50 transition-colors">
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                   <span class="block truncate max-w-[280px]" :title="item.judul">
                     {{ item.judul }}
@@ -429,6 +468,11 @@
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                     </svg>
                   </router-link>
+                  <button @click="openEditNewsModal(item)" class="p-2 text-amber-600 hover:text-amber-800 hover:bg-amber-50 rounded-lg inline-flex items-center transition" title="Edit Berita">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                  </button>
                   <button @click="deleteNewsItem(item.id)" class="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg inline-flex items-center transition" title="Hapus Berita">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -442,24 +486,77 @@
             </tbody>
           </table>
         </div>
+
+        <!-- News Pagination Footer Controls -->
+        <div v-if="filteredNews.length > 0" class="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-between items-center gap-3">
+          <div class="text-sm text-gray-500 text-center sm:text-left">
+            Menampilkan <span class="font-semibold text-gray-800">{{ newsStartIndex + 1 }}</span> sampai <span class="font-semibold text-gray-800">{{ Math.min(newsStartIndex + newsPerPage, filteredNews.length) }}</span> dari <span class="font-semibold text-gray-800">{{ filteredNews.length }}</span> berita
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button 
+              @click="goToNewsPage(newsPage - 1)" 
+              :disabled="newsPage === 1"
+              class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-1 shadow-xs cursor-pointer"
+              title="Halaman Sebelumnya"
+            >
+              <i class="fas fa-chevron-left text-[10px]"></i>
+              <span>Prev</span>
+            </button>
+
+            <div class="flex items-center gap-1">
+              <template v-for="p in visibleNewsPages" :key="p">
+                <span v-if="p === '...'" class="px-2 py-1 text-xs text-gray-400">...</span>
+                <button 
+                  v-else
+                  @click="goToNewsPage(p as number)"
+                  class="w-8 h-8 text-xs font-bold rounded-lg transition flex items-center justify-center shadow-xs cursor-pointer"
+                  :class="newsPage === p ? 'bg-blue-600 text-white shadow-blue-500/20' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'"
+                >
+                  {{ p }}
+                </button>
+              </template>
+            </div>
+
+            <button 
+              @click="goToNewsPage(newsPage + 1)" 
+              :disabled="newsPage >= totalNewsPages"
+              class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-1 shadow-xs cursor-pointer"
+              title="Halaman Selanjutnya"
+            >
+              <span>Next</span>
+              <i class="fas fa-chevron-right text-[10px]"></i>
+            </button>
+          </div>
+        </div>
       </div>
 
       
       <div v-else-if="activeSection === 'wisata'" class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden animate-in fade-in duration-200">
         <div class="border-b border-gray-100 bg-gray-50/50 px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
           <h4 class="font-bold text-gray-800 text-base">Manajemen Destinasi Wisata</h4>
-          <div class="relative w-full sm:w-64">
-            <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
+          <div class="flex items-center gap-3 w-full sm:w-auto">
+            <div class="relative w-full sm:w-64">
+              <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+              </span>
+              <input 
+                v-model="wisataSearchQuery"
+                type="text" 
+                placeholder="Cari destinasi..."
+                class="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500"
+              />
+            </div>
+            <button 
+              @click="openWisataCreateModal" 
+              class="bg-rose-600 hover:bg-rose-700 text-white font-semibold py-2 px-4 rounded-xl shadow-xs hover:shadow transition-all flex items-center space-x-2 text-sm shrink-0"
+            >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
               </svg>
-            </span>
-            <input 
-              v-model="wisataSearchQuery"
-              type="text" 
-              placeholder="Cari destinasi..."
-              class="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500"
-            />
+              <span>Tambah Wisata</span>
+            </button>
           </div>
         </div>
 
@@ -562,18 +659,29 @@
       <div v-else-if="activeSection === 'iklan'" class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden animate-in fade-in duration-200">
         <div class="border-b border-gray-100 bg-gray-50/50 px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
           <h4 class="font-bold text-gray-800 text-base">Manajemen Penempatan Iklan</h4>
-          <div class="relative w-full sm:w-64">
-            <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
+          <div class="flex items-center gap-3 w-full sm:w-auto">
+            <div class="relative w-full sm:w-64">
+              <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+              </span>
+              <input 
+                v-model="iklanSearchQuery"
+                type="text" 
+                placeholder="Cari iklan..."
+                class="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500"
+              />
+            </div>
+            <button 
+              @click="openIklanCreateModal" 
+              class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-xl shadow-xs hover:shadow transition-all flex items-center space-x-2 text-sm shrink-0"
+            >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
               </svg>
-            </span>
-            <input 
-              v-model="iklanSearchQuery"
-              type="text" 
-              placeholder="Cari iklan..."
-              class="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500"
-            />
+              <span>Pasang Iklan Baru</span>
+            </button>
           </div>
         </div>
 
@@ -634,14 +742,22 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-50">
               <tr v-for="ad in filteredIklan" :key="ad.id" class="hover:bg-gray-50/50 transition-colors">
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 truncate max-w-[200px]" :title="ad.name">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 truncate max-w-[220px]" :title="ad.title || ad.name">
                   <div class="flex items-center space-x-3">
-                    <img :src="ad.image" class="w-10 h-7 rounded object-cover border" alt="Ad Preview" />
-                    <span>{{ ad.name }}</span>
+                    <img :src="ad.image_url || ad.image || '/images/themes/photo.jpg'" class="w-12 h-8 rounded object-cover border border-gray-200 shrink-0" alt="Ad Preview" />
+                    <span class="truncate">{{ ad.title || ad.name }}</span>
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ ad.slot }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate max-w-[240px]" :title="ad.url">{{ ad.url }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">
+                  <span class="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold border border-blue-100">
+                    {{ slotLabels[ad.slot] || ad.slot }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate max-w-[240px]" :title="ad.redirect_url || ad.url">
+                  <a :href="ad.redirect_url || ad.url" target="_blank" class="text-blue-600 hover:underline flex items-center gap-1">
+                    <span class="truncate">{{ ad.redirect_url || ad.url || '-' }}</span>
+                  </a>
+                </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm">
                   <span 
                     class="px-2.5 py-1 text-xs font-bold rounded-full uppercase"
@@ -672,7 +788,7 @@
       </div>
 
       
-      <div v-if="showUserModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto">
+      <div v-if="showUserModal" @click.self="closeUserModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto">
         <div class="bg-white rounded-2xl max-w-xl w-full shadow-2xl overflow-hidden my-8 animate-in fade-in duration-200">
           <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
             <h3 class="text-lg font-bold text-gray-800">
@@ -684,15 +800,41 @@
           <div class="px-6 py-4 space-y-4 max-h-[70vh] overflow-y-auto">
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Lengkap</label>
-              <input type="text" v-model="userForm.name" placeholder="Contoh: Herdianto Wildan" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 text-sm">
+              <input type="text" v-model="userForm.name" placeholder="Contoh: Wildan Cihuy" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 text-sm">
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Email</label>
-              <input type="email" v-model="userForm.email" placeholder="Contoh: herdianto@pasuruaninfo.com" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 text-sm">
+              <input type="email" v-model="userForm.email" placeholder="Contoh: wildan@pasuruaninfo.com" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 text-sm">
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">{{ isEditingUser ? 'Password Baru (Opsional)' : 'Password' }}</label>
-              <input type="password" v-model="userForm.password" :placeholder="isEditingUser ? 'Kosongkan jika tidak ingin mengubah password' : 'Masukkan password aman untuk akun baru'" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 text-sm">
+              <div class="relative">
+                <input :type="showPassword ? 'text' : 'password'" v-model="userForm.password" :placeholder="isEditingUser ? 'Kosongkan jika tidak ingin mengubah password' : 'Masukkan password aman untuk akun baru'" class="w-full px-3.5 py-2 pr-10 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 text-sm">
+                <button type="button" @click="showPassword = !showPassword" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none p-1" :title="showPassword ? 'Sembunyikan password' : 'Tampilkan password'">
+                  <svg v-if="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                  </svg>
+                  <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858-5.908a10.03 10.03 0 013.982-.863c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21M3 3l18 18"/>
+                  </svg>
+                </button>
+              </div>
+              <div v-if="userForm.password" class="mt-2 space-y-1">
+                <div class="flex justify-between items-center text-xs font-semibold">
+                  <span class="text-gray-500">Kekuatan Password:</span>
+                  <span :class="passwordStrength.color">{{ passwordStrength.label }}</span>
+                </div>
+                <div class="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                  <div class="h-full transition-all duration-300 rounded-full" :class="passwordStrength.barColor" :style="{ width: passwordStrength.percent }"></div>
+                </div>
+              </div>
+              <p class="text-xs text-gray-500 mt-1.5 flex items-center gap-1">
+                <svg class="w-3.5 h-3.5 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span>Minimal 8 karakter, kombinasi huruf kapital (A-Z), angka (0-9) &amp; simbol (!@#$%^&*).</span>
+              </p>
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Role</label>
@@ -764,6 +906,18 @@
                 />
               </div>
             </div>
+
+            
+            <div class="grid grid-cols-1 gap-4 border-t border-gray-100 pt-4">
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Nomor Telepon</label>
+                <input type="text" v-model="userForm.phone" placeholder="Contoh: 081234567890" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 text-sm">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Alamat Lengkap</label>
+                <textarea v-model="userForm.alamat" rows="2" placeholder="Contoh: Jl. Pahlawan No. 123, Pasuruan" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 text-sm resize-none"></textarea>
+              </div>
+            </div>
           </div>
 
           <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 sm:flex sm:flex-row-reverse gap-3">
@@ -778,7 +932,7 @@
       </div>
 
       
-      <div v-if="showCategoryModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+      <div v-if="showCategoryModal" @click.self="closeCategoryModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
         <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden">
           <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
             <h3 class="text-lg font-bold text-gray-800">
@@ -810,7 +964,99 @@
       </div>
 
       
-      <div v-if="showWisataModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto">
+      <div v-if="showNewsEditModal" @click.self="closeNewsEditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto">
+        <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl overflow-hidden my-8 animate-in fade-in duration-200">
+          <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+            <h3 class="text-lg font-bold text-gray-800">Edit Artikel Berita</h3>
+            <button @click="closeNewsEditModal" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+          </div>
+          
+          <div class="px-6 py-4 space-y-4 max-h-[75vh] overflow-y-auto">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1">Judul Berita</label>
+              <input type="text" v-model="newsForm.title" placeholder="Masukkan judul berita..." class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 text-sm font-semibold">
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Kategori</label>
+                <select v-model="newsForm.category_id" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 text-sm bg-white">
+                  <option :value="0" disabled>Pilih Kategori</option>
+                  <option v-for="cat in categories" :key="cat.ID || cat.id" :value="cat.ID || cat.id">
+                    {{ cat.name }}
+                  </option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Status Rilis</label>
+                <select v-model="newsForm.status" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 text-sm bg-white font-medium">
+                  <option value="draft">Draft</option>
+                  <option value="pending">Review (Pending)</option>
+                  <option value="revision">Revisi</option>
+                  <option value="published">Rilis (Published)</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1">Konten Berita</label>
+              <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <QuillEditor 
+                  theme="snow" 
+                  v-model:content="newsForm.content" 
+                  contentType="html" 
+                  class="w-full bg-white border-0 cursor-text" 
+                  style="min-height: 300px; font-size: 15px;" 
+                />
+              </div>
+            </div>
+
+            <!-- Kelola Gambar & Caption -->
+            <div class="pt-2">
+              <div class="flex items-center justify-between mb-2">
+                <label class="block text-sm font-semibold text-gray-700">Gambar Artikel & Caption</label>
+                <button type="button" @click="triggerNewsImageUpload" class="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-bold transition flex items-center gap-1">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                  Tambah Gambar
+                </button>
+                <input type="file" ref="editNewsImageInputRef" @change="handleEditNewsFileSelect" multiple accept="image/*" class="hidden">
+              </div>
+
+              <div v-if="newsForm.images.length === 0" class="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center">
+                <p class="text-xs text-gray-400 font-medium">Belum ada gambar disematkan. Klik tombol "Tambah Gambar" untuk mengunggah gambar.</p>
+              </div>
+
+              <div v-else class="space-y-3">
+                <div v-for="(img, idx) in newsForm.images" :key="idx" class="p-3 bg-gray-50 border border-gray-200 rounded-xl flex flex-col sm:flex-row items-center gap-3">
+                  <div class="relative w-full sm:w-28 h-20 bg-gray-200 rounded-lg overflow-hidden shrink-0 border border-gray-200">
+                    <img :src="img" alt="Preview" class="w-full h-full object-cover">
+                    <span class="absolute top-1 left-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">#{{ idx + 1 }}</span>
+                  </div>
+                  <div class="flex-1 w-full">
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Caption Gambar #{{ idx + 1 }}</label>
+                    <input type="text" v-model="newsForm.image_captions[idx]" placeholder="Masukkan keterangan gambar (caption)..." class="w-full px-3 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 text-xs bg-white">
+                  </div>
+                  <button type="button" @click="removeNewsImage(idx)" class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition self-end sm:self-center shrink-0" title="Hapus Gambar Ini">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 sm:flex sm:flex-row-reverse gap-3">
+            <button @click="saveNewsEdit" class="w-full sm:w-auto px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-sm transition">
+              Simpan Perubahan
+            </button>
+            <button @click="closeNewsEditModal" class="w-full sm:w-auto px-5 py-2.5 bg-white border border-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-50 transition mt-3 sm:mt-0">
+              Batal
+            </button>
+          </div>
+        </div>
+      </div>
+
+      
+      <div v-if="showWisataModal" @click.self="closeWisataModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto">
         <div class="bg-white rounded-2xl max-w-xl w-full shadow-2xl overflow-hidden my-8 animate-in fade-in duration-200">
           <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
             <h3 class="text-lg font-bold text-gray-800">
@@ -859,7 +1105,7 @@
       </div>
 
       
-      <div v-if="showIklanModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto">
+      <div v-if="showIklanModal" @click.self="closeIklanModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto">
         <div class="bg-white rounded-2xl max-w-xl w-full shadow-2xl overflow-hidden my-8 animate-in fade-in duration-200">
           <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
             <h3 class="text-lg font-bold text-gray-800">
@@ -873,26 +1119,63 @@
               <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Iklan / Deskripsi Campaign</label>
               <input type="text" v-model="iklanForm.name" placeholder="Contoh: Promo Ramadhan Hotel Royal" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 text-sm">
             </div>
+
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Slot Penempatan Iklan</label>
-              <select v-model="iklanForm.slot" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 text-sm bg-white">
-                <option value="Header">Header (Banner Atas)</option>
-                <option value="Sidebar">Sidebar (Panel Samping)</option>
-                <option value="Content">Content (Di Tengah Artikel)</option>
-                <option value="Footer">Footer (Bagian Bawah)</option>
+              <select v-model="iklanForm.slot" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 text-sm bg-white font-medium">
+                <option v-for="(spec, key) in slotSpecs" :key="key" :value="key">
+                  {{ spec.label }} ({{ spec.size }})
+                </option>
               </select>
+
+              <div v-if="slotSpecs[iklanForm.slot]" class="mt-2.5 p-3 bg-blue-50/80 border border-blue-200/70 rounded-xl flex items-start gap-2.5 text-xs text-blue-950">
+                <svg class="w-4 h-4 text-blue-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div class="space-y-0.5">
+                  <p class="font-bold text-blue-950">Rekomendasi Ukuran Pixel: <span class="text-blue-700 font-extrabold bg-blue-100/90 px-1.5 py-0.5 rounded border border-blue-200">{{ slotSpecs[iklanForm.slot].size }}</span></p>
+                  <p class="text-blue-800/80">{{ slotSpecs[iklanForm.slot].desc }}</p>
+                  <p class="text-[11px] text-blue-600/90 italic font-medium pt-0.5">*Sistem otomatis menyesuaikan (auto-fit & object-cover) tampilan gambar secara responsif di semua layar.</p>
+                </div>
+              </div>
             </div>
+
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-1">Gambar URL Banner</label>
-              <input type="text" v-model="iklanForm.image" placeholder="Contoh: https://images.unsplash.com/..." class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 text-sm">
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Metode Sumber Gambar Banner</label>
+              <div class="flex items-center gap-4 mb-3">
+                <label class="flex items-center gap-2 text-xs font-semibold text-gray-700 cursor-pointer">
+                  <input type="radio" value="url" v-model="iklanImageMode" class="text-blue-600 focus:ring-blue-500">
+                  <span>URL Gambar Direct (Link)</span>
+                </label>
+                <label class="flex items-center gap-2 text-xs font-semibold text-gray-700 cursor-pointer">
+                  <input type="radio" value="upload" v-model="iklanImageMode" class="text-blue-600 focus:ring-blue-500">
+                  <span>Upload Gambar Manual (File)</span>
+                </label>
+              </div>
+
+              <div v-if="iklanImageMode === 'url'">
+                <input type="text" v-model="iklanForm.image_url" placeholder="Masukkan URL gambar banner (https://...)" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 text-sm">
+              </div>
+
+              <div v-else class="space-y-2">
+                <input type="file" @change="handleIklanFileUpload" accept="image/*" class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+              </div>
+
+              <div v-if="iklanForm.image_url" class="mt-3 p-2.5 bg-gray-50 border border-gray-200 rounded-xl flex items-center gap-3">
+                <img :src="iklanForm.image_url" alt="Preview Banner" class="h-14 w-28 object-cover rounded-lg border border-gray-200 shrink-0">
+                <div class="text-xs text-gray-500 overflow-hidden">
+                  <span class="font-bold block text-gray-700">Preview Banner</span>
+                  <span class="truncate block text-[11px] text-gray-400 max-w-[300px]">{{ iklanForm.image_url }}</span>
+                </div>
+              </div>
             </div>
+
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Redirect Link (Tujuan Klik)</label>
-              <input type="text" v-model="iklanForm.url" placeholder="Contoh: https://royalhotel.com/promo" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 text-sm">
+              <input type="text" v-model="iklanForm.redirect_url" placeholder="Contoh: https://royalhotel.com/promo" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 text-sm">
             </div>
+
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-1">Status Penayangan</label>
-              <select v-model="iklanForm.status" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 text-sm bg-white">
+              <select v-model="iklanForm.status" class="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 text-sm bg-white font-medium">
                 <option value="Aktif">Aktif (Ditayangkan)</option>
                 <option value="Non-Aktif">Non-Aktif (Diarsipkan)</option>
               </select>
@@ -914,10 +1197,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import Swal from 'sweetalert2';
 import vSelect from 'vue-select';
 import 'vue-select/dist/vue-select.css';
+import { QuillEditor } from '@vueup/vue-quill';
+import '@vueup/vue-quill/dist/vue-quill.snow.css';
 
 const loading = ref(false);
 const activeSection = ref('users');
@@ -964,6 +1249,9 @@ const iklanSearchQuery = ref('');
 const userSortKey = ref<'name' | 'email' | 'lokasi' | 'is_verified'>('name');
 const userSortOrder = ref<'asc' | 'desc'>('asc');
 
+const newsSortKey = ref<'title' | 'category' | 'author' | 'views' | 'status' | 'updated_at'>('updated_at');
+const newsSortOrder = ref<'asc' | 'desc'>('desc');
+
 const categorySortKey = ref<'name' | 'slug'>('name');
 const categorySortOrder = ref<'asc' | 'desc'>('asc');
 
@@ -976,6 +1264,7 @@ const iklanSortOrder = ref<'asc' | 'desc'>('asc');
 
 const showUserModal = ref(false);
 const isEditingUser = ref(false);
+const showPassword = ref(false);
 const userForm = ref({
   id: 0,
   name: '',
@@ -983,10 +1272,12 @@ const userForm = ref({
   password: '',
   role: 'member',
   is_verified: 0,
+  phone: '',
   provinsi: '',
   kota_kab: '',
   kecamatan: '',
-  kelurahan: ''
+  kelurahan: '',
+  alamat: ''
 });
 
 
@@ -1009,6 +1300,18 @@ const categoryForm = ref({
   slug: ''
 });
 
+const showNewsEditModal = ref(false);
+const editNewsImageInputRef = ref<HTMLInputElement | null>(null);
+const newsForm = ref({
+  id: 0,
+  title: '',
+  category_id: 0,
+  status: 'published',
+  content: '',
+  images: [] as string[],
+  image_captions: [] as string[]
+});
+
 
 const showWisataModal = ref(false);
 const isEditingWisata = ref(false);
@@ -1022,14 +1325,32 @@ const wisataForm = ref({
 });
 
 
+const slotSpecs: Record<string, { label: string; size: string; desc: string }> = {
+  header_top: { label: 'Header Top Banner', size: '728 × 90 px / 970 × 90 px', desc: 'Tampil paling atas di seluruh halaman utama & header.' },
+  home_top: { label: 'Beranda - Atas Kategori', size: '728 × 90 px / 970 × 90 px', desc: 'Tampil di beranda di atas daftar berita kategori.' },
+  home_middle: { label: 'Beranda - Atas Pasinfo Jelajah', size: '728 × 90 px / 970 × 90 px', desc: 'Tampil di beranda persis di atas section Jelajah.' },
+  home_bottom: { label: 'Beranda - Bawah Pasinfo Jelajah', size: '728 × 90 px / 970 × 90 px', desc: 'Tampil di beranda di paling bawah halaman.' },
+  home_sidebar: { label: 'Beranda - Sidebar Samping', size: '300 × 250 px / 300 × 600 px', desc: 'Tampil di panel kanan (sidebar) beranda.' },
+  berita_inline: { label: 'Detail Berita - Sela Paragraf Konten', size: '728 × 90 px / 728 × 120 px', desc: 'Tampil otomatis di dalam isi artikel setiap 2 paragraf.' },
+  berita_popular_bottom: { label: 'Detail Berita - Bawah Berita Terpopuler', size: '300 × 250 px (Medium Rectangle)', desc: 'Tampil di paling bawah section Berita Terpopuler (sidebar).' },
+  berita_related_top: { label: 'Detail Berita - Atas Berita Terkait', size: '728 × 90 px / 970 × 90 px', desc: 'Tampil di atas slider section Berita Terkait.' },
+  berita_latest_bottom: { label: 'Detail Berita - Bawah Berita Terbaru', size: '728 × 90 px / 970 × 90 px', desc: 'Tampil di bawah section Berita Terbaru di paling bawah artikel.' },
+  wisata_banner: { label: 'Destinasi Wisata - Banner Utama', size: '728 × 90 px / 970 × 90 px', desc: 'Tampil di halaman eksplorasi destinasi wisata.' }
+};
+
+const slotLabels: Record<string, string> = Object.fromEntries(
+  Object.entries(slotSpecs).map(([key, spec]) => [key, `${spec.label} (${spec.size})`])
+);
+
 const showIklanModal = ref(false);
 const isEditingIklan = ref(false);
+const iklanImageMode = ref<'url' | 'upload'>('url');
 const iklanForm = ref({
   id: 0,
   name: '',
-  slot: 'Header',
-  image: '',
-  url: '',
+  slot: 'header_top',
+  image_url: '',
+  redirect_url: '',
   status: 'Aktif'
 });
 
@@ -1189,6 +1510,15 @@ const sortWisata = (key: 'name' | 'category' | 'location' | 'jam' | 'ticket') =>
   }
 };
 
+const sortNews = (key: 'title' | 'category' | 'author' | 'views' | 'status' | 'updated_at') => {
+  if (newsSortKey.value === key) {
+    newsSortOrder.value = newsSortOrder.value === 'asc' ? 'desc' : 'asc';
+  } else {
+    newsSortKey.value = key;
+    newsSortOrder.value = 'asc';
+  }
+};
+
 const sortIklan = (key: 'name' | 'slot' | 'url' | 'status') => {
   if (iklanSortKey.value === key) {
     iklanSortOrder.value = iklanSortOrder.value === 'asc' ? 'desc' : 'asc';
@@ -1270,10 +1600,76 @@ const filteredNews = computed(() => {
     );
   }
   return [...result].sort((a, b) => {
-    const timeA = a.updated_at ? new Date(a.updated_at).getTime() : (a.created_at ? new Date(a.created_at).getTime() : 0);
-    const timeB = b.updated_at ? new Date(b.updated_at).getTime() : (b.created_at ? new Date(b.created_at).getTime() : 0);
-    return timeB - timeA;
+    let valA: any = '';
+    let valB: any = '';
+
+    if (newsSortKey.value === 'title') {
+      valA = (a.judul || '').toLowerCase();
+      valB = (b.judul || '').toLowerCase();
+    } else if (newsSortKey.value === 'category') {
+      valA = (a.kategori || '').toLowerCase();
+      valB = (b.kategori || '').toLowerCase();
+    } else if (newsSortKey.value === 'author') {
+      valA = (a.penulis || '').toLowerCase();
+      valB = (b.penulis || '').toLowerCase();
+    } else if (newsSortKey.value === 'views') {
+      return newsSortOrder.value === 'asc'
+        ? (a.views || 0) - (b.views || 0)
+        : (b.views || 0) - (a.views || 0);
+    } else if (newsSortKey.value === 'status') {
+      valA = (a.status || '').toLowerCase();
+      valB = (b.status || '').toLowerCase();
+    } else if (newsSortKey.value === 'updated_at') {
+      const timeA = a.updated_at ? new Date(a.updated_at).getTime() : (a.created_at ? new Date(a.created_at).getTime() : 0);
+      const timeB = b.updated_at ? new Date(b.updated_at).getTime() : (b.created_at ? new Date(b.created_at).getTime() : 0);
+      return newsSortOrder.value === 'asc' ? timeA - timeB : timeB - timeA;
+    }
+
+    return newsSortOrder.value === 'asc'
+      ? valA.localeCompare(valB)
+      : valB.localeCompare(valA);
   });
+});
+
+const newsPage = ref(1);
+const newsPerPage = ref(20);
+
+const totalNewsPages = computed(() => {
+  return Math.ceil(filteredNews.value.length / newsPerPage.value) || 1;
+});
+
+const newsStartIndex = computed(() => {
+  return (newsPage.value - 1) * newsPerPage.value;
+});
+
+const paginatedNews = computed(() => {
+  const start = newsStartIndex.value;
+  return filteredNews.value.slice(start, start + newsPerPage.value);
+});
+
+const visibleNewsPages = computed(() => {
+  const total = totalNewsPages.value;
+  const current = newsPage.value;
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+  if (current <= 4) {
+    return [1, 2, 3, 4, 5, '...', total];
+  }
+  if (current >= total - 3) {
+    return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
+  }
+  return [1, '...', current - 1, current, current + 1, '...', total];
+});
+
+const goToNewsPage = (p: number | string) => {
+  if (typeof p === 'number' && p >= 1 && p <= totalNewsPages.value) {
+    newsPage.value = p;
+  }
+};
+
+watch(newsSearchQuery, () => {
+  newsPage.value = 1;
 });
 
 const filteredWisata = computed(() => {
@@ -1417,6 +1813,7 @@ const clearUserVillages = () => {
 
 const openUserCreateModal = () => {
   isEditingUser.value = false;
+  showPassword.value = false;
   userForm.value = {
     id: 0,
     name: '',
@@ -1424,10 +1821,12 @@ const openUserCreateModal = () => {
     password: '',
     role: activeUserTab.value,
     is_verified: 0,
+    phone: '',
     provinsi: '',
     kota_kab: '',
     kecamatan: '',
-    kelurahan: ''
+    kelurahan: '',
+    alamat: ''
   };
   
   userSelectedProv.value = null;
@@ -1437,6 +1836,7 @@ const openUserCreateModal = () => {
 
 const openUserEditModal = async (u: any) => {
   isEditingUser.value = true;
+  showPassword.value = false;
   userForm.value = {
     id: u.id,
     name: u.name || '',
@@ -1444,10 +1844,12 @@ const openUserEditModal = async (u: any) => {
     password: '',
     role: u.role || 'member',
     is_verified: u.is_verified || 0,
+    phone: u.phone || '',
     provinsi: u.provinsi || '',
     kota_kab: u.kota_kab || '',
     kecamatan: u.kecamatan || '',
-    kelurahan: u.kelurahan || ''
+    kelurahan: u.kelurahan || '',
+    alamat: u.alamat || ''
   };
 
   userSelectedProv.value = provinces.value.find((p: any) => p.name === u.provinsi) || (u.provinsi ? { name: u.provinsi, code: '' } : null);
@@ -1481,10 +1883,58 @@ const closeUserModal = () => {
   showUserModal.value = false;
 };
 
+const passwordStrength = computed(() => {
+  const pwd = userForm.value.password || '';
+  if (!pwd) return { score: 0, label: '', color: '', barColor: '', percent: '0%' };
+
+  let score = 0;
+  if (pwd.length >= 8) score++;
+  if (/[A-Z]/.test(pwd)) score++;
+  if (/[0-9]/.test(pwd)) score++;
+  if (/[^A-Za-z0-9]/.test(pwd)) score++;
+
+  if (score <= 1) {
+    return { score, label: 'Weak (Lemah)', color: 'text-red-500', barColor: 'bg-red-500', percent: '33%' };
+  } else if (score <= 3) {
+    return { score, label: 'Moderate (Sedang)', color: 'text-amber-500', barColor: 'bg-amber-500', percent: '66%' };
+  } else {
+    return { score, label: 'Strong (Sangat Kuat)', color: 'text-emerald-600', barColor: 'bg-emerald-500', percent: '100%' };
+  }
+});
+
+const validateUserPassword = (pwd: string): { valid: boolean; message: string } => {
+  if (pwd.length < 8) {
+    return { valid: false, message: 'Password minimal 8 karakter!' };
+  }
+  if (!/[A-Z]/.test(pwd)) {
+    return { valid: false, message: 'Password harus mengandung minimal 1 huruf kapital (A-Z)!' };
+  }
+  if (!/[0-9]/.test(pwd)) {
+    return { valid: false, message: 'Password harus mengandung minimal 1 angka (0-9)!' };
+  }
+  if (!/[^A-Za-z0-9]/.test(pwd)) {
+    return { valid: false, message: 'Password harus mengandung minimal 1 simbol / karakter khusus (!@#$%^&*)!' };
+  }
+  return { valid: true, message: '' };
+};
+
 const saveUser = async () => {
   if (!userForm.value.name || !userForm.value.email) {
     Swal.fire('Error', 'Nama dan Email harus diisi!', 'error');
     return;
+  }
+
+  if (!isEditingUser.value && !userForm.value.password) {
+    Swal.fire('Error', 'Password wajib diisi untuk pengguna baru!', 'error');
+    return;
+  }
+
+  if (userForm.value.password) {
+    const pwdCheck = validateUserPassword(userForm.value.password);
+    if (!pwdCheck.valid) {
+      Swal.fire('Password Tidak Memenuhi Syarat', pwdCheck.message, 'warning');
+      return;
+    }
   }
   
   const url = isEditingUser.value 
@@ -1501,11 +1951,13 @@ const saveUser = async () => {
         email: userForm.value.email,
         password: userForm.value.password || undefined,
         role: userForm.value.role,
-        is_verified: userForm.value.is_verified,
+        is_verified: Number(userForm.value.is_verified),
+        phone: userForm.value.phone,
         provinsi: userForm.value.provinsi,
         kota_kab: userForm.value.kota_kab,
         kecamatan: userForm.value.kecamatan,
-        kelurahan: userForm.value.kelurahan
+        kelurahan: userForm.value.kelurahan,
+        alamat: userForm.value.alamat
       })
     });
     
@@ -1655,6 +2107,109 @@ const deleteCategory = async (id: number) => {
 };
 
 
+const openEditNewsModal = (item: any) => {
+  const catObj = categories.value.find((c: any) => (c.name || '').toLowerCase() === (item.kategori || '').toLowerCase());
+  const itemImages = item.images && Array.isArray(item.images) ? [...item.images] : [];
+  const itemCaptions = item.image_captions && Array.isArray(item.image_captions) ? [...item.image_captions] : [];
+  while (itemCaptions.length < itemImages.length) {
+    itemCaptions.push('');
+  }
+
+  newsForm.value = {
+    id: item.id,
+    title: item.judul || '',
+    category_id: catObj ? (catObj.ID || catObj.id) : (item.category_id || 0),
+    status: item.status || 'published',
+    content: item.konten || '',
+    images: itemImages,
+    image_captions: itemCaptions
+  };
+  showNewsEditModal.value = true;
+};
+
+const closeNewsEditModal = () => {
+  showNewsEditModal.value = false;
+};
+
+const triggerNewsImageUpload = () => {
+  if (editNewsImageInputRef.value) {
+    editNewsImageInputRef.value.click();
+  }
+};
+
+const handleEditNewsFileSelect = (e: Event) => {
+  const input = e.target as HTMLInputElement;
+  if (input.files) {
+    processEditNewsFiles(input.files);
+  }
+};
+
+const processEditNewsFiles = async (files: FileList | File[]) => {
+  const allowedMime = ['image/jpeg', 'image/png', 'image/webp'];
+  const maxBytes = 5 * 1024 * 1024;
+
+  for (const file of Array.from(files)) {
+    if (!allowedMime.includes(file.type)) {
+      Swal.fire('Format Tidak Didukung', `Berkas "${file.name}" harus berupa JPG, PNG, atau WEBP.`, 'error');
+      continue;
+    }
+    if (file.size > maxBytes) {
+      Swal.fire('Berkas Terlalu Besar', `Berkas "${file.name}" melebihi ukuran maksimum 5 MB.`, 'error');
+      continue;
+    }
+    try {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          newsForm.value.images.push(e.target.result as string);
+          newsForm.value.image_captions.push('');
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      console.error('Failed to read image file:', err);
+    }
+  }
+};
+
+const removeNewsImage = (index: number) => {
+  newsForm.value.images.splice(index, 1);
+  newsForm.value.image_captions.splice(index, 1);
+};
+
+const saveNewsEdit = async () => {
+  if (!newsForm.value.title || !newsForm.value.content) {
+    Swal.fire('Error', 'Judul dan Konten berita wajib diisi!', 'error');
+    return;
+  }
+
+  try {
+    const res = await fetch(`http://localhost:8080/api/v1/news/${newsForm.value.id}`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify({
+        title: newsForm.value.title,
+        content: newsForm.value.content,
+        category_id: Number(newsForm.value.category_id),
+        status: newsForm.value.status,
+        images: newsForm.value.images,
+        image_captions: newsForm.value.image_captions
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      Swal.fire('Berhasil', 'Artikel berita berhasil diperbarui!', 'success');
+      showNewsEditModal.value = false;
+      fetchNews();
+      fetchStats();
+    } else {
+      Swal.fire('Gagal', data.message || 'Gagal merubah artikel berita', 'error');
+    }
+  } catch (err) {
+    Swal.fire('Error', 'Gagal terhubung ke server', 'error');
+  }
+};
+
 const deleteNewsItem = async (id: number) => {
   Swal.fire({
     title: 'Hapus Artikel Berita?',
@@ -1769,14 +2324,29 @@ const deleteWisata = (id: number) => {
 };
 
 
+const fetchIklan = async () => {
+  try {
+    const res = await fetch('http://localhost:8080/api/v1/ads', {
+      headers: getHeaders()
+    });
+    const data = await res.json();
+    if (data.success) {
+      iklanList.value = data.data || [];
+    }
+  } catch (err) {
+    console.error('Error fetching ads:', err);
+  }
+};
+
 const openIklanCreateModal = () => {
   isEditingIklan.value = false;
+  iklanImageMode.value = 'url';
   iklanForm.value = {
     id: 0,
     name: '',
-    slot: 'Header',
-    image: 'https://images.unsplash.com/photo-1542744094-3a31f103e35f?w=600',
-    url: 'https://pasuruaninfo.com/promo',
+    slot: 'header_top',
+    image_url: 'https://images.unsplash.com/photo-1542744094-3a31f103e35f?w=600',
+    redirect_url: 'https://pasuruaninfo.com/promo',
     status: 'Aktif'
   };
   showIklanModal.value = true;
@@ -1784,13 +2354,15 @@ const openIklanCreateModal = () => {
 
 const openIklanEditModal = (ad: any) => {
   isEditingIklan.value = true;
+  const img = ad.image_url || ad.image || '';
+  iklanImageMode.value = img.startsWith('data:') ? 'upload' : 'url';
   iklanForm.value = {
     id: ad.id,
-    name: ad.name,
-    slot: ad.slot,
-    image: ad.image,
-    url: ad.url,
-    status: ad.status
+    name: ad.title || ad.name || '',
+    slot: ad.slot || 'header_top',
+    image_url: img,
+    redirect_url: ad.redirect_url || ad.url || '',
+    status: ad.status || 'Aktif'
   };
   showIklanModal.value = true;
 };
@@ -1799,52 +2371,101 @@ const closeIklanModal = () => {
   showIklanModal.value = false;
 };
 
-const saveIklanCampaign = () => {
-  if (!iklanForm.value.name || !iklanForm.value.image || !iklanForm.value.url) {
-    Swal.fire('Error', 'Nama, Gambar Banner, dan Redirect Link wajib diisi!', 'error');
+const handleIklanFileUpload = async (e: Event) => {
+  const input = e.target as HTMLInputElement;
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    const allowedMime = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedMime.includes(file.type)) {
+      Swal.fire('Format Tidak Didukung', 'Berkas harus berupa JPG, PNG, atau WEBP.', 'error');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      Swal.fire('Berkas Terlalu Besar', 'Ukuran gambar maksimal 5 MB.', 'error');
+      return;
+    }
+
+    try {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        if (ev.target?.result) {
+          iklanForm.value.image_url = ev.target.result as string;
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      console.error('Failed to read ad image file:', err);
+    }
+  }
+};
+
+const saveIklanCampaign = async () => {
+  if (!iklanForm.value.name || !iklanForm.value.image_url) {
+    Swal.fire('Error', 'Nama Iklan dan Gambar Banner wajib diisi!', 'error');
     return;
   }
 
-  if (isEditingIklan.value) {
-    const idx = iklanList.value.findIndex(ad => ad.id === iklanForm.value.id);
-    if (idx !== -1) {
-      iklanList.value[idx] = { ...iklanForm.value };
-    }
-    Swal.fire('Berhasil', 'Iklan berhasil diperbarui!', 'success');
-  } else {
-    const nextId = iklanList.value.length > 0 ? Math.max(...iklanList.value.map(ad => ad.id)) + 1 : 1;
-    iklanList.value.push({
-      id: nextId,
-      name: iklanForm.value.name,
-      slot: iklanForm.value.slot,
-      image: iklanForm.value.image,
-      url: iklanForm.value.url,
-      status: iklanForm.value.status
-    });
-    Swal.fire('Berhasil', 'Iklan baru berhasil ditambahkan!', 'success');
-  }
+  const payload = {
+    title: iklanForm.value.name,
+    slot: iklanForm.value.slot,
+    image_url: iklanForm.value.image_url,
+    redirect_url: iklanForm.value.redirect_url,
+    status: iklanForm.value.status
+  };
 
-  saveIklanData();
-  fetchStats();
-  showIklanModal.value = false;
+  const url = isEditingIklan.value 
+    ? `http://localhost:8080/api/v1/ads/${iklanForm.value.id}`
+    : 'http://localhost:8080/api/v1/ads';
+  const method = isEditingIklan.value ? 'PUT' : 'POST';
+
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: getHeaders(),
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data.success) {
+      Swal.fire('Berhasil', isEditingIklan.value ? 'Iklan berhasil diperbarui!' : 'Iklan baru berhasil ditambahkan!', 'success');
+      showIklanModal.value = false;
+      fetchIklan();
+      fetchStats();
+    } else {
+      Swal.fire('Gagal', data.message || 'Gagal menyimpan iklan', 'error');
+    }
+  } catch (err) {
+    Swal.fire('Error', 'Gagal terhubung ke server', 'error');
+  }
 };
 
-const deleteIklan = (id: number) => {
+const deleteIklan = async (id: number) => {
   Swal.fire({
     title: 'Hapus Iklan?',
-    text: 'Aksi ini akan menghapus penempatan iklan terpilih.',
+    text: 'Aksi ini akan menghapus penempatan iklan terpilih secara permanen.',
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#d33',
     cancelButtonColor: '#3085d6',
     confirmButtonText: 'Ya, Hapus!',
     cancelButtonText: 'Batal'
-  }).then((result) => {
+  }).then(async (result) => {
     if (result.isConfirmed) {
-      iklanList.value = iklanList.value.filter(ad => ad.id !== id);
-      saveIklanData();
-      fetchStats();
-      Swal.fire('Terhapus', 'Penempatan iklan berhasil dihapus.', 'success');
+      try {
+        const res = await fetch(`http://localhost:8080/api/v1/ads/${id}`, {
+          method: 'DELETE',
+          headers: getHeaders()
+        });
+        const data = await res.json();
+        if (data.success) {
+          Swal.fire('Terhapus', 'Penempatan iklan berhasil dihapus.', 'success');
+          fetchIklan();
+          fetchStats();
+        } else {
+          Swal.fire('Gagal', data.message || 'Gagal menghapus iklan', 'error');
+        }
+      } catch (err) {
+        Swal.fire('Error', 'Gagal memproses penghapusan iklan', 'error');
+      }
     }
   });
 };
@@ -1859,7 +2480,7 @@ onMounted(async () => {
 
 
   loadWisataData();
-  loadIklanData();
+  fetchIklan();
 
   fetchStats();
   fetchUsers();
@@ -1867,3 +2488,13 @@ onMounted(async () => {
   fetchNews();
 });
 </script>
+
+<style scoped>
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+</style>
+

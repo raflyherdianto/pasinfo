@@ -1,0 +1,36 @@
+# Robots.txt for Pasuruan Info (https://pasuruaninfo.com)
+# Configured for standard Search Engines & Generative Engine Optimization (GEO)
+
+User-agent: *
+Allow: /
+Disallow: /dashboard*
+Disallow: /login*
+Disallow: /register*
+
+# AI & Generative Engine Crawlers (Explicitly Allowed for GEO Citations)
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+# Sitemap Location
+Sitemap: https://pasuruaninfo.com/sitemap.xml

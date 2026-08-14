@@ -1,6 +1,40 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
+import { RouterView, useRoute } from 'vue-router'
 import Navbar from './components/Navbar.vue'
+
+const route = useRoute()
+const hideHeaderAd = computed(() => {
+  const path = route.path.toLowerCase()
+  const name = route.name ? route.name.toString().toLowerCase() : ''
+  return (
+    path.includes('/dashboard') ||
+    path.includes('/login') ||
+    path.includes('/register') ||
+    path.includes('/lupa-password') ||
+    name.includes('dashboard') ||
+    name.includes('login') ||
+    name.includes('register') ||
+    name.includes('lupa-password') ||
+    name.includes('not-found')
+  )
+})
+
+const headerAd = ref<any>(null)
+
+const fetchHeaderAd = async () => {
+  try {
+    const res = await fetch('http://localhost:8080/api/v1/ads/slot/header_top')
+    const json = await res.json()
+    if (json.success && json.data && json.data.length > 0) {
+      headerAd.value = json.data[0]
+    }
+  } catch (err) {}
+}
+
+onMounted(() => {
+  fetchHeaderAd()
+})
 </script>
 
 <template>
@@ -8,6 +42,27 @@ import Navbar from './components/Navbar.vue'
     <Navbar />
     
     <main class="flex-grow pt-24 pb-12 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Header Top Banner Slot (header_top) - Sembunyikan di Halaman Dashboard, Login, dan Register -->
+      <div v-if="!hideHeaderAd" class="mb-6 overflow-hidden rounded-xl">
+        <template v-if="headerAd && (headerAd.image_url || headerAd.image)">
+          <a :href="headerAd.redirect_url || headerAd.url || '#'" target="_blank" class="block w-full overflow-hidden rounded-xl border border-gray-100 shadow-sm">
+            <img :src="headerAd.image_url || headerAd.image" :alt="headerAd.title || 'Header Top Banner'" class="w-full max-h-[140px] object-cover sm:object-contain rounded-xl hover:opacity-95 transition-opacity" />
+          </a>
+        </template>
+        <template v-else>
+          <div class="bg-gradient-to-r from-gray-50 via-gray-100 to-gray-50 border border-dashed border-gray-300 rounded-xl p-5 sm:p-6 relative overflow-hidden flex flex-col items-center justify-center min-h-[100px] text-center shadow-sm">
+            <span class="absolute top-2.5 right-3 text-[11px] uppercase tracking-widest text-gray-400 font-bold bg-white/90 px-2.5 py-0.5 rounded border border-gray-200 shadow-2xs">SPONSORED / IKLAN</span>
+            <div class="flex flex-col items-center gap-1.5 z-10 my-auto">
+              <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+              </svg>
+              <span class="text-xs sm:text-sm font-bold text-gray-600 tracking-wider uppercase">Space Ads Available</span>
+              <p class="text-[11px] sm:text-xs text-gray-400 max-w-md">Contact Admin for more information</p>
+            </div>
+          </div>
+        </template>
+      </div>
+
       <RouterView />
     </main>
     <footer class="bg-gray-900 text-gray-300 py-16 mt-auto border-t border-gray-800">
@@ -16,7 +71,7 @@ import Navbar from './components/Navbar.vue'
           
           <div class="md:col-span-4">
             <div class="flex items-center mb-6">
-              <img src="/logo.webp" alt="Pasinfo Logo" class="h-14 w-auto object-contain brightness-0 invert" />
+              <img src="/logo.webp" alt="Pasuruan Info Logo" class="h-14 w-auto object-contain brightness-0 invert" />
             </div>
             <p class="text-sm text-gray-400 leading-relaxed max-w-sm">
               Portal informasi digital yang menyajikan berita terkini dan terpercaya seputar Pasuruan, meliputi peristiwa, cek fakta, ekonomi, pemerintahan, hiburan, kuliner, gaya hidup, pariwisata, serta dinamika lokal yang relevan bagi masyarakat.
