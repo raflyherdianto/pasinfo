@@ -45,10 +45,11 @@
               v-if="!isEmailVerified"
               type="button" 
               @click="handleSendEmailOTP"
-              :disabled="isSendingOTP || !email"
+              :disabled="isSendingOTP || !email || emailCooldown > 0"
               class="flex-shrink-0 px-3.5 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 rounded-md transition-colors shadow-sm focus:outline-none"
             >
               <span v-if="isSendingOTP">Mengirim...</span>
+              <span v-else-if="emailCooldown > 0">Tunggu ({{ emailCooldown }}s)</span>
               <span v-else-if="otpSent">Kirim Ulang</span>
               <span v-else>Verifikasi</span>
             </button>
@@ -348,21 +349,46 @@ const otpSent = ref(false);
 const otpCode = ref('');
 const isSendingOTP = ref(false);
 const isVerifyingOTP = ref(false);
+const emailCooldown = ref(0);
+let cooldownTimer: any = null;
+
+const startCooldown = (seconds = 60) => {
+  emailCooldown.value = seconds;
+  if (cooldownTimer) clearInterval(cooldownTimer);
+  cooldownTimer = setInterval(() => {
+    if (emailCooldown.value > 0) {
+      emailCooldown.value--;
+    } else {
+      clearInterval(cooldownTimer);
+      cooldownTimer = null;
+    }
+  }, 1000);
+};
 
 const onEmailChange = () => {
   isEmailVerified.value = false;
   otpSent.value = false;
   otpCode.value = '';
+  emailCooldown.value = 0;
+  if (cooldownTimer) {
+    clearInterval(cooldownTimer);
+    cooldownTimer = null;
+  }
 };
 
 const handleChangeEmail = () => {
   isEmailVerified.value = false;
   otpSent.value = false;
   otpCode.value = '';
+  emailCooldown.value = 0;
+  if (cooldownTimer) {
+    clearInterval(cooldownTimer);
+    cooldownTimer = null;
+  }
 };
 
 const handleSendEmailOTP = async () => {
-  if (!email.value) return;
+  if (!email.value || emailCooldown.value > 0) return;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email.value)) {
     Swal.fire({
@@ -389,9 +415,11 @@ const handleSendEmailOTP = async () => {
         confirmButtonColor: '#2563eb'
       });
       otpSent.value = true;
+      startCooldown(60);
     }
   } catch (error: any) {
     if (error.response?.data?.active_otp_exists || error.response?.status === 429) {
+      const remainingSecs = error.response?.data?.retry_after_seconds || 60;
       Swal.fire({
         icon: 'info',
         title: 'Mohon Tunggu',
@@ -399,6 +427,7 @@ const handleSendEmailOTP = async () => {
         confirmButtonColor: '#2563eb'
       });
       otpSent.value = true;
+      startCooldown(remainingSecs);
     } else {
       const msg = error.response?.data?.message || 'Gagal mengirim kode OTP. Silakan periksa email Anda.';
       Swal.fire({

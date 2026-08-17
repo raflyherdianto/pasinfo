@@ -452,25 +452,19 @@ func SendRegisterOTP(c *fiber.Ctx) error {
 		})
 	}
 
-	// Check if there is an active OTP that has not expired yet
-	var activeOTP models.VerifyOTP
-	if err := database.DB.Where("email = ? AND is_used = ? AND expires_at > ?", email, false, time.Now()).Order("created_at desc").First(&activeOTP).Error; err == nil {
-		diff := time.Until(activeOTP.ExpiresAt)
-		totalSec := int(diff.Seconds())
-		mins := totalSec / 60
-		secs := totalSec % 60
-		var waitStr string
-		if mins > 0 {
-			waitStr = fmt.Sprintf("%d menit %d detik", mins, secs)
-		} else {
-			waitStr = fmt.Sprintf("%d detik", secs)
+	// Check if there is an active OTP created recently (60s resend cooldown)
+	var lastOTP models.VerifyOTP
+	if err := database.DB.Where("email = ? AND is_used = ? AND created_at > ?", email, false, time.Now().Add(-60*time.Second)).Order("created_at desc").First(&lastOTP).Error; err == nil {
+		diff := time.Until(lastOTP.CreatedAt.Add(60 * time.Second))
+		secs := int(diff.Seconds())
+		if secs > 0 {
+			return c.Status(fiber.StatusTooManyRequests).JSON(fiber.Map{
+				"success":             false,
+				"message":             fmt.Sprintf("Mohon tunggu %d detik lagi sebelum meminta kode OTP baru.", secs),
+				"retry_after_seconds": secs,
+				"active_otp_exists":   true,
+			})
 		}
-		return c.Status(fiber.StatusTooManyRequests).JSON(fiber.Map{
-			"success":             false,
-			"message":             fmt.Sprintf("Kode OTP sebelumnya masih aktif. Mohon tunggu %s lagi sebelum meminta kode OTP baru.", waitStr),
-			"retry_after_seconds": totalSec,
-			"active_otp_exists":   true,
-		})
 	}
 
 	// Generate 6-digit numeric OTP
@@ -507,9 +501,9 @@ func SendRegisterOTP(c *fiber.Ctx) error {
 
 	// Send OTP email asynchronously
 	go func(toEmail, name, otpCode string) {
-		log.Printf("\n========================================================================\n[EMAIL REGISTER OTP]\nTarget: %s\nOTP Code: %s\n========================================================================", toEmail, otpCode)
+		log.Printf("\n========================================================================\n[EMAIL REGISTER OTP]\nTarget: %s\nOTP Code: %s\nTime: %s\n========================================================================", toEmail, otpCode, time.Now().Format(time.RFC3339))
 		if err := utils.SendRegisterOTPEmail(toEmail, name, otpCode); err != nil {
-			log.Printf("[Email Error] Failed to send registration OTP to %s: %v", toEmail, err)
+			log.Printf("[Email Error] Failed to deliver registration OTP to %s: %v", toEmail, err)
 		} else {
 			log.Printf("[Email Success] Registration OTP successfully delivered to %s", toEmail)
 		}
@@ -548,25 +542,19 @@ func ForgotPassword(c *fiber.Ctx) error {
 		})
 	}
 
-	// Check if there is an active OTP that has not expired yet
-	var activeOTP models.VerifyOTP
-	if err := database.DB.Where("email = ? AND is_used = ? AND expires_at > ?", email, false, time.Now()).Order("created_at desc").First(&activeOTP).Error; err == nil {
-		diff := time.Until(activeOTP.ExpiresAt)
-		totalSec := int(diff.Seconds())
-		mins := totalSec / 60
-		secs := totalSec % 60
-		var waitStr string
-		if mins > 0 {
-			waitStr = fmt.Sprintf("%d menit %d detik", mins, secs)
-		} else {
-			waitStr = fmt.Sprintf("%d detik", secs)
+	// Check if there is an active OTP created recently (60s resend cooldown)
+	var lastOTP models.VerifyOTP
+	if err := database.DB.Where("email = ? AND is_used = ? AND created_at > ?", email, false, time.Now().Add(-60*time.Second)).Order("created_at desc").First(&lastOTP).Error; err == nil {
+		diff := time.Until(lastOTP.CreatedAt.Add(60 * time.Second))
+		secs := int(diff.Seconds())
+		if secs > 0 {
+			return c.Status(fiber.StatusTooManyRequests).JSON(fiber.Map{
+				"success":             false,
+				"message":             fmt.Sprintf("Mohon tunggu %d detik lagi sebelum meminta kode OTP baru.", secs),
+				"retry_after_seconds": secs,
+				"active_otp_exists":   true,
+			})
 		}
-		return c.Status(fiber.StatusTooManyRequests).JSON(fiber.Map{
-			"success":             false,
-			"message":             fmt.Sprintf("Kode OTP sebelumnya masih aktif. Mohon tunggu %s lagi sebelum meminta kode OTP baru.", waitStr),
-			"retry_after_seconds": totalSec,
-			"active_otp_exists":   true,
-		})
 	}
 
 	// Generate 6-digit numeric OTP
@@ -598,7 +586,7 @@ func ForgotPassword(c *fiber.Ctx) error {
 
 	// Send OTP email asynchronously
 	go func(toEmail, userName, otpCode string) {
-		log.Printf("\n========================================================================\n[EMAIL PASSWORD RESET OTP]\nTarget: %s\nOTP Code: %s\n========================================================================", toEmail, otpCode)
+		log.Printf("\n========================================================================\n[EMAIL PASSWORD RESET OTP]\nTarget: %s\nOTP Code: %s\nTime: %s\n========================================================================", toEmail, otpCode, time.Now().Format(time.RFC3339))
 		if err := utils.SendOTPEmail(toEmail, userName, otpCode); err != nil {
 			log.Printf("[Email Error] Failed to send OTP to %s: %v", toEmail, err)
 		} else {

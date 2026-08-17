@@ -39,19 +39,22 @@ func getSMTPConfig() (host, port, user, password, fromName, fromEmail string) {
 	if port == "" {
 		port = "465"
 	}
-	user = os.Getenv("SMTP_USER")
+	user = strings.TrimSpace(os.Getenv("SMTP_USER"))
 	if user == "" {
-		user = os.Getenv("GMAIL_MAIL")
+		user = strings.TrimSpace(os.Getenv("GMAIL_MAIL"))
 	}
-	password = os.Getenv("SMTP_PASSWORD")
+	password = strings.TrimSpace(os.Getenv("SMTP_PASSWORD"))
 	if password == "" {
-		password = os.Getenv("GMAIL_APP_PASSWORD")
+		password = strings.TrimSpace(os.Getenv("GMAIL_APP_PASSWORD"))
 	}
+	// Automatically strip spaces in Google App Password (e.g. "abcd efgh ijkl mnop")
+	password = strings.ReplaceAll(password, " ", "")
+
 	fromName = os.Getenv("SMTP_FROM_NAME")
 	if fromName == "" {
 		fromName = "Pasuruan Info"
 	}
-	fromEmail = os.Getenv("SMTP_FROM_EMAIL")
+	fromEmail = strings.TrimSpace(os.Getenv("SMTP_FROM_EMAIL"))
 	if fromEmail == "" {
 		fromEmail = user
 	}
@@ -63,7 +66,7 @@ func SendHTMLEmail(to string, subject string, htmlBody string) error {
 	smtpHost, _, from, password, fromName, fromEmail := getSMTPConfig()
 
 	if from == "" || password == "" {
-		return fmt.Errorf("SMTP credentials not configured in environment")
+		return fmt.Errorf("SMTP credentials not configured in environment (SMTP_USER/SMTP_PASSWORD missing)")
 	}
 
 	boundary := fmt.Sprintf("----=_PasinfoPart_%d", time.Now().UnixNano())
@@ -109,12 +112,12 @@ func SendHTMLEmail(to string, subject string, htmlBody string) error {
 	rawMessage := message.String()
 	auth := smtp.PlainAuth("", from, password, smtpHost)
 
-	// Attempt 1: Port 465 with Direct SSL/TLS
+	// Attempt 1: Port 465 with Direct SSL/TLS (12s timeout)
 	tlsConfig := &tls.Config{
 		ServerName: smtpHost,
 	}
 	dialer := &net.Dialer{
-		Timeout: 5 * time.Second,
+		Timeout: 12 * time.Second,
 	}
 
 	conn465, err465 := tls.DialWithDialer(dialer, "tcp", smtpHost+":465", tlsConfig)
@@ -138,8 +141,8 @@ func SendHTMLEmail(to string, subject string, htmlBody string) error {
 		}
 	}
 
-	// Attempt 2: Port 587 with STARTTLS
-	conn587, err587 := net.DialTimeout("tcp", smtpHost+":587", 5*time.Second)
+	// Attempt 2: Port 587 with STARTTLS (12s timeout)
+	conn587, err587 := net.DialTimeout("tcp", smtpHost+":587", 12*time.Second)
 	if err587 == nil {
 		defer conn587.Close()
 		client, err := smtp.NewClient(conn587, smtpHost)
