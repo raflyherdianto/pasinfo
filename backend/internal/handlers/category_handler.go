@@ -72,8 +72,19 @@ func DeleteCategory(c *fiber.Ctx) error {
 	if err := database.DB.First(&cat, id).Error; err != nil {
 		return c.Status(404).JSON(fiber.Map{"success": false, "message": "Category not found"})
 	}
-	if err := database.DB.Delete(&cat).Error; err != nil {
-		return c.Status(500).JSON(fiber.Map{"success": false, "message": "Failed to delete category"})
+
+	// Cascade delete all news in this category and their associated data
+	var newsList []models.News
+	database.DB.Where("category_id = ?", cat.ID).Find(&newsList)
+	for _, n := range newsList {
+		database.DB.Where("news_id = ?", n.ID).Delete(&models.NewsImage{})
+		database.DB.Where("news_id = ?", n.ID).Delete(&models.History{})
+		database.DB.Where("news_id = ?", n.ID).Delete(&models.Notification{})
+		database.DB.Delete(&n)
 	}
-	return c.JSON(fiber.Map{"success": true, "message": "Category deleted successfully"})
+
+	if err := database.DB.Delete(&cat).Error; err != nil {
+		return c.Status(500).JSON(fiber.Map{"success": false, "message": "Failed to delete category: " + err.Error()})
+	}
+	return c.JSON(fiber.Map{"success": true, "message": "Category and all related news deleted successfully"})
 }

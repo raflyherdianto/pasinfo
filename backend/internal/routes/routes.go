@@ -96,6 +96,10 @@ func SetupRoutes(app *fiber.App) {
 		middleware.Protected(),
 		middleware.RoleMiddleware("penulis", "editor", "admin"),
 		handlers.UpdateNews)
+	api.Delete("/news/all",
+		middleware.Protected(),
+		middleware.RoleMiddleware("admin"),
+		handlers.DeleteAllNews)
 	api.Delete("/news/:id",
 		middleware.Protected(),
 		middleware.RoleMiddleware("admin"),

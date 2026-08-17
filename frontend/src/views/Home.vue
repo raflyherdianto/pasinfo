@@ -1,7 +1,33 @@
 <template>
   <div>
     
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+      <!-- Loading State -->
+      <div v-if="loadingNews" class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12 animate-pulse">
+        <div class="lg:col-span-2 h-80 sm:h-96 md:h-[450px] bg-gray-200 rounded-2xl"></div>
+        <div class="space-y-4 bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+          <div class="h-6 w-1/3 bg-gray-200 rounded mb-4"></div>
+          <div v-for="i in 3" :key="i" class="flex gap-4">
+            <div class="w-24 h-24 bg-gray-200 rounded-lg shrink-0"></div>
+            <div class="flex-1 space-y-2 py-2">
+              <div class="h-4 bg-gray-200 rounded"></div>
+              <div class="h-4 bg-gray-200 rounded w-4/5"></div>
+              <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State for Main Section -->
+      <div v-else-if="featuredNews.length === 0" class="bg-white rounded-3xl border border-gray-100 shadow-sm p-10 sm:p-16 text-center my-6 max-w-2xl mx-auto flex flex-col items-center justify-center">
+        <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-4">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2.5 2.5 0 00-2.5-2.5H15M9 11l3 3m0 0l3-3m-3 3V8"></path></svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-800 mb-2">Belum Ada Berita</h3>
+        <p class="text-gray-500 text-sm sm:text-base">Berita akan muncul segera. Mohon tunggu update terbaru.</p>
+      </div>
+
+      <!-- Main News Content (6 Berita Utama & Berita Terbaru) -->
+      <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
         
         <div class="lg:col-span-2">
           
@@ -22,7 +48,7 @@
                 @click="navigateToBerita(news.id, news.judul)"
               >
                 <img 
-                  :src="(news.images && news.images.length > 0) ? news.images[0] : '/images/themes/photo.jpg'"
+                  :src="(news.images && news.images.length > 0) ? news.images[0] : '/images/themes/photo.jpg'" 
                   :alt="news.judul" 
                   class="w-full h-full object-cover"
                 />
@@ -86,7 +112,7 @@
               @click="navigateToBerita(news.id, news.judul)"
             >
               <img 
-                :src="(news.images && news.images.length > 0) ? news.images[0] : '/images/themes/photo.jpg'"
+                :src="(news.images && news.images.length > 0) ? news.images[0] : '/images/themes/photo.jpg'" 
                 :alt="news.judul" 
                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
@@ -126,7 +152,7 @@
               @click="navigateToBerita(latestNews[0].id, latestNews[0].judul)"
             >
               <img 
-                :src="(latestNews[0].images && latestNews[0].images.length > 0) ? latestNews[0].images[0] : '/images/themes/photo.jpg'"
+                :src="(latestNews[0].images && latestNews[0].images.length > 0) ? latestNews[0].images[0] : '/images/themes/photo.jpg'" 
                 :alt="latestNews[0].judul" 
                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
@@ -163,8 +189,8 @@
                     {{ berita.kategori }}
                   </span>
                   <img 
-                    :src="(berita.images && berita.images.length > 0) ? berita.images[0] : '/images/themes/photo.jpg'"
-                    :alt="berita.judul"
+                    :src="(berita.images && berita.images.length > 0) ? berita.images[0] : '/images/themes/photo.jpg'" 
+                    :alt="berita.judul" 
                     class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                   />
                 </div>
@@ -247,7 +273,7 @@
               <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
             </div>
             
-            <div class="space-y-4">
+            <div v-if="categoryList.length > 0" class="space-y-4">
               <div 
                 v-for="news in categoryList" 
                 :key="news.id"
@@ -270,6 +296,10 @@
                   </div>
                 </div>
               </div>
+            </div>
+
+            <div v-else class="bg-gray-50/80 rounded-xl p-5 text-center border border-dashed border-gray-200">
+              <p class="text-xs text-gray-500 font-medium">Berita akan muncul segera. Mohon tunggu update terbaru.</p>
             </div>
           </div>
         </template>
@@ -368,6 +398,7 @@ const formatDateOnly = (waktuStr?: string): string => {
 
 const featuredNews = ref<any[]>([])
 const latestNews = ref<any[]>([])
+const loadingNews = ref(true)
 
 const currentSlide = ref(0)
 let sliderInterval: any = null
@@ -433,6 +464,7 @@ const fetchHomeAds = async () => {
 
 onMounted(async () => {
   fetchHomeAds()
+  loadingNews.value = true
   try {
     const response = await fetch('http://localhost:8080/api/v1/news')
     const result = await response.json()
@@ -440,14 +472,16 @@ onMounted(async () => {
       featuredNews.value = result.data.slice(0, 6)
       latestNews.value = result.data.slice(6, 12)
 
-      categoryNews.value.lokal    = result.data.filter((n: any) => n.kategori.toLowerCase() === 'lokal').slice(0, 4)
-      categoryNews.value.nasional = result.data.filter((n: any) => n.kategori.toLowerCase() === 'nasional').slice(0, 4)
-      categoryNews.value.politik  = result.data.filter((n: any) => n.kategori.toLowerCase() === 'politik').slice(0, 4)
+      categoryNews.value.lokal    = result.data.filter((n: any) => n.kategori && n.kategori.toLowerCase() === 'lokal').slice(0, 4)
+      categoryNews.value.nasional = result.data.filter((n: any) => n.kategori && n.kategori.toLowerCase() === 'nasional').slice(0, 4)
+      categoryNews.value.politik  = result.data.filter((n: any) => n.kategori && n.kategori.toLowerCase() === 'politik').slice(0, 4)
 
       startAutoSlider()
     }
   } catch (err) {
     console.error('Failed to fetch news:', err)
+  } finally {
+    loadingNews.value = false
   }
 })
 

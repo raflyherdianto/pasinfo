@@ -499,11 +499,13 @@ func DeleteNews(c *fiber.Ctx) error {
 		}
 	}
 	
-	// Delete associated images first
+	// Delete associated records first (cascade)
 	database.DB.Where("news_id = ?", news.ID).Delete(&models.NewsImage{})
+	database.DB.Where("news_id = ?", news.ID).Delete(&models.History{})
+	database.DB.Where("news_id = ?", news.ID).Delete(&models.Notification{})
 	
 	if err := database.DB.Delete(&news).Error; err != nil {
-		return c.Status(500).JSON(fiber.Map{"success": false, "message": "Failed to delete news"})
+		return c.Status(500).JSON(fiber.Map{"success": false, "message": "Failed to delete news: " + err.Error()})
 	}
 
 	// If deleted by admin and author has email, send deletion notice
@@ -519,6 +521,27 @@ func DeleteNews(c *fiber.Ctx) error {
 	}
 	
 	return c.JSON(fiber.Map{"success": true, "message": "News deleted successfully"})
+}
+
+func DeleteAllNews(c *fiber.Ctx) error {
+	// Cascade delete all dependent tables
+	if err := database.DB.Exec("DELETE FROM news_images").Error; err != nil {
+		return c.Status(500).JSON(fiber.Map{"success": false, "message": "Failed to delete news images: " + err.Error()})
+	}
+	if err := database.DB.Exec("DELETE FROM histories WHERE news_id IS NOT NULL").Error; err != nil {
+		return c.Status(500).JSON(fiber.Map{"success": false, "message": "Failed to delete histories: " + err.Error()})
+	}
+	if err := database.DB.Exec("DELETE FROM notifications WHERE news_id IS NOT NULL").Error; err != nil {
+		return c.Status(500).JSON(fiber.Map{"success": false, "message": "Failed to delete notifications: " + err.Error()})
+	}
+	if err := database.DB.Exec("DELETE FROM news").Error; err != nil {
+		return c.Status(500).JSON(fiber.Map{"success": false, "message": "Failed to delete all news: " + err.Error()})
+	}
+
+	return c.JSON(fiber.Map{
+		"success": true,
+		"message": "Semua artikel berita berhasil dihapus.",
+	})
 }
 
 type UpdateNewsRequest struct {

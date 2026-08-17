@@ -32,7 +32,7 @@
         <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2.5 2.5 0 00-2.5-2.5H15M9 11l3 3m0 0l3-3m-3 3V8"></path></svg>
       </div>
       <h3 class="text-xl font-bold text-gray-800 mb-2">Belum Ada Berita</h3>
-      <p class="text-gray-500 max-w-md mb-8">Berita untuk kategori "{{ kategoriTitle }}" saat ini belum tersedia. Silakan telusuri berita-berita menarik di kategori lainnya!</p>
+      <p class="text-gray-500 max-w-md mb-8">Berita akan muncul segera. Mohon tunggu update terbaru.</p>
       <button @click="router.push('/')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition duration-300 shadow-md">
         Kembali ke Beranda
       </button>

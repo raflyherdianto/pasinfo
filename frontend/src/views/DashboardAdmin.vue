@@ -313,7 +313,7 @@
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-50">
-              <tr v-for="cat in filteredCategories" :key="cat.ID" class="hover:bg-gray-50/50 transition-colors">
+              <tr v-for="cat in filteredCategories" :key="cat.id || cat.ID" class="hover:bg-gray-50/50 transition-colors">
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 truncate max-w-[200px]" :title="cat.name">{{ cat.name }}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ cat.slug }}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-semibold space-x-1">
@@ -323,7 +323,7 @@
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                     </svg>
                   </button>
-                  <button @click="deleteCategory(cat.ID)" class="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg inline-flex items-center transition" title="Hapus Kategori">
+                  <button @click="deleteCategory(cat.id || cat.ID)" class="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg inline-flex items-center transition" title="Hapus Kategori">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                     </svg>
@@ -343,6 +343,17 @@
         <div class="border-b border-gray-100 bg-gray-50/50 px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
           <h4 class="font-bold text-gray-800 text-base">Seluruh Berita / Artikel</h4>
           <div class="flex items-center gap-2 w-full sm:w-auto">
+            <button 
+              v-if="newsList.length > 0"
+              @click="deleteAllNews" 
+              class="px-3.5 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 hover:border-red-300 rounded-xl text-sm font-semibold transition flex items-center space-x-1.5 shrink-0 shadow-sm"
+              title="Hapus Semua Berita"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+              </svg>
+              <span>Delete All</span>
+            </button>
             <div class="relative w-full sm:w-64">
               
               <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
@@ -2077,9 +2088,13 @@ const saveCategory = async () => {
 };
 
 const deleteCategory = async (id: number) => {
+  if (!id) {
+    Swal.fire('Error', 'ID Kategori tidak valid', 'error');
+    return;
+  }
   Swal.fire({
     title: 'Hapus Kategori?',
-    text: 'Aksi ini akan menghapus kategori yang dipilih.',
+    text: 'PERINGATAN: Menghapus kategori ini juga akan menghapus seluruh artikel berita yang terkait!',
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#d33',
@@ -2095,17 +2110,19 @@ const deleteCategory = async (id: number) => {
         });
         const data = await res.json();
         if (data.success) {
-          Swal.fire('Terhapus', 'Kategori berhasil dihapus.', 'success');
+          Swal.fire('Terhapus', 'Kategori dan seluruh berita terkait berhasil dihapus.', 'success');
           fetchCategories();
+          fetchNews();
           fetchStats();
         } else {
           Swal.fire('Gagal', data.message || 'Gagal menghapus kategori', 'error');
         }
-      } catch (err) {}
+      } catch (err) {
+        Swal.fire('Error', 'Gagal memproses penghapusan kategori', 'error');
+      }
     }
   });
 };
-
 
 const openEditNewsModal = (item: any) => {
   const catObj = categories.value.find((c: any) => (c.name || '').toLowerCase() === (item.kategori || '').toLowerCase());
@@ -2211,6 +2228,10 @@ const saveNewsEdit = async () => {
 };
 
 const deleteNewsItem = async (id: number) => {
+  if (!id) {
+    Swal.fire('Error', 'ID Berita tidak valid', 'error');
+    return;
+  }
   Swal.fire({
     title: 'Hapus Artikel Berita?',
     text: 'Aksi ini akan menghapus artikel berita secara permanen.',
@@ -2237,6 +2258,38 @@ const deleteNewsItem = async (id: number) => {
         }
       } catch (err) {
         Swal.fire('Error', 'Gagal memproses penghapusan', 'error');
+      }
+    }
+  });
+};
+
+const deleteAllNews = async () => {
+  Swal.fire({
+    title: 'Hapus Semua Berita?',
+    text: 'PERINGATAN: Seluruh artikel berita akan dihapus secara permanen dari sistem!',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Ya, Hapus Semua!',
+    cancelButtonText: 'Batal'
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        const res = await fetch(`http://localhost:8080/api/v1/news/all`, {
+          method: 'DELETE',
+          headers: getHeaders()
+        });
+        const data = await res.json();
+        if (data.success) {
+          Swal.fire('Terhapus', 'Semua artikel berita berhasil dihapus.', 'success');
+          fetchNews();
+          fetchStats();
+        } else {
+          Swal.fire('Gagal', data.message || 'Gagal menghapus seluruh berita', 'error');
+        }
+      } catch (err) {
+        Swal.fire('Error', 'Gagal memproses penghapusan seluruh berita', 'error');
       }
     }
   });
