@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { RouterView, useRoute } from 'vue-router'
 import Navbar from './components/Navbar.vue'
+import ChatbotWidget from './components/ChatbotWidget.vue'
 
 const route = useRoute()
 const hideHeaderAd = computed(() => {
@@ -40,8 +41,9 @@ onMounted(() => {
 <template>
   <div class="min-h-screen flex flex-col bg-gray-50 font-sans text-gray-900 selection:bg-blue-200">
     <Navbar />
-    
-    <main class="flex-grow pt-24 pb-12 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <ChatbotWidget />
+
+    <main :class="route.meta.legacy ? 'flex-grow pt-24 pb-0 w-full' : 'flex-grow pt-24 pb-12 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'">
       <!-- Header Top Banner Slot (header_top) - Sembunyikan di Halaman Dashboard, Login, dan Register -->
       <div v-if="!hideHeaderAd" class="mb-6 overflow-hidden rounded-xl">
         <template v-if="headerAd && (headerAd.image_url || headerAd.image)">

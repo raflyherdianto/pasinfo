@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Tirai transisi halaman: CSS dipusatkan di src/input.css,
+         logika di public/js/page-enter.js (HTML bersih - Owner). -->
+    <script src="../../public/js/page-enter.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pasuruan Info - Eksplorasi Wisata Pasuruan Raya</title>
+    <link rel="icon" href="data:," />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+     <link rel="stylesheet" href="../../public/css/styles.css" />
+     <link rel="stylesheet" href="../../public/vendor/leaflet/leaflet.css" />
+     <!-- Preload foto slide-1 hero wisata agar transisi home→wisata tidak
+          menampilkan "blank hitam" (dimulai lebih awal oleh browser). -->
+     <link
+       rel="preload"
+       as="image"
+       href="../../public/assets/images/wisata/optimized/bromo_banner.webp"
+       fetchpriority="high"
+     />
+    <!-- Latar section Rekomendasi: pakai versi WebP teroptimasi (fallback CSS;
+         JS tetap meng-override dinamis per kartu). Menggantikan gambar PNG
+         3,4 MB di styles.css (stale, tidak di-build ulang - design.md §66.5). -->
+        <link rel="stylesheet" href="../../public/css/wisata.css" />
+  </head>
+  <body
+    class="bg-white text-gray-800 font-sans"
+    data-page-active="wisata"
+    data-asset-prefix="../../public"
+    data-wisata-href="wisata.html"
+    data-header-overlay="dark"
+    data-hero-label="Galeri Wisata Pasuruan Raya"
+    data-hero-bg-label="Latar hero wisata"
+    data-hero-badge-class="bg-[#ef4444]"
+    data-hero-badge="Wisata"
+    data-hero-location="Pasuruan Raya"
+    data-hero-title-class="text-3xl sm:text-4xl md:text-6xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-extrabold text-white tracking-tight leading-[1.12] drop-shadow-md"
+    data-hero-title="Eksplorasi Wisata&lt;br /&gt; Pasuruan Raya"
+    data-hero-desc="Temukan keindahan alam, budaya, dan kuliner khas Pasuruan. Dari pegunungan Bromo hingga pantai berpasir putih — semua informasi wisata terpercaya ada di sini."
+    data-hero-cards-label="Thumbnail antrean destinasi"
+    data-home-href="../../index.html"
+  >
+    <!-- HEADER / NAVBAR -->
+    <div data-layout-header></div>
+
+    <main>
+      <!-- HERO SECTION -->
+      <div data-listing-hero></div>
+      <script src="../../public/js/pages/listing-hero.js"></script>
+      <!-- Latar hero awal (slide 1) di-set sinkron saat parse supaya area hero
+           tidak menampilkan hitam polos sebelum wisata-hero.js jalan
+           (perbaikan transisi home→wisata: tanpa "blank hitam" + lag).
+           Inline style ini ditimpa kembali oleh setActiveBg() saat init. -->
+            <script src="../../public/js/pages/wisata-inline-2.js"></script>
+      <!-- MAP & DESTINATION HIGHLIGHT SECTION -->
+      <section
+        id="map-section"
+        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10"
+      >
+        <div class="mb-6">
+          <h2 class="text-4xl font-bold text-gray-900">
+            Temukan Destinasi Wisata Pasuruan
+          </h2>
+          <p class="text-sm text-gray-500 mt-1">
+            Temukan berbagai destinasi wisata menarik di Kabupaten dan Kota
+            Pasuruan melalui peta interaktif. Jelajahi persebaran wisata
+            berdasarkan wilayah dan temukan informasi lokasi, jam operasional,
+            serta harga tiket. Pilih penanda pada peta untuk melihat detail
+            destinasi dan merencanakan perjalanan Anda.
+          </p>
+        </div>
+
+        <!-- Tablet: layout diatur #map-detail-grid (style scoped di head).
+              Desktop: 2/3 peta + 1/3 detail (lg). Mobile: menumpuk (1 kolom). -->
+        <div id="map-detail-grid" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Map Area -->
+          <div
+            class="lg:col-span-2 flex flex-col bg-white border-2 p-5 rounded-xl h-full"
+          >
+            <span class="font-bold text-gray-700 text-2xl"
+              >Peta Destinasi Wisata</span
+            >
+            <p class="text-sm text-gray-500 mt-1 mb-3">
+              Warna = wilayah berdasarkan batas kecamatan resmi. Klik poligon
+              untuk memilih wilayah, klik lagi untuk kembali.
+            </p>
+            <!-- Peta interaktif Leaflet -->
+            <div
+              id="wisata-map"
+              class="relative z-0 w-full rounded-xl overflow-hidden bg-white ring-1 ring-gray-200"
+              style="min-height: 440px; height: 100%; flex-grow: 1;"
+              role="application"
+              aria-label="Peta interaktif destinasi wisata (data placeholder)"
+            ></div>
+          </div>
+
+          <!-- Panel detail destinasi (dirender via JS dari data) — TASK 4: Equal Height Container -->
+          <div id="dest-detail" class="flex flex-col h-full" aria-live="polite">
+            <div class="bg-white rounded-xl shadow-sm border-2 p-4 flex flex-col h-full">
+              <span class="font-bold text-gray-800 text-2xl block mb-3">Destinasi</span>
+              <p class="text-sm text-gray-500 text-center flex items-center justify-center flex-1">
+                Pilih penanda pada peta atau kartu destinasi untuk melihat detail.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div
+          class="mt-8 bg-gray-100 rounded-xl p-8 text-center border border-gray-200"
+        >
+          <span class="text-2xl font-bold text-gray-700 tracking-wide"
+            >Space Iklan</span
+          >
+        </div>
+      </section>
+
+      <!-- DAFTAR DESTINASI WISATA SECTION -->
+      <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 scroll-mt-24">
+        <div class="mb-4">
+          <h2 class="text-4xl font-bold text-gray-900">
+            Daftar Destinasi Wisata
+          </h2>
+          <p class="text-sm text-gray-500 mt-1">
+            Jelajahi beragam destinasi wisata terbaik di Pasuruan, mulai dari
+            keindahan alam hingga wisata sejarah dan budaya. Temukan informasi
+            lokasi, jam operasional, harga tiket, serta ulasan pengunjung untuk
+            setiap destinasi. Gunakan kategori wisata untuk menemukan tempat
+            yang sesuai dengan minat dan rencana perjalanan Anda.
+          </p>
+        </div>
+
+        <!-- Categories / Filter Tabs -- Owner 2026-10-17: satu baris +
+              scroll horizontal di mobile (overflow-x-auto) agar semua kategori
+              tetap terjangkau, tidak lagi wrap menumpuk tinggi. -->
+        <div
+          class="flex flex-nowrap gap-2 pb-4 mb-2 overflow-x-auto no-scrollbar"
+          role="group"
+          aria-label="Filter kategori destinasi"
+        >
+          <button
+            type="button"
+            data-filter-btn
+            data-filter="Semua"
+            aria-pressed="true"
+            class="bg-red-600 text-white shrink-0 px-4 py-1.5 rounded-md text-xs font-medium whitespace-nowrap"
+          >
+            Semua
+          </button>
+          <button
+            type="button"
+            data-filter-btn
+            data-filter="Wisata Alam"
+            aria-pressed="false"
+            class="bg-red-100 text-red-700 shrink-0 px-4 py-1.5 rounded-md text-xs font-medium whitespace-nowrap"
+          >
+            Wisata Alam
+          </button>
+          <button
+            type="button"
+            data-filter-btn
+            data-filter="Keluarga"
+            aria-pressed="false"
+            class="bg-red-100 text-red-700 shrink-0 px-4 py-1.5 rounded-md text-xs font-medium whitespace-nowrap"
+          >
+            Keluarga
+          </button>
+          <button
+            type="button"
+            data-filter-btn
+            data-filter="Sejarah & Budaya"
+            aria-pressed="false"
+            class="bg-red-100 text-red-700 shrink-0 px-4 py-1.5 rounded-md text-xs font-medium whitespace-nowrap"
+          >
+            Sejarah & Budaya
+          </button>
+          <button
+            type="button"
+            data-filter-btn
+            data-filter="Wisata Religi"
+            aria-pressed="false"
+            class="bg-red-100 text-red-700 shrink-0 px-4 py-1.5 rounded-md text-xs font-medium whitespace-nowrap"
+          >
+            Wisata Religi
+          </button>
+        </div>
+
+        <!-- Destination Grid -->
+        <div
+          id="dest-grid"
+          class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+        >
+          <!-- Kartu destinasi dirender via JS (mock data) -->
+        </div>
+        <p id="dest-empty" class="hidden text-sm text-gray-500">
+          Tidak ada destinasi pada kategori ini.
+        </p>
+        <nav
+          id="dest-pager"
+          class="mt-6 flex items-center justify-center gap-1.5"
+          aria-label="Pagination destinasi"
+        ></nav>
+
+      </section>
+
+      <!-- Horizontal Ad Banner -->
+      <section
+        class="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-6 lg:px-8"
+        aria-label="Space iklan"
+      >
+        <div class="rounded-xl border border-gray-200 bg-gray-100 px-4 py-5 text-center sm:px-6">
+          <span class="text-lg font-bold tracking-wide text-gray-700 sm:text-xl">
+            Space Iklan
+          </span>
+        </div>
+      </section>
+
+      <!-- TESTIMONIAL / RECOMMENDATION CAROUSEL SECTION -->
+      <section class="reco-section-bg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <!-- Section Title -->
+          <div class="reco-heading text-center max-w-xl mx-auto mb-10">
+            <h2 class="text-4xl sm:text-4xl font-bold text-white">
+              Rekomendasi Wisata di Pasuruan
+            </h2>
+            <p
+              class="text-[11px] sm:text-xs text-gray-200 mt-2 leading-relaxed"
+            >
+              Temukan destinasi wisata alam tersembunyi hingga tempat liburan
+              keluarga terbaik di Pasuruan. Rencanakan petualangan serumu dan
+              buat momen tak terlupakan bersama orang tersayang. Dapatkan
+              rekomendasi lokasi populer beserta ulasan lengkap dari para
+              wisatawan di sini!
+            </p>
+          </div>
+
+          <!-- Slider Container -->
+          <div class="coverflow-container">
+            <!-- Left Arrow Button -->
+
+            <!-- Cards Slider Track -->
+            <div id="reco-row" class="coverflow-track no-scrollbar">
+              <!-- LAYER 3 (LUAR) KIRI -->
+              <div class="coverflow-card ref-card-outer-side">
+                <div
+                  class="reco-card"
+                  data-slug="taman-safari-prigen"
+                  data-name="Taman Safari Indonesia II Prigen"
+                  data-img="../../public/assets/images/wisata/optimized/taman_safari_indonesia_2.webp"
+                >
+                  <div
+                    class="reco-card__img"
+                    style="
+                      background-image: url(&quot;../../public/assets/images/wisata/optimized/taman_safari_indonesia_2.webp&quot;);
+                    "
+                  ></div>
+                  <div class="reco-card__grad"></div>
+                  <div class="reco-card__tint"></div>
+                  <div class="reco-card__body">
+                    <div class="mb-1.5" aria-hidden="true"><svg class="block h-4 w-20 text-amber-400" viewBox="0 0 120 24" fill="currentColor" focusable="false"><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(24 0)"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(48 0)"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(72 0)"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(96 0)"/></svg></div>
+                    <p class="reco-card__name text-xl font-bold leading-snug line-clamp-2 mb-1 text-white">
+                      Taman Safari Indonesia II Prigen
+                    </p>
+                    <p
+                      class="reco-card__desc text-sm text-gray-100 line-clamp-2 leading-relaxed"
+                    >
+                      Taman safari di kaki Gunung Arjuno–Welirang yang
+                      menyatukan konservasi satwa dengan wisata keluarga.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- LAYER 2 (DALAM) KIRI -->
+              <div class="coverflow-card ref-card-inner-side">
+                <div
+                  class="reco-card"
+                  data-slug="kebun-raya-purwodadi"
+                  data-name="Kebun Raya Purwodadi"
+                  data-img="../../public/assets/images/wisata/optimized/purwodadi-botanic-garden.webp"
+                >
+                  <div
+                    class="reco-card__img"
+                    style="
+                      background-image: url(&quot;../../public/assets/images/wisata/optimized/purwodadi-botanic-garden.webp&quot;);
+                    "
+                  ></div>
+                  <div class="reco-card__grad"></div>
+                  <div class="reco-card__tint"></div>
+                  <div class="reco-card__body">
+                    <div class="mb-1.5" aria-hidden="true"><svg class="block h-4 w-20 text-amber-400" viewBox="0 0 120 24" fill="currentColor" focusable="false"><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(24 0)"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(48 0)"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(72 0)"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(96 0)"/></svg></div>
+                    <p class="reco-card__name text-xl font-bold leading-snug line-clamp-2 mb-1 text-white">
+                      Kebun Raya Purwodadi
+                    </p>
+                    <p
+                      class="reco-card__desc text-sm text-gray-100 line-clamp-2 leading-relaxed"
+                    >
+                      Kebun botani di Kecamatan Purwosari dengan koleksi
+                      tanaman khas dataran rendah beriklim kering.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- LAYER 1 (TENGAH) — kartu utama -->
+              <div
+                class="coverflow-card ref-card-center"
+                role="link"
+                tabindex="0"
+                aria-label="Lihat detail Penanjakan Bromo (Penanjakan 1)"
+                data-dest-slug="penanjakan-bromo"
+              >
+                <div
+                  class="reco-card"
+                  data-slug="penanjakan-bromo"
+                  data-name="Penanjakan Bromo (Penanjakan 1)"
+                  data-img="../../public/assets/images/wisata/optimized/bromo_banner.webp"
+                >
+                  <div
+                    class="reco-card__img"
+                    style="
+                      background-image: url(&quot;../../public/assets/images/wisata/optimized/bromo_banner.webp&quot;);
+                    "
+                  ></div>
+                  <div class="reco-card__grad"></div>
+                  <div class="reco-card__tint"></div>
+                  <div class="reco-card__body">
+                    <div class="mb-1.5" aria-hidden="true"><svg class="block h-4 w-20 text-amber-400" viewBox="0 0 120 24" fill="currentColor" focusable="false"><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(24 0)"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(48 0)"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(72 0)"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(96 0)"/></svg></div>
+                    <p class="reco-card__name text-xl font-bold leading-snug line-clamp-2 mb-1 text-white">
+                      Penanjakan Bromo (Penanjakan 1)
+                    </p>
+                    <p
+                      class="reco-card__desc text-sm text-gray-100 line-clamp-2 leading-relaxed"
+                    >
+                      Titik pandang paling terkenal untuk menikmati matahari
+                      terbit di Taman Nasional Bromo Tengger Semeru.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- LAYER 2 (DALAM) KANAN -->
+              <div class="coverflow-card ref-card-inner-side">
+                <div
+                  class="reco-card"
+                  data-slug="bukit-cinta-bromo"
+                  data-name="Bukit Cinta (Bromo Tengger Semeru)"
+                  data-img="../../public/assets/images/wisata/optimized/bromo2.webp"
+                >
+                  <div
+                    class="reco-card__img"
+                    style="
+                      background-image: url(&quot;../../public/assets/images/wisata/optimized/bromo2.webp&quot;);
+                    "
+                  ></div>
+                  <div class="reco-card__grad"></div>
+                  <div class="reco-card__tint"></div>
+                  <div class="reco-card__body">
+                    <div class="mb-1.5" aria-hidden="true"><svg class="block h-4 w-20 text-amber-400" viewBox="0 0 120 24" fill="currentColor" focusable="false"><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(24 0)"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(48 0)"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(72 0)"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(96 0)"/></svg></div>
+                    <p class="reco-card__name text-xl font-bold leading-snug line-clamp-2 mb-1 text-white">
+                      Bukit Cinta (Bromo Tengger Semeru)
+                    </p>
+                    <p
+                      class="reco-card__desc text-sm text-gray-100 line-clamp-2 leading-relaxed"
+                    >
+                      Titik pandang di kawasan Bromo Tengger Semeru yang berada
+                      di wilayah Wonokitri, Tosari.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- LAYER 3 (LUAR) KANAN -->
+              <div class="coverflow-card ref-card-outer-side">
+                <div
+                  class="reco-card"
+                  data-slug="air-terjun-kakek-bodo"
+                  data-name="Air Terjun Kakek Bodo"
+                  data-img="../../public/assets/images/wisata/optimized/air-terjun-kakek-bodo.webp"
+                >
+                  <div
+                    class="reco-card__img"
+                    style="
+                      background-image: url(&quot;../../public/assets/images/wisata/optimized/air-terjun-kakek-bodo.webp&quot;);
+                    "
+                  ></div>
+                  <div class="reco-card__grad"></div>
+                  <div class="reco-card__tint"></div>
+                  <div class="reco-card__body">
+                    <div class="mb-1.5" aria-hidden="true"><svg class="block h-4 w-20 text-amber-400" viewBox="0 0 120 24" fill="currentColor" focusable="false"><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(24 0)"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(48 0)"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(72 0)"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(96 0)"/></svg></div>
+                    <p class="reco-card__name text-xl font-bold leading-snug line-clamp-2 mb-1 text-white">
+                      Air Terjun Kakek Bodo
+                    </p>
+                    <p
+                      class="reco-card__desc text-sm text-gray-100 line-clamp-2 leading-relaxed"
+                    >
+                      Air terjun populer di kawasan Prigen, tidak jauh dari
+                      kawasan wisata Tretes.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Arrow Button -->
+            <button
+              type="button"
+              data-reco-prev
+              aria-label="Rekomendasi sebelumnya"
+              class="reco-nav-btn reco-nav-btn-prev"
+            >
+              <svg
+                class="h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M15.75 19.5L8.25 12l7.5-7.5"
+                />
+              </svg>
+            </button>
+
+            <!-- Right Arrow Button -->
+            <button
+              type="button"
+              data-reco-next
+              aria-label="Rekomendasi berikutnya"
+              class="reco-nav-btn reco-nav-btn-next"
+            >
+              <svg
+                class="h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Carousel Dots Indicator
+               Owner 2026-10-14: dot aktif (membesar) MENGIKUTI kartu yang
+               sedang aktif - tidak selalu di tengah. Klik dot = buka kartu. -->
+          <div
+            id="reco-dots"
+            class="flex justify-center items-center space-x-1.5 mt-6"
+          >
+            <span
+              class="w-6 h-2 rounded-full bg-white shadow-sm transition-all duration-300"
+            ></span>
+            <span
+              class="w-2 h-2 rounded-full bg-white/40 cursor-pointer transition-all duration-300"
+            ></span>
+            <span
+              class="w-2 h-2 rounded-full bg-white/40 cursor-pointer transition-all duration-300"
+            ></span>
+            <span
+              class="w-2 h-2 rounded-full bg-white/40 cursor-pointer transition-all duration-300"
+            ></span>
+            <span
+              class="w-2 h-2 rounded-full bg-white/40 cursor-pointer transition-all duration-300"
+            ></span>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <div data-layout-footer></div>
+    <script src="../../public/vendor/leaflet/leaflet.js"></script>
+    <script src="../../public/js/data-wisata.js"></script>
+    <script src="../../public/js/wisata-map.js"></script>
+    <!-- Hero carousel: vanilla JS, tanpa library animasi -->
+    <script src="../../public/js/pages/wisata-hero.js?v=20261016"></script>
+
+    <script src="../../public/js/page-transition.js" defer></script>
+    <script src="../../public/js/pages/wisata-listing.js"></script>
+
+    <!-- GSAP Animations (TASK 7 - 2026-10-13): GSAP CDN + ScrollTrigger.
+         `defer` agar tidak memblokir render/parse (perbaikan lag), urutan
+         tetap terjaga: gsap → ScrollTrigger → wisata-gsap-animations. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js" defer></script>
+    <script src="../../public/js/pages/wisata-gsap-animations.js" defer></script>
+
+    <!-- <script src="../../public/js/pages/reco-carousel.js"></script> -->
+        <script src="../../public/js/pages/wisata-inline-1.js"></script>
+    <script src="./partials/pasinfo-header.js" defer></script>
+    <script src="./partials/pasinfo-footer.js" defer></script>
+    <script src="./partials/pasinfo-layout.js" defer></script>
+    <script src="../../public/js/main.js" defer></script>
+    <script src="../../public/js/pages/internal-nav.js" defer></script>
+  </body>
+</html>

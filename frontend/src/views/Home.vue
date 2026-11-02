@@ -328,25 +328,42 @@
       </div>
 
       <!-- Section Pasinfo Jelajah -->
-      <div class="bg-white rounded-xl shadow-md p-8 mb-8">
-        <div class="text-center mb-8">
-          <h2 class="text-3xl font-extrabold text-blue-900 mb-2">Pasinfo Jelajah</h2>
-          <p class="text-gray-600">Ingin mengenal Pasuruan lebih dalam?</p>
-        </div>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-          <div 
-            v-for="item in jelajahItems" 
+      <section id="pasinfo-jelajah" class="mb-8 bg-white py-8 sm:py-10 scroll-mt-24" aria-labelledby="jelajah-heading">
+        <header class="mb-8 text-center">
+          <h2 id="jelajah-heading" class="text-3xl font-bold text-gray-900">Pasinfo Jelajah</h2>
+          <p class="mx-auto mt-2 max-w-2xl text-sm text-gray-600 sm:text-base">
+            Temukan destinasi, kuliner, budaya, dan acara pilihan di Pasuruan.
+          </p>
+        </header>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 md:gap-6">
+          <router-link
+            v-for="item in jelajahItems"
             :key="item.name"
-            class="relative rounded-lg overflow-hidden group cursor-pointer aspect-square"
-            @click="navigateToJelajah(item.path)"
+            :to="item.path"
+            class="group flex min-w-0 flex-col overflow-hidden rounded-xl border border-gray-200 bg-white transition duration-300 hover:-translate-y-1 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
           >
-            <img :src="item.image" :alt="item.name" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-            <div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
-              <span class="text-white font-bold text-xl drop-shadow-md">{{ item.name }}</span>
+            <div class="h-48 w-full shrink-0 overflow-hidden bg-gray-200">
+              <img
+                :src="item.image"
+                :alt="item.alt"
+                loading="lazy"
+                class="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+              />
             </div>
-          </div>
+            <div class="relative flex flex-1 flex-col p-5">
+              <span :class="['absolute -top-3.5 left-5 inline-flex items-center rounded-full px-3 py-1 text-xs font-bold text-white ring-2 ring-white', item.badgeClass]">
+                {{ item.name }}
+              </span>
+              <h3 class="mt-2 text-lg font-bold text-gray-900">{{ item.title }}</h3>
+              <p class="mt-2 text-sm leading-relaxed text-gray-600">{{ item.description }}</p>
+              <span class="mt-auto flex items-center gap-1 pt-4 text-sm font-bold text-blue-800 group-hover:text-blue-700">
+                {{ item.linkLabel }} <span aria-hidden="true">→</span>
+              </span>
+            </div>
+          </router-link>
         </div>
-      </div>
+      </section>
 
       <!-- Section Iklan Responsif di bawah Pasinfo Jelajah -->
       <div class="mb-0 sm:mb-2 overflow-hidden rounded-xl">
@@ -372,11 +389,28 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, nextTick, onMounted, onUnmounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { createSlug } from '../utils'
 
 const router = useRouter()
+const route = useRoute()
+
+const scrollToRequestedSection = async () => {
+  if (route.hash !== '#pasinfo-jelajah') return
+
+  await nextTick()
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const section = document.getElementById('pasinfo-jelajah')
+      if (!section) return
+
+      const navbarOffset = 96
+      const top = section.getBoundingClientRect().top + window.scrollY - navbarOffset
+      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
+    })
+  })
+}
 
 const getPenulisName = (item: any): string => {
   if (!item) return 'Redaksi Pasinfo'
@@ -463,6 +497,7 @@ const fetchHomeAds = async () => {
 }
 
 onMounted(async () => {
+  scrollToRequestedSection()
   fetchHomeAds()
   loadingNews.value = true
   try {
@@ -485,16 +520,47 @@ onMounted(async () => {
   }
 })
 
+watch(
+  () => route.hash,
+  () => {
+    scrollToRequestedSection()
+  }
+)
+
 onUnmounted(() => {
   stopAutoSlider()
 })
 
-const jelajahItems = ref([
-  { name: 'Wisata',  path: 'wisata',  image: 'https://images.unsplash.com/photo-1519331379826-f10be5486c6f?auto=format&fit=crop&q=80&w=400' },
-  { name: 'Kuliner', path: 'kuliner', image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=400' },
-  { name: 'Budaya',  path: 'budaya',  image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&q=80&w=400' },
-  { name: 'Acara',   path: 'acara',   image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=400' }
-])
+const jelajahItems = [
+  {
+    name: 'Wisata', path: '/wisata', badgeClass: 'bg-red-600',
+    image: '/legacy/public/assets/images/wisata/optimized/bromo 4.thumb.webp',
+    alt: 'Pemandangan Gunung Bromo', title: 'Jelajah Destinasi Wisata Pasuruan',
+    description: 'Nikmati kesegaran alam dan suasana asri di destinasi wisata unggulan Pasuruan.',
+    linkLabel: 'Lihat Destinasi'
+  },
+  {
+    name: 'Kuliner', path: '/kuliner', badgeClass: 'bg-blue-700',
+    image: '/legacy/public/assets/images/kuliner/optimized/Nasi Punel.thumb.webp',
+    alt: 'Nasi Punel khas Pasuruan', title: 'Jelajah Destinasi Kuliner Pasuruan',
+    description: 'Rasakan cita rasa khas Pasuruan, dari hidangan tradisional hingga kuliner favorit.',
+    linkLabel: 'Lihat Kuliner'
+  },
+  {
+    name: 'Budaya', path: '/budaya', badgeClass: 'bg-violet-700',
+    image: '/legacy/public/assets/images/budaya/optimized/Tradisi-Skilot.thumb.webp',
+    alt: 'Tradisi Skilot di Pasuruan', title: 'Jelajah Destinasi Budaya Pasuruan',
+    description: 'Kenali seni, tradisi, dan warisan budaya yang hidup di masyarakat Pasuruan.',
+    linkLabel: 'Lihat Budaya'
+  },
+  {
+    name: 'Acara', path: '/acara', badgeClass: 'bg-green-700',
+    image: '/legacy/public/assets/images/acara/optimized/bromo-marathon.thumb.webp',
+    alt: 'Acara Bromo Marathon', title: 'Jelajah Acara Pasuruan',
+    description: 'Temukan festival, kegiatan komunitas, dan acara menarik di Pasuruan.',
+    linkLabel: 'Lihat Acara'
+  }
+]
 
 const navigateToBerita = (id: number, title: string) => {
   router.push({ name: 'berita', params: { id, slug: createSlug(title) } })
@@ -504,11 +570,4 @@ const navigateToCategory = (category: string) => {
   router.push({ name: 'kategori', query: { cat: category } })
 }
 
-const navigateToJelajah = (path: string) => {
-  if (path === 'wisata') {
-    router.push('/wisata')
-  } else {
-    router.push({ path: '/jelajah', query: { tab: path } })
-  }
-}
 </script>

@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <script src="../../public/js/page-enter.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pasuruan Info - Jelajah Kuliner Pasuruan</title>
+    <link rel="icon" href="data:," />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../public/css/styles.css" />
+    <link rel="stylesheet" href="../../public/vendor/leaflet/leaflet.css" />
+    <script src="../../public/vendor/leaflet/leaflet.js" defer></script>
+    <link
+      rel="preload"
+      as="image"
+      href="../../public/assets/images/kuliner/optimized/soto-pasuruan.webp"
+      fetchpriority="high"
+    />
+    <!-- Latar section Rekomendasi (mirror wisata): pakai WebP teroptimasi;
+         JS tetap meng-override dinamis per kartu lewat .reco-section-bg. -->
+        <link rel="stylesheet" href="../../public/css/kuliner.css" />
+  </head>
+  <body
+    class="bg-gray-50 text-gray-800 font-sans"
+    data-page-active="kuliner"
+    data-asset-prefix="../../public"
+    data-wisata-href="wisata.html"
+    data-header-overlay="dark"
+    data-hero-label="Galeri Kuliner Pasuruan"
+    data-hero-bg-label="Latar hero kuliner"
+    data-hero-badge-class="bg-blue-600"
+    data-hero-badge="Kuliner"
+    data-hero-location="Pasuruan Raya"
+          data-hero-title-class="text-3xl sm:text-4xl md:text-6xl lg:text-4xl xl:text-5xl 2xl:text-6xl font-extrabold text-white tracking-tight leading-[1.12] drop-shadow-md"
+    data-hero-title="Temukan Kuliner&lt;br /&gt; Terbaik di Pasuruan"
+    data-hero-desc="Jelajahi cita rasa khas Pasuruan. Dari kuliner tradisional hingga camilan oleh-oleh — semua informasi tempat makan terpercaya ada di sini."
+    data-hero-cards-label="Thumbnail antrean kuliner"
+    data-home-href="../../index.html"
+  >
+    <!-- HEADER / NAVBAR -->
+    <div data-layout-header></div>
+
+    <main>
+      <!-- HERO SECTION -->
+      <div data-listing-hero></div>
+      <script src="../../public/js/pages/listing-hero.js"></script>
+      <!-- Latar hero awal (slide 1) di-set sinkron saat parse supaya area hero
+           tidak menampilkan hitam polos sebelum kuliner-hero.js jalan
+           (perbaikan transisi: tanpa "blank hitam" + lag).
+           Inline style ini ditimpa kembali oleh setActiveBg() saat init. -->
+            <script src="../../public/js/pages/kuliner-inline-2.js"></script>
+
+      <!-- MAP & FEATURED KULINER SECTION -->
+      <section
+        id="map-section"
+        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10"
+      >
+        <div class="mb-6">
+          <h2 class="text-4xl font-bold text-gray-900">
+            Jelajah Kuliner Pasuruan Lebih Jauh Lagi
+          </h2>
+          <p class="text-sm text-gray-500 mt-1">
+            Jelajahi persebaran kuliner khas Pasuruan melalui peta interaktif.
+            Pilih penanda pada peta untuk melihat detail tempat makan dan
+            merencanakan jelajah kuliner Anda.
+          </p>
+        </div>
+
+        <!-- Tablet: layout diatur #map-detail-grid (style scoped di head).
+              Desktop: 2/3 peta + 1/3 detail (lg). Mobile: menumpuk (1 kolom). -->
+        <div id="map-detail-grid" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Map Area -->
+          <div
+            class="lg:col-span-2 flex flex-col bg-white border-2 p-5 rounded-xl h-full"
+          >
+            <span class="font-bold text-gray-700 text-2xl">Peta Kuliner</span>
+            <p class="text-sm text-gray-500 mt-1 mb-3">
+              Warna = wilayah berdasarkan batas kecamatan resmi. Klik poligon
+              untuk memilih wilayah, klik lagi untuk kembali.
+            </p>
+            <!-- Peta interaktif Leaflet -->
+            <div
+              id="kuliner-map"
+              class="relative z-0 w-full rounded-xl overflow-hidden bg-white ring-1 ring-gray-200"
+              style="min-height: 440px; height: 100%; flex-grow: 1"
+              role="application"
+              aria-label="Peta interaktif kuliner Pasuruan (data placeholder)"
+            ></div>
+          </div>
+
+          <!-- Panel detail kuliner (dirender via JS dari data) — fallback
+               awal (mirror wisata): pesan terpusat saat belum ada pilihan. -->
+          <div id="kul-detail" class="flex flex-col h-full" aria-live="polite">
+            <div
+              class="bg-white rounded-xl shadow-sm border-2 p-4 flex flex-col h-full"
+            >
+              <span class="font-bold text-gray-800 text-2xl block mb-3"
+                >Kuliner</span
+              >
+              <p
+                class="text-sm text-gray-500 text-center flex items-center justify-center flex-1"
+              >
+                Pilih penanda pada peta atau kartu kuliner untuk melihat detail.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div
+          class="mt-8 bg-gray-100 rounded-xl p-8 text-center border border-gray-200"
+        >
+          <span class="text-2xl font-bold text-gray-700 tracking-wide"
+            >Space Iklan</span
+          >
+        </div>
+      </section>
+
+      <!-- DAFTAR KULINER SECTION -->
+      <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 scroll-mt-24">
+        <div class="mb-4">
+          <h2 class="text-4xl font-bold text-gray-900">Daftar Kuliner</h2>
+          <p class="text-sm text-gray-500 mt-1">
+            Jelajahi beragam kuliner terbaik di Pasuruan, dari hidangan
+            tradisional hingga camilan oleh-oleh. Temukan informasi lokasi, jam
+            operasional, harga, serta ulasan untuk setiap tempat makan. Gunakan
+            kategori kuliner untuk menemukan tempat yang sesuai dengan selera
+            Anda.
+          </p>
+        </div>
+
+        <!-- Categories / Filter Tabs -- Owner: struktur statis selaras wisata -->
+          <div
+            class="kul-filter-scroll gap-2 pb-2 sm:pb-4 mb-2"
+            role="group"
+            aria-label="Filter kategori kuliner"
+          >
+          <button
+            type="button"
+            data-filter-btn
+            data-filter="Semua"
+            aria-pressed="true"
+            class="bg-blue-600 text-white px-4 py-1.5 rounded-md text-xs font-medium whitespace-nowrap"
+          >
+            Semua
+          </button>
+          <button
+            type="button"
+            data-filter-btn
+            data-filter="Tradisional"
+            aria-pressed="false"
+            class="bg-blue-100 text-blue-700 px-4 py-1.5 rounded-md text-xs font-medium whitespace-nowrap"
+          >
+            Tradisional
+          </button>
+          <button
+            type="button"
+            data-filter-btn
+            data-filter="Camilan &amp; Oleh-oleh"
+            aria-pressed="false"
+            class="bg-blue-100 text-blue-700 px-4 py-1.5 rounded-md text-xs font-medium whitespace-nowrap"
+          >
+            Camilan &amp; Oleh-oleh
+          </button>
+          <button
+            type="button"
+            data-filter-btn
+            data-filter="Kopi &amp; Minuman"
+            aria-pressed="false"
+            class="bg-blue-100 text-blue-700 px-4 py-1.5 rounded-md text-xs font-medium whitespace-nowrap"
+          >
+            Kopi &amp; Minuman
+          </button>
+          <button
+            type="button"
+            data-filter-btn
+            data-filter="Seafood"
+            aria-pressed="false"
+            class="bg-blue-100 text-blue-700 px-4 py-1.5 rounded-md text-xs font-medium whitespace-nowrap"
+          >
+            Seafood
+          </button>
+        </div>
+
+        <!-- Kuliner Grid (responsive: mobile 1 / sm 2 / tablet 3 / desktop 4 kolom) -->
+        <div
+          id="kul-grid"
+          class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6 lg:gap-6"
+        >
+          <!-- Kartu kuliner dirender via JS (mock data) -->
+        </div>
+        <p id="kul-empty" class="hidden text-sm text-gray-500">
+          Tidak ada kuliner yang cocok dengan pencarian atau kategori ini.
+        </p>
+        <nav
+          id="kul-pager"
+          class="mt-8 flex items-center justify-center gap-1.5"
+          aria-label="Pagination kuliner"
+        ></nav>
+
+        <!-- Horizontal Ad Banner (rendered by public/js/pages/layout-ad.js) -->
+        <div data-layout-ad></div>
+        <script src="../../public/js/pages/layout-ad.js"></script>
+      </section>
+
+      <!-- TESTIMONIAL / RECOMMENDATION CAROUSEL SECTION (mirror wisata: coverflow) -->
+      <section class="reco-section-bg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <!-- Section Title -->
+          <div class="reco-heading text-center max-w-xl mx-auto mb-10">
+            <h2 class="text-4xl sm:text-4xl font-bold text-white">
+              Rekomendasi Kuliner Khas Pasuruan
+            </h2>
+            <p
+              class="text-[11px] sm:text-xs text-gray-200 mt-2 leading-relaxed"
+            >
+              Temukan cita rasa khas Pasuruan, dari nasi punel legendaris hingga
+              rumah makan sambal dan tempat makan keluarga. Dapatkan rekomendasi
+              tempat makan populer beserta informasi lokasi, harga, dan ulasan
+              lengkapnya di sini!
+            </p>
+          </div>
+
+          <!-- Slider Container -->
+          <div class="coverflow-container">
+            <!-- Cards Slider Track -->
+            <div id="reco-row" class="coverflow-track no-scrollbar">
+              <!-- LAYER 3 (LUAR) KIRI -->
+              <div class="coverflow-card ref-card-outer-side">
+                <div
+                  class="reco-card"
+                  data-slug="waroeng-sambel-bangil"
+                  data-name="Waroeng Sambel"
+                  data-img="../../public/assets/images/kuliner/optimized/Lontong Kupang Kraton.webp"
+                >
+                  <div
+                    class="reco-card__img"
+                    style="
+                      background-image: url(&quot;../../public/assets/images/kuliner/optimized/Lontong Kupang Kraton.webp&quot;);
+                    "
+                  ></div>
+                  <div class="reco-card__grad"></div>
+                  <div class="reco-card__tint"></div>
+                  <div class="reco-card__body">
+                    <div class="mb-1.5" aria-hidden="true"><svg class="block h-4 w-20 text-amber-400" viewBox="0 0 120 24" fill="currentColor" focusable="false"><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(24 0)"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(48 0)"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(72 0)"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(96 0)"/></svg></div>
+                    <p
+                      class="reco-card__name text-xl font-bold leading-snug line-clamp-2 mb-1 text-white"
+                    >
+                      Waroeng Sambel
+                    </p>
+                    <p
+                      class="reco-card__desc text-sm text-gray-100 line-clamp-2 leading-relaxed"
+                    >
+                      Rumah makan sambal di Jl. Raya Pandaan-Bangil dengan
+                      beberapa paket hidangan.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- LAYER 2 (DALAM) KIRI -->
+              <div class="coverflow-card ref-card-inner-side">
+                <div
+                  class="reco-card"
+                  data-slug="warung-teko-beji"
+                  data-name="Warung Teko Beji"
+                  data-img="../../public/assets/images/kuliner/optimized/soto-pasuruan.webp"
+                >
+                  <div
+                    class="reco-card__img"
+                    style="
+                      background-image: url(&quot;../../public/assets/images/kuliner/optimized/soto-pasuruan.webp&quot;);
+                    "
+                  ></div>
+                  <div class="reco-card__grad"></div>
+                  <div class="reco-card__tint"></div>
+                  <div class="reco-card__body">
+                    <div class="mb-1.5" aria-hidden="true"><svg class="block h-4 w-20 text-amber-400" viewBox="0 0 120 24" fill="currentColor" focusable="false"><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(24 0)"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(48 0)"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(72 0)"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(96 0)"/></svg></div>
+                    <p
+                      class="reco-card__name text-xl font-bold leading-snug line-clamp-2 mb-1 text-white"
+                    >
+                      Warung Teko Beji
+                    </p>
+                    <p
+                      class="reco-card__desc text-sm text-gray-100 line-clamp-2 leading-relaxed"
+                    >
+                      Restoran bergazebo dengan kolam ikan dan area bermain
+                      anak.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- LAYER 1 (TENGAH) - kartu utama -->
+              <div
+                class="coverflow-card ref-card-center"
+                role="link"
+                tabindex="0"
+                aria-label="Lihat detail Nasi Punel Bu Hj. Lin"
+                data-dest-slug="nasi-punel-bu-hj-lin"
+              >
+                <div
+                  class="reco-card"
+                  data-slug="nasi-punel-bu-hj-lin"
+                  data-name="Nasi Punel Bu Hj. Lin"
+                  data-img="../../public/assets/images/kuliner/optimized/Nasi Punel.webp"
+                >
+                  <div
+                    class="reco-card__img"
+                    style="
+                      background-image: url(&quot;../../public/assets/images/kuliner/optimized/Nasi Punel.webp&quot;);
+                    "
+                  ></div>
+                  <div class="reco-card__grad"></div>
+                  <div class="reco-card__tint"></div>
+                  <div class="reco-card__body">
+                    <div class="mb-1.5" aria-hidden="true"><svg class="block h-4 w-20 text-amber-400" viewBox="0 0 120 24" fill="currentColor" focusable="false"><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(24 0)"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(48 0)"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(72 0)"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(96 0)"/></svg></div>
+                    <p
+                      class="reco-card__name text-xl font-bold leading-snug line-clamp-2 mb-1 text-white"
+                    >
+                      Nasi Punel Bu Hj. Lin
+                    </p>
+                    <p
+                      class="reco-card__desc text-sm text-gray-100 line-clamp-2 leading-relaxed"
+                    >
+                      Nasi punel khas Bangil dengan lauk empal, lidah, babat,
+                      dan ayam.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- LAYER 2 (DALAM) KANAN -->
+              <div class="coverflow-card ref-card-inner-side">
+                <div
+                  class="reco-card"
+                  data-slug="depot-nasi-punel-setia-budi-bangil"
+                  data-name="Depot Nasi Punel Setia Budi Bangil"
+                  data-img="../../public/assets/images/kuliner/optimized/Lontong Kupang Kraton.webp"
+                >
+                  <div
+                    class="reco-card__img"
+                    style="
+                      background-image: url(&quot;../../public/assets/images/kuliner/optimized/Lontong Kupang Kraton.webp&quot;);
+                    "
+                  ></div>
+                  <div class="reco-card__grad"></div>
+                  <div class="reco-card__tint"></div>
+                  <div class="reco-card__body">
+                    <div class="mb-1.5" aria-hidden="true"><svg class="block h-4 w-20 text-amber-400" viewBox="0 0 120 24" fill="currentColor" focusable="false"><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(24 0)"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(48 0)"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(72 0)"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(96 0)"/></svg></div>
+                    <p
+                      class="reco-card__name text-xl font-bold leading-snug line-clamp-2 mb-1 text-white"
+                    >
+                      Depot Nasi Punel Setia Budi Bangil
+                    </p>
+                    <p
+                      class="reco-card__desc text-sm text-gray-100 line-clamp-2 leading-relaxed"
+                    >
+                      Nasi punel dengan pilihan lauk daging, ayam, dan jeroan.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- LAYER 3 (LUAR) KANAN -->
+              <div class="coverflow-card ref-card-outer-side">
+                <div
+                  class="reco-card"
+                  data-slug="warung-pojok-nasi-punel-bangil"
+                  data-name="Warung Pojok Nasi Punel Bangil"
+                  data-img="../../public/assets/images/kuliner/optimized/Nasi Punel.webp"
+                >
+                  <div
+                    class="reco-card__img"
+                    style="
+                      background-image: url(&quot;../../public/assets/images/kuliner/optimized/Nasi Punel.webp&quot;);
+                    "
+                  ></div>
+                  <div class="reco-card__grad"></div>
+                  <div class="reco-card__tint"></div>
+                  <div class="reco-card__body">
+                    <div class="mb-1.5" aria-hidden="true"><svg class="block h-4 w-20 text-amber-400" viewBox="0 0 120 24" fill="currentColor" focusable="false"><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(24 0)"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(48 0)"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(72 0)"/><path d="M12 2l2.9 6 6.6.9-4.8 4.7 1.1 6.6L12 17l-5.8 3.2 1.1-6.6L2.5 8.9l6.6-.9L12 2z" transform="translate(96 0)"/></svg></div>
+                    <p
+                      class="reco-card__name text-xl font-bold leading-snug line-clamp-2 mb-1 text-white"
+                    >
+                      Warung Pojok Nasi Punel Bangil
+                    </p>
+                    <p
+                      class="reco-card__desc text-sm text-gray-100 line-clamp-2 leading-relaxed"
+                    >
+                      Warung kecil dengan tempat duduk terbatas dan sering antre
+                      di Bangil.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Left Arrow Button -->
+            <button
+              type="button"
+              data-reco-prev
+              aria-label="Rekomendasi sebelumnya"
+              class="reco-nav-btn reco-nav-btn-prev"
+            >
+              <svg
+                class="h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M15.75 19.5L8.25 12l7.5-7.5"
+                />
+              </svg>
+            </button>
+
+            <!-- Right Arrow Button -->
+            <button
+              type="button"
+              data-reco-next
+              aria-label="Rekomendasi berikutnya"
+              class="reco-nav-btn reco-nav-btn-next"
+            >
+              <svg
+                class="h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Carousel Dots Indicator -->
+          <div
+            id="reco-dots"
+            class="flex justify-center items-center space-x-1.5 mt-6"
+          >
+            <span
+              class="w-6 h-2 rounded-full bg-white shadow-sm transition-all duration-300"
+            ></span>
+            <span
+              class="w-2 h-2 rounded-full bg-white/40 cursor-pointer transition-all duration-300"
+            ></span>
+            <span
+              class="w-2 h-2 rounded-full bg-white/40 cursor-pointer transition-all duration-300"
+            ></span>
+            <span
+              class="w-2 h-2 rounded-full bg-white/40 cursor-pointer transition-all duration-300"
+            ></span>
+            <span
+              class="w-2 h-2 rounded-full bg-white/40 cursor-pointer transition-all duration-300"
+            ></span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <div data-layout-footer></div>
+    <script src="../../public/js/data-kuliner.js" defer></script>
+    <script src="../../public/js/kuliner-map.js" defer></script>
+    <!-- Hero carousel: vanilla JS, tanpa library animasi -->
+    <script src="../../public/js/pages/kuliner-hero.js"></script>
+
+    <script src="../../public/js/pages/kuliner-listing.js"></script>
+
+    <!-- GSAP Animations (Owner override design.md §49-50): GSAP CDN + ScrollTrigger.
+         `defer` disamakan dengan wisata.html (L521-522): gsap → ScrollTrigger →
+         kuliner-gsap-animations dieksekusi berurutan setelah parsing, tanpa
+         memblokir parser (perbaikan performa 2026-10-15). -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js" defer></script>
+    <script
+      src="../../public/js/pages/kuliner-gsap-animations.js"
+      defer
+    ></script>
+
+    <!-- Coverflow Rekomendasi Kuliner: diadaptasi dari wisata.html (mirror).
+         Mesin 3D/shell identik; hanya ORDER_SLUGS + sumber teks + target
+         detail yang berbeda (kuliner). Tanpa library animasi. -->
+        <script src="../../public/js/pages/kuliner-inline-1.js"></script>
+
+    <script src="./partials/pasinfo-header.js" defer></script>
+    <script src="./partials/pasinfo-footer.js" defer></script>
+    <script src="./partials/pasinfo-layout.js" defer></script>
+    <script src="../../public/js/main.js" defer></script>
+    <script src="../../public/js/page-transition.js" defer></script>
+    <script src="../../public/js/pages/internal-nav.js" defer></script>
+  </body>
+</html>

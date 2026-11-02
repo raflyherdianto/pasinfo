@@ -90,6 +90,12 @@ const handleNotificationReadEvent = (e: any) => {
 }
 
 const categories = ref<any[]>([])
+const setCategories = (items: any[]) => {
+  categories.value = items.filter((category) => {
+    const slug = String(category?.slug || category?.name || '').toLowerCase()
+    return slug !== 'wisata'
+  })
+}
 const navContainer = ref<HTMLElement | null>(null)
 let isDown = false
 let startX = 0
@@ -146,15 +152,14 @@ const fetchCategories = async () => {
     const res = await fetch('http://localhost:8080/api/v1/categories')
     const json = await res.json()
     if (json.success && json.data) {
-      categories.value = json.data
+      setCategories(json.data)
     } else {
-      categories.value = json.data || []
+      setCategories(json.data || [])
     }
   } catch (err) {
-    categories.value = [
+    setCategories([
       { name: 'Nasional', slug: 'nasional' },
       { name: 'Lokal', slug: 'lokal' },
-      { name: 'Wisata', slug: 'wisata' },
       { name: 'Politik', slug: 'politik' },
       { name: 'Ekonomi', slug: 'ekonomi' },
       { name: 'Olahraga', slug: 'olahraga' },
@@ -162,7 +167,7 @@ const fetchCategories = async () => {
       { name: 'Hiburan', slug: 'hiburan' },
       { name: 'Kesehatan', slug: 'kesehatan' },
       { name: 'Inspiratif', slug: 'inspiratif' }
-    ]
+    ])
   }
 }
 
@@ -315,14 +320,14 @@ const goToNews = (id: number, judul: string) => {
               {{ cat.name }}
             </router-link>
             <router-link 
-              to="/wisata" 
+              to="/wisata"
               class="text-sm font-bold text-gray-500 hover:text-blue-600 transition shrink-0 uppercase tracking-wider"
               active-class="text-blue-600"
             >
               WISATA
             </router-link>
             <router-link 
-              to="/jelajah" 
+              to="/#pasinfo-jelajah"
               class="text-sm font-bold text-gray-500 hover:text-blue-600 transition shrink-0 uppercase tracking-wider"
               active-class="text-blue-600"
             >
@@ -478,14 +483,14 @@ const goToNews = (id: number, judul: string) => {
           </router-link>
           <router-link 
             @click="showMobileMenu = false"
-            to="/wisata" 
+            to="/wisata"
             class="px-4 py-2.5 bg-gray-50 hover:bg-blue-50 hover:text-blue-600 text-gray-700 rounded-xl text-center text-sm font-semibold uppercase"
           >
             Wisata
           </router-link>
           <router-link 
             @click="showMobileMenu = false"
-            to="/jelajah" 
+            to="/#pasinfo-jelajah"
             class="px-4 py-2.5 bg-gray-50 hover:bg-blue-50 hover:text-blue-600 text-gray-700 rounded-xl text-center text-sm font-semibold uppercase"
           >
             Jelajah
