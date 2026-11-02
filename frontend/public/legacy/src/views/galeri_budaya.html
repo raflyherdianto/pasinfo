@@ -1,0 +1,248 @@
+﻿<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Tirai transisi halaman: CSS di src/input.css, logika di page-enter.js
+         (HTML bersih). Harus sinkron di <head> agar kelas tirai terpasang
+         sebelum paint pertama. -->
+    <script src="../../public/js/page-enter.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pasuruan Info - Galeri Budaya</title>
+    <link rel="icon" href="data:," />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../public/css/styles.css" />
+    <!-- Aksen Budaya = UNGU (violet), warna miliknya sendiri (Owner 2026-10-16).
+         Utility Tailwind violet/purple solid tidak ada di styles.css
+         terkompilasi dan build:css tidak dijalankan (Â§66.5) â†’ didefinisikan
+         di sini. Identik dengan budaya.html Â§O + detail_budaya.html. -->
+        <link rel="stylesheet" href="../../public/css/galeri-budaya.css" />
+  </head>
+  <body
+    class="bg-white text-gray-800 font-sans"
+    data-page-active="galeri-budaya"
+    data-asset-prefix="../../public"
+    data-wisata-href="/wisata"
+    data-home-href="/"
+  >
+    <!-- HEADER / NAVBAR -->
+    <div data-layout-header></div>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <!-- BREADCRUMB -->
+      <nav class="flex items-center text-xs text-gray-500 mb-4 gap-1" aria-label="Breadcrumb">
+        <a href="/" class="bud-accent-text" aria-label="Beranda">
+          <svg
+            class="w-3.5 h-3.5 inline"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 00-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+            />
+          </svg>
+        </a>
+        <span>&gt;</span>
+        <a href="budaya.html" class="bud-accent-text">Budaya</a>
+        <span>&gt;</span>
+        <span class="bud-accent-text font-medium">Galeri</span>
+      </nav>
+
+      <!-- HERO BANNER CARD -->
+      <section
+        class="relative w-full rounded-2xl overflow-hidden h-[340px] sm:h-[420px] lg:h-[440px] mb-6 flex items-center"
+      >
+        <div
+          id="galeri-hero-bg"
+          class="absolute inset-0 bg-cover bg-center bg-gray-900"
+        ></div>
+        <div class="absolute inset-0 bg-black/60"></div>
+        <div class="relative z-10 p-6 sm:p-10 text-white max-w-xl">
+          <h1 class="text-3xl sm:text-4xl font-extrabold mb-3 leading-tight">
+            Galeri Budaya<br />Pasuruan
+          </h1>
+          <p class="text-xs sm:text-sm text-gray-200 leading-relaxed">
+            Jelajahi kekayaan budaya Pasuruan Raya melalui galeri foto pilihan.
+          </p>
+        </div>
+      </section>
+
+      <!-- FILTER MEDIA (SEMUA / FOTO / VIDEO) DIHAPUS
+           (Owner 2026-10-16) â€” galeri budaya hanya berisi foto budaya. -->
+
+      <!-- MAIN CONTENT: FILTER KATEGORI + GRID GALERI -->
+      <!-- Owner 2026-10-17: sidebar kategori + Space Iklan samping dihapus
+           (keputusan Owner: iklan galeri yang dihapus hanya yang di sidebar).
+           Kategori jadi chip horizontal mengikuti UI/UX filter budaya.html
+           (tanpa ikon); warna chip mengikuti domain. Layout galeri satu
+           kolom penuh; iklan besar bawah halaman dipertahankan. -->
+      <div class="mb-8">
+        <!-- Filter kategori (chip horizontal, dirender via JS) -->
+        <div
+          id="category-sidebar"
+          class="flex space-x-2 overflow-x-auto no-scrollbar pb-4 mb-6"
+          role="group"
+          aria-label="Filter kategori galeri"
+        >
+          <!-- Chip kategori dirender via JS -->
+        </div>
+
+        <!-- AREA GRID GALERI -->
+        <div>
+          <!-- Sub-header Grid -->
+          <div class="flex items-center justify-between mb-4">
+            <span id="gallery-count" class="text-xs font-bold text-gray-900"
+              >40 hasil ditemukan</span
+            >
+            <button
+              type="button"
+              class="bud-accent text-white text-xs font-semibold px-4 py-1.5 rounded-full transition"
+            >
+              Terbaru â–¾
+            </button>
+          </div>
+
+          <!-- Grid Galeri 3x3 -->
+          <div
+            id="gallery-grid"
+            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6 items-stretch"
+          >
+            <!-- Items galeri dirender via JS -->
+          </div>
+
+          <p
+            id="gallery-empty"
+            class="hidden text-sm text-gray-500 text-center py-12"
+          >
+            Tidak ada galeri budaya yang cocok dengan pencarian atau filter ini.
+          </p>
+
+          <!-- Pagination -->
+          <!-- Owner 2026-10-18: teks "Menampilkan data/page" dihapus (Owner)
+               â€” pager saja, dipusatkan, bersih & rapi. -->
+          <div
+            class="flex items-center justify-center border-t pt-3"
+          >
+            <nav
+              id="gallery-pager"
+              class="flex items-center gap-1.5"
+              aria-label="Pagination galeri"
+            ></nav>
+          </div>
+        </div>
+      </div>
+
+      <!-- REKOMENDASI SECTION -->
+      <div class="mb-8">
+        <div class="space-y-6">
+          <!-- Rekomendasi Budaya Serupa -->
+          <section class="bg-gray-50 border border-gray-100 rounded-2xl p-5">
+            <div class="flex flex-col items-start justify-between sm:flex-row mb-2">
+              <div>
+                <h3 class="font-bold text-2xl md:text-3xl lg:text-4xl text-gray-900">
+                  Rekomendasi Budaya Serupa
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-500 max-w-lg mt-0.5">
+                  Rekomendasi budaya serupa di Pasuruan Raya.
+                </p>
+              </div>
+              <a
+                href="budaya.html"
+                class="text-sm font-semibold bud-accent-text hover:underline whitespace-nowrap mt-2 sm:mt-0"
+                >Jelajah Sekarang â†’</a
+              >
+            </div>
+            <div
+              id="reco-serupa-grid"
+              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 items-stretch auto-rows-fr"
+            >
+              <!-- Cards dirender via JS -->
+            </div>
+          </section>
+
+          <!-- Rekomendasi Budaya Lainnya -->
+          <section class="bg-gray-50 border border-gray-100 rounded-2xl p-5">
+            <div class="flex flex-col items-start justify-between sm:flex-row mb-2">
+              <div>
+                <h3 class="font-bold text-2xl md:text-3xl lg:text-4xl text-gray-900">
+                  Rekomendasi Budaya Lainnya
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-500 max-w-lg mt-0.5">
+                  Rekomendasi budaya lain di Pasuruan Raya.
+                </p>
+              </div>
+              <a
+                href="budaya.html"
+                class="text-sm font-semibold bud-accent-text hover:underline whitespace-nowrap mt-2 sm:mt-0"
+                >Jelajah Sekarang â†’</a
+              >
+            </div>
+            <div
+              id="reco-lainnya-grid"
+              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 items-stretch auto-rows-fr"
+            >
+              <!-- Cards dirender via JS -->
+            </div>
+          </section>
+
+          <!-- Jelajah Destinasi Sekitar Budaya -->
+          <section class="bg-gray-50 border border-gray-100 rounded-2xl p-5">
+            <div class="flex flex-col items-start justify-between sm:flex-row mb-2">
+              <div>
+                <h3 class="font-bold text-2xl md:text-3xl lg:text-4xl text-gray-900">
+                  Jelajah Destinasi Sekitar Budaya
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-500 max-w-lg mt-0.5">
+                  Jelajahi destinasi wisata di sekitar budaya pilihan.
+                </p>
+              </div>
+              <a
+                href="/wisata"
+                class="text-sm font-semibold bud-accent-text hover:underline whitespace-nowrap mt-2 sm:mt-0"
+                >Jelajah Sekarang â†’</a
+              >
+            </div>
+            <div
+              id="reco-destinasi-grid"
+              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 items-stretch auto-rows-fr"
+            >
+              <!-- Cards dirender via JS -->
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- BANNER IKLAN HORISONTAL BOTTOM -->
+      <section
+        class="bg-gray-100 border border-gray-200 rounded-2xl py-10 px-4 text-center mb-8"
+      >
+        <span class="text-2xl font-bold text-gray-700">Space Iklan</span>
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <div data-layout-footer></div>
+
+    <script src="../../public/js/data-budaya.js"></script>
+    <script src="../../public/js/data-wisata.js"></script>
+    <script src="../../public/js/pages/galeri-budaya.js"></script>
+
+    <script src="./partials/pasinfo-header.js" defer></script>
+    <script src="./partials/pasinfo-footer.js" defer></script>
+    <script src="./partials/pasinfo-layout.js" defer></script>
+    <script src="../../public/js/page-transition.js" defer></script>
+    <script src="../../public/js/pages/internal-nav.js" defer></script>
+    <script src="../../public/js/main.js" defer></script>
+  </body>
+</html>
+
+
+

@@ -1,0 +1,318 @@
+﻿<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Tirai transisi halaman: CSS di src/input.css, logika page-enter.js. -->
+    <script src="../../public/js/page-enter.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pasuruan Info - Agenda Budaya</title>
+    <link rel="icon" href="data:," />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../public/css/styles.css" />
+    <!-- (O) Aksen Budaya = UNGU (violet). Utility Tailwind solid (violet/purple)
+         tidak ada di public/css/styles.css terkompilasi dan build:css tidak
+         dijalankan -> class aksen didefinisikan di sini. Identik dengan
+         budaya.html / detail_budaya.html / galeri_budaya.html.
+         Owner 2026-10-16: aksen ungu berlaku untuk seluruh domain Budaya.
+         Marker hari mini-kalender TETAP biru (bagian widget kalender). -->
+        <link rel="stylesheet" href="../../public/css/agenda-budaya.css" />
+  </head>
+  <!-- Owner 2026-10-18: atribut header dilengkapi agar logo/Beranda/tautan
+       Wisata berfungsi (sebelumnya href="#") â€” nilai mengikuti halaman
+       dengan header yang berjalan (index.html/detail_budaya.html). -->
+  <body
+    class="bg-white text-gray-800 font-sans antialiased"
+    data-page-active="agenda-budaya"
+    data-asset-prefix="../../public"
+    data-wisata-href="/wisata"
+    data-home-href="/"
+  >
+    <!-- HEADER / NAVBAR -->
+    <div data-layout-header></div>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <!-- BREADCRUMB -->
+      <!-- Owner 2026-10-18: samakan tipografi/struktur breadcrumb dengan
+           detail_budaya.html (wrapper bg-white py-3, nav text-xs md:text-sm,
+           ikon rumah + label bud-accent-text font-bold). -->
+      <div class="bg-white py-3">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <nav class="flex items-center text-xs md:text-sm space-x-2" aria-label="Breadcrumb">
+            <a href="/" class="bud-accent-text transition-colors" aria-label="Beranda">
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75" /></svg>
+            </a>
+            <span aria-hidden="true" class="bud-accent-text font-bold">&gt;</span>
+            <a href="budaya.html" class="font-bold bud-accent-text transition-colors">Budaya</a>
+            <span aria-hidden="true" class="bud-accent-text font-bold">&gt;</span>
+            <span class="bud-accent-text font-bold truncate">Agenda Budaya</span>
+          </nav>
+        </div>
+      </div>
+
+      <!-- HERO SECTION -->
+      <section
+        class="relative w-full h-[340px] sm:h-[420px] lg:h-[440px] rounded-2xl overflow-hidden mb-10 shadow-lg"
+      >
+        <!-- Owner 2026-10-17: hero memakai aset lokal Owner (sementara),
+             menggantikan mockup-png; foto asli agenda menyusul. -->
+        <div
+          class="absolute inset-0 bg-cover bg-center"
+          style="
+            background-image: url(&quot;../../public/assets/images/budaya/optimized/Tari Terbang Bandung &amp; Tari Pasuruan Kondang.webp&quot;);
+          "
+        ></div>
+        <!-- Gradient Overlay -->
+        <div
+          class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent"
+        ></div>
+
+        <!-- Content -->
+        <div class="absolute bottom-6 left-6 right-6 text-white max-w-2xl">
+          <h1
+            class="text-2xl sm:text-4xl font-extrabold leading-tight mb-2 drop-shadow-md"
+          >
+            Jadwal Agenda Budaya Pasuruan
+          </h1>
+          <p class="text-xs sm:text-sm text-gray-200 line-clamp-2">
+            Agenda budaya rutin dan tahunan yang digelar di Pasuruan Raya.
+          </p>
+        </div>
+      </section>
+
+      <!-- TITLE SECTION -->
+      <!-- Owner 2026-10-17: judul/deskripsi mengikuti pola section halaman lain
+           (text-2xl md:text-3xl lg:text-4xl + deskripsi kecil abu). -->
+      <div class="mb-8">
+        <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900">
+          Agenda Budaya Pasuruan
+        </h2>
+        <p class="text-xs sm:text-sm text-gray-500 mt-1 max-w-3xl">
+          Daftar agenda budaya yang akan dan sedang berlangsung di Pasuruan Raya.
+        </p>
+      </div>
+
+      <!-- MAIN GRID (Sidebar Kiri: Kalender + Konten Kanan) -->
+      <!-- Owner 2026-10-17: kartu "Kategori Budaya" di sidebar dihapus;
+           filter kategori jadi strip chip horizontal di atas daftar (UI/UX =
+           filter galeri_budaya: overflow-x-auto no-scrollbar, tanpa ikon).
+           Kalender tinggal satu-satunya widget sidebar. -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- LEFT SIDEBAR (Span 3): Calendar Widget -->
+        <!-- Owner 2026-10-18 (ronde-2): kalender kembali tinggi normal
+             (tidak di-stretch menyatu dengan iklan); Space Iklan berdiri
+             sendiri di bawah sidebar dengan tinggi kartunya sendiri,
+             hanya desktop lg+. -->
+        <div class="lg:col-span-3 space-y-6">
+          <div
+            class="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm"
+          >
+            <div class="flex items-center justify-between mb-3 border-b pb-2">
+              <span class="text-xs font-semibold text-gray-500"
+                >Kalender Agenda Pasuruan</span
+              >
+            </div>
+            <!-- Owner 2026-10-17: kalender aktif â€” klik tanggal bertitik
+                 event memfilter daftar agenda ke tanggal itu. -->
+            <div class="text-center">
+              <div class="flex items-center justify-between mb-2">
+                <button type="button" data-cal-nav="-1" aria-label="Bulan sebelumnya" class="text-gray-400 text-sm hover:text-gray-700 px-1">
+                  &lt;
+                </button>
+                <span class="text-xs font-bold text-gray-800" id="cal-month-label">Okt 2028</span>
+                <button type="button" data-cal-nav="1" aria-label="Bulan berikutnya" class="text-gray-400 text-sm hover:text-gray-700 px-1">
+                  &gt;
+                </button>
+              </div>
+              <div
+                class="grid grid-cols-7 gap-1 text-[10px] text-gray-400 font-bold mb-1"
+              >
+                <span>Min</span><span>Sen</span><span>Sel</span><span>Rab</span
+                ><span>Kam</span><span>Jum</span><span>Sab</span>
+              </div>
+              <div id="cal-grid" class="grid grid-cols-7 gap-1 text-xs text-gray-700">
+                <!-- Dirender via JS -->
+              </div>
+              <!-- Reset filter tanggal (tampil via JS bila tanggal terpilih) -->
+              <div id="cal-filter-info" class="mt-3 pt-2 border-t border-gray-100 text-[11px] text-gray-500" aria-live="polite"></div>
+          </div>
+
+          <!-- Owner 2026-10-18 (ronde-2): Space Iklan berdiri sendiri
+               (tidak digabung/di-stretch dengan kalender), hanya desktop. -->
+          <div
+            class="bg-gray-100 rounded-2xl border border-gray-200 shadow-sm hidden lg:flex h-32 items-center justify-center"
+            aria-label="Space iklan"
+          >
+            <span
+              class="text-2xl font-extrabold text-gray-400 tracking-wider"
+              >Space Iklan</span
+            >
+          </div>
+        </div>
+        </div>
+
+        <!-- RIGHT CONTENT (Span 9) -->
+        <div class="lg:col-span-9">
+          <!-- Filter kategori: strip chip horizontal -->
+          <div
+            id="agenda-filters"
+            class="flex space-x-2 overflow-x-auto no-scrollbar pb-4 mb-2"
+            role="group"
+            aria-label="Filter kategori agenda"
+          >
+            <!-- Chip filter dirender via JS -->
+          </div>
+
+          <!-- Filter Top Header -->
+          <!-- Owner 2026-10-18: tombol "Terbaru" dihapus (Owner) â€” header
+               filter kini hanya menyajikan jumlah hasil. -->
+          <div class="flex items-center mb-4">
+            <p
+              id="agenda-count"
+              class="text-xs sm:text-sm font-bold text-gray-700"
+            >
+              40 hasil ditemukan
+            </p>
+          </div>
+
+          <!-- Agenda Card List -->
+          <div id="agenda-list" class="space-y-4">
+            <!-- Items rendered by JS -->
+          </div>
+
+          <p
+            id="agenda-empty"
+            class="hidden text-sm text-gray-500 text-center py-8"
+          >
+            Tidak ada agenda budaya yang cocok dengan pencarian atau filter ini.
+          </p>
+
+          <!-- Pagination -->
+          <!-- Owner 2026-10-18: teks "Menampilkan data/page" dihapus (Owner)
+               â€” pager saja, dipusatkan, bersih & rapi. -->
+          <div class="mt-8 flex items-center justify-center border-t pt-4">
+            <nav
+              id="agenda-pager"
+              class="flex items-center gap-1"
+              aria-label="Pagination agenda"
+            ></nav>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECOMMENDATIONS (full width, no vertical ad) -->
+      <div class="mt-16 mb-8">
+        <div class="space-y-6">
+          <!-- 1. Rekomendasi Budaya Serupa -->
+          <section class="bg-gray-50 border border-gray-100 rounded-2xl p-5">
+            <div class="flex flex-col items-start justify-between sm:flex-row mb-2">
+              <div>
+                <h3 class="font-bold text-2xl md:text-3xl lg:text-4xl text-gray-900">
+                  Rekomendasi Budaya Serupa
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-500 max-w-lg mt-0.5">
+                  Rekomendasi budaya serupa di Pasuruan Raya.
+                </p>
+              </div>
+              <a
+                href="budaya.html"
+                class="text-sm font-semibold bud-accent-text hover:underline whitespace-nowrap mt-2 sm:mt-0"
+                >Jelajah Sekarang â†’</a
+              >
+            </div>
+            <div
+              id="reco-serupa-grid"
+              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 items-stretch auto-rows-fr"
+            >
+              <!-- Rendered via JS -->
+            </div>
+          </section>
+
+          <!-- 2. Rekomendasi Budaya Lainnya -->
+          <section class="bg-gray-50 border border-gray-100 rounded-2xl p-5">
+            <div class="flex flex-col items-start justify-between sm:flex-row mb-2">
+              <div>
+                <h3 class="font-bold text-2xl md:text-3xl lg:text-4xl text-gray-900">
+                  Rekomendasi Budaya Lainnya
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-500 max-w-lg mt-0.5">
+                  Rekomendasi budaya lain di Pasuruan Raya.
+                </p>
+              </div>
+              <a
+                href="budaya.html"
+                class="text-sm font-semibold bud-accent-text hover:underline whitespace-nowrap mt-2 sm:mt-0"
+                >Jelajah Sekarang â†’</a
+              >
+            </div>
+            <div
+              id="reco-lainnya-grid"
+              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 items-stretch auto-rows-fr"
+            >
+              <!-- Rendered via JS -->
+            </div>
+          </section>
+
+          <!-- 3. Jelajah Destinasi Sekitar Budaya -->
+          <section class="bg-gray-50 border border-gray-100 rounded-2xl p-5">
+            <div class="flex flex-col items-start justify-between sm:flex-row mb-2">
+              <div>
+                <h3 class="font-bold text-2xl md:text-3xl lg:text-4xl text-gray-900">
+                  Jelajah Destinasi Sekitar Budaya
+                </h3>
+                <p class="text-xs sm:text-sm text-gray-500 max-w-lg mt-0.5">
+                  Jelajahi destinasi wisata di sekitar budaya pilihan.
+                </p>
+              </div>
+              <a
+                href="/wisata"
+                class="text-sm font-semibold bud-accent-text hover:underline whitespace-nowrap mt-2 sm:mt-0"
+                >Jelajah Sekarang â†’</a
+              >
+            </div>
+            <div
+              id="reco-destinasi-grid"
+              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 items-stretch auto-rows-fr"
+            >
+              <!-- Rendered via JS -->
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- BOTTOM BANNER AD -->
+      <section class="mt-12 mb-8">
+        <div
+          class="bg-gray-100 rounded-2xl p-10 text-center border border-gray-200 shadow-inner"
+        >
+          <span
+            class="text-xl sm:text-2xl font-bold text-gray-400 tracking-wider"
+            >Space Iklan</span
+          >
+        </div>
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <div data-layout-footer></div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script src="../../public/js/data-budaya.js"></script>
+    <script src="../../public/js/data-wisata.js"></script>
+    <script src="../../public/js/pages/agenda-budaya.js"></script>
+
+    <script src="./partials/pasinfo-header.js" defer></script>
+    <script src="./partials/pasinfo-footer.js" defer></script>
+    <script src="./partials/pasinfo-layout.js" defer></script>
+    <script src="../../public/js/main.js" defer></script>
+    <script src="../../public/js/page-transition.js" defer></script>
+    <script src="../../public/js/pages/internal-nav.js" defer></script>
+  </body>
+</html>
+
+
+

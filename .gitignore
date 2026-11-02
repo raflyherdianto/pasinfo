@@ -55,3 +55,7 @@ backend/main.exe
 
 # Legacy code — not pushed to remote repo
 legacy/
+
+# Public legacy runtime is served by the Vue shell and must ship with frontend builds
+!frontend/public/legacy/
+!frontend/public/legacy/**

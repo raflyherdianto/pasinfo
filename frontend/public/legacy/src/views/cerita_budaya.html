@@ -1,0 +1,376 @@
+﻿<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Tirai transisi halaman: CSS di src/input.css, logika page-enter.js. -->
+    <script src="../../public/js/page-enter.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cerita di Balik Budaya | Pasuruan Info</title>
+    <link rel="icon" href="data:," />
+    <!-- Tailwind CSS kompilasi proyek + font Roboto (tanpa CDN) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../../public/css/styles.css" />
+    <!-- (O) Aksen Budaya = UNGU (violet). Utility Tailwind solid (violet/purple)
+         tidak ada di public/css/styles.css terkompilasi dan build:css tidak
+         dijalankan -> class aksen didefinisikan di sini. Identik dengan
+         budaya.html / detail_budaya.html / galeri_budaya.html.
+         Owner 2026-10-16: aksen ungu berlaku untuk seluruh domain Budaya. -->
+        <link rel="stylesheet" href="../../public/css/cerita-budaya.css" />
+  </head>
+  <body
+    class="bg-white text-gray-800 font-sans antialiased min-h-screen flex flex-col justify-between"
+    data-page-active=""
+    data-asset-prefix="../../public"
+    data-wisata-href="/wisata"
+    data-home-href="/"
+  >
+    <div>
+      <!-- HEADER (shared partials, sama dengan halaman lain) -->
+      <div data-layout-header></div>
+
+      <!-- ================= MAIN CONTENT ================= -->
+      <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-5">
+        <!-- BREADCRUMB -->
+        <!-- Owner 2026-10-18: samakan tipografi/struktur breadcrumb dengan
+             detail_budaya.html (wrapper bg-white py-3, nav text-xs md:text-sm,
+             ikon rumah + label bud-accent-text font-bold). -->
+        <div class="bg-white py-3">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <nav
+              class="flex items-center text-xs md:text-sm space-x-2"
+              aria-label="Breadcrumb"
+            >
+              <a
+                href="/"
+                class="bud-accent-text transition-colors"
+                aria-label="Beranda"
+              >
+                <svg
+                  class="h-4 w-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75"
+                  />
+                </svg>
+              </a>
+              <span aria-hidden="true" class="bud-accent-text font-bold"
+                >&gt;</span
+              >
+              <a
+                href="budaya.html"
+                class="font-bold bud-accent-text transition-colors"
+                >Budaya</a
+              >
+              <span aria-hidden="true" class="bud-accent-text font-bold"
+                >&gt;</span
+              >
+              <span class="bud-accent-text font-bold truncate"
+                >Cerita dibalik Budaya</span
+              >
+            </nav>
+          </div>
+        </div>
+
+        <!-- Banner Hero Section (Banner Utama) -->
+        <section
+          class="relative rounded-2xl overflow-hidden shadow-sm bg-slate-900 h-[340px] sm:h-[420px] lg:h-[440px] flex items-end"
+        >
+          <img
+            id="story-hero-img"
+            src="../../public/assets/images/budaya/optimized/Tari Terbang Bandung & Tari Pasuruan Kondang.webp"
+            alt="Cerita budaya Pasuruan"
+            class="absolute inset-0 w-full h-full object-cover opacity-60"
+          />
+
+          <div
+            class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"
+          ></div>
+
+          <!-- Action Buttons (Simpan & Bagikan) -->
+          <div class="absolute top-4 right-4 flex items-center gap-2 z-10">
+            <button
+              id="save-btn"
+              class="bg-white hover:bg-gray-100 text-gray-900 text-xs font-semibold px-4 py-1.5 rounded-full shadow flex items-center gap-1.5 transition"
+            >
+              <svg
+                class="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.424 48.424 0 0111.186 0z"
+                />
+              </svg>
+              <span>Simpan</span>
+            </button>
+            <button
+              id="share-btn"
+              class="bud-accent text-white text-xs font-semibold px-4 py-1.5 rounded-full shadow flex items-center gap-1.5 transition"
+            >
+              <svg
+                class="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"
+                />
+              </svg>
+              <span>Bagikan</span>
+            </button>
+          </div>
+
+          <!-- Hero Content Text -->
+          <div class="relative z-10 p-6 sm:p-8 text-white max-w-3xl space-y-2">
+            <span
+              class="inline-block bud-accent text-[11px] font-bold px-3 py-1 rounded-full tracking-wide mb-1"
+            >
+              Cerita Budaya
+            </span>
+            <h1
+              id="story-title"
+              class="text-2xl sm:text-4xl font-extrabold tracking-tight"
+            >
+              Cerita di Balik Budaya
+            </h1>
+            <p
+              id="story-excerpt"
+              class="text-gray-300 text-xs sm:text-sm line-clamp-2 leading-relaxed"
+            ></p>
+
+            <div
+              class="flex items-center gap-4 pt-2 text-xs text-gray-300 font-medium"
+            >
+              <div class="flex items-center gap-1.5">
+                <svg
+                  class="h-4 w-4 text-red-500"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
+                  />
+                </svg>
+                <span id="story-location"></span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Main Layout Grid â€” Owner 2026-10-18: konsep EQUAL HEIGHT CARD di
+             SEMUA tampilan (mobile/tablet/desktop): dua kartu (Cerita + Situs
+             Terkait) sama lebar & tinggi barisnya diserarakan lewat
+             auto-rows + grid items-stretch + h-full. Owner 2026-10-18
+             (ronde-3): TABLET (md, 768px+) sudah DIBUAT SAMA DENGAN DESKTOP â€”
+             2 kolom berdampingan sama lebar; hanya mobile yang menumpuk
+             1 kolom (kartu tetap equal height antar barisnya). -->
+        <div
+          id="cerita-layout-grid"
+          class="grid grid-cols-1 md:grid-cols-2 gap-6 auto-rows-max md:auto-rows-fr"
+        >
+          <!-- LEFT: kartu cerita (mirror kartu "Tentang Wisata" detail) -->
+          <section
+            class="bg-gray-100 rounded-2xl p-5 sm:p-7 h-full"
+            aria-labelledby="cerita-title"
+          >
+            <div class="space-y-4">
+              <h2
+                id="cerita-title"
+                class="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-4"
+              >
+                Cerita di Balik Budaya
+              </h2>
+              <p class="text-xs sm:text-sm text-gray-600 max-w-lg mb-6">
+                Kisah dan sejarah di balik tradisi budaya Pasuruan Raya.
+              </p>
+
+              <p
+                id="story-body"
+                class="text-gray-600 text-xs sm:text-sm leading-relaxed"
+              ></p>
+            </div>
+
+            <!-- Featured Gallery (Equal Height Grid Thumbnails) -->
+            <div class="space-y-3 pt-2">
+              <!-- Main Display Image -->
+              <div
+                class="rounded-xl overflow-hidden border border-gray-200 aspect-[16/9] bg-gray-100"
+              >
+                <img
+                  id="main-gallery-img"
+                  src="../../public/assets/images/budaya/optimized/Tari Terbang Bandung & Tari Pasuruan Kondang.webp"
+                  alt="Foto budaya Pasuruan"
+                  class="w-full h-full object-cover"
+                />
+              </div>
+
+              <!-- Thumbnail Grid (diisi JS dari aset budaya REAL) -->
+              <div
+                id="story-thumbs"
+                class="grid grid-cols-3 gap-3 items-stretch"
+              ></div>
+            </div>
+          </section>
+
+          <!-- RIGHT: kartu Situs Terkait (satu <section> bg-gray-100
+               rounded-2xl p-5 sm:p-7 h-full; equal height dgn kartu kiri) -->
+          <section
+            class="bg-gray-100 rounded-2xl p-5 sm:p-7 h-full"
+            aria-labelledby="situs-title"
+          >
+            <div>
+              <h3
+                id="situs-title"
+                class="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-3"
+              >
+                Situs Terkait
+              </h3>
+              <p class="text-xs sm:text-sm text-gray-600 mb-4">
+                Situs budaya terkait di Pasuruan Raya.
+              </p>
+
+              <div
+                class=" rounded-xl p-3 sm:flex sm:items-start sm:gap-4"
+              >
+                <div
+                  class="w-full sm:w-36 md:w-40 h-32 bg-gray-200 rounded-lg overflow-hidden mb-3 sm:mb-0 flex-shrink-0"
+                >
+                  <img
+                    id="related-img"
+                    src="../../public/assets/images/budaya/optimized/Tradisi-Skilot.webp"
+                    alt="Budaya terkait"
+                    class="w-full h-full object-cover"
+                  />
+                </div>
+
+                <div class="min-w-0">
+                  <h4
+                    id="related-title"
+                    class="font-bold text-gray-900 text-xl"
+                  ></h4>
+
+                  <div
+                    class="text-[11px] text-gray-500 mt-1 space-y-1 font-medium "
+                  >
+                    <p class="flex items-center gap-1.5">
+                      <svg
+                        class="h-3.5 w-3.5 text-gray-400"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        aria-hidden="true"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
+                        />
+                      </svg>
+                      <span id="related-location"></span>
+                    </p>
+                  </div>
+
+                  <p
+                    id="related-desc"
+                    class="text-xs text-gray-500 mt-2 leading-relaxed"
+                  ></p>
+                  <!-- Footer Situs Terkait -->
+                  <div
+                    class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-end text-xs font-semibold"
+                  >
+                    <a
+                      id="related-link"
+                      href="budaya.html"
+                      class="bud-accent-text hover:underline flex items-center gap-1 bg-white p-2 rounded-xl "
+                    >
+                      Lihat Detail
+                      <svg
+                        class="h-3 w-3"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        aria-hidden="true"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                        />
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Banner Space Iklan Bottom Horizontal -->
+        <section
+          class="bg-gray-100 rounded-2xl h-36 md:h-44 flex items-center justify-center border border-gray-200 my-6"
+          aria-label="Space iklan"
+        >
+          <span
+            class="text-3xl sm:text-5xl font-extrabold text-gray-700 tracking-wider"
+            >Space Iklan</span
+          >
+        </section>
+      </main>
+    </div>
+
+    <!-- FOOTER (shared partials, sama dengan halaman lain) -->
+    <div data-layout-footer></div>
+
+    <!-- ================= VANILLA JAVASCRIPT ================= -->
+    <script src="../../public/js/data-budaya.js"></script>
+    <script src="./partials/pasinfo-header.js" defer></script>
+    <script src="./partials/pasinfo-footer.js" defer></script>
+    <script src="./partials/pasinfo-layout.js" defer></script>
+    <script src="../../public/js/main.js" defer></script>
+    <script src="../../public/js/pages/cerita-budaya.js"></script>
+    <script src="../../public/js/page-transition.js" defer></script>
+    <script src="../../public/js/pages/internal-nav.js" defer></script>
+  </body>
+</html>
+
+
+
